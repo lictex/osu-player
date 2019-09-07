@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <SeekBar
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBar" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/btn" android:layout_marginTop="16dp"/>
+    <Button
+            android:text="DT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnDT"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/seekBar"
+            app:layout_constraintStart_toStartOf="@+id/seekBar" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"/>
+    <Button
+            android:text="NC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnNC"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/seekBar" app:layout_constraintStart_toEndOf="@+id/btnDT"
+            android:layout_marginLeft="8dp" android:layout_marginStart="8dp"/>
+    <Button
+            android:text="NM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnNM"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/seekBar"
+            app:layout_constraintEnd_toEndOf="@+id/seekBar" android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"/>
+    <Button
+            android:text="HT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnHT"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/seekBar" app:layout_constraintEnd_toStartOf="@+id/btnNM"
+            android:layout_marginEnd="8dp" android:layout_marginRight="8dp"/>
+    <Button
+            android:text="OPEN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnOpen" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/btnNC"/>
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/offset" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/btnOpen" android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp" android:text="36"
+            android:gravity="center"/>
+    <SeekBar
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:id="@+id/musicVol" android:rotation="270"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/btn"
+            android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
+            app:layout_constraintHorizontal_bias="0.888"
+            android:layout_marginBottom="32dp" app:layout_constraintBottom_toBottomOf="@+id/btn" android:max="100"
+            android:progress="100"/>
+    <SeekBar
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:id="@+id/soundVol" android:rotation="270"
+            android:layout_marginBottom="32dp" app:layout_constraintBottom_toBottomOf="@+id/btn"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
+            app:layout_constraintStart_toEndOf="@+id/btn" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" android:max="100" android:progress="100"/>
+
+</android.support.constraint.ConstraintLayout>
