@@ -1,17 +1,10 @@
 package pw.lictex.libosu.beatmap;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.var;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import lombok.*;
 
-@RequiredArgsConstructor
-@Getter
-@Setter
+@RequiredArgsConstructor @Getter @Setter
 public abstract class HitObject {
     protected int x, y, time;
     protected int hitSounds;

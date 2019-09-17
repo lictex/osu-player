@@ -2,8 +2,7 @@ package pw.lictex.libosu.beatmap;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Getter @Setter
 public class TimingPoint {
     private double offset;
     private double beatLength;
@@ -36,5 +35,23 @@ public class TimingPoint {
                 volume + "," +
                 (timingChange ? 1 : 0) + "," +
                 effects;
+    }
+
+    public boolean isEffectEnabled(Effect e) {
+        return (getEffects() & e.asInt()) != 0;
+    }
+
+    public enum Effect {
+        None(0),
+        Kiai(1),
+        OmitFirstBarLine(8);
+
+        private int i;
+
+        Effect(int i) {
+            this.i = i;
+        }
+
+        private int asInt() {return i;}
     }
 }

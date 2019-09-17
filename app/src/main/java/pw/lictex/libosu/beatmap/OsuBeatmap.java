@@ -1,18 +1,10 @@
 package pw.lictex.libosu.beatmap;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.var;
+import java.io.*;
+import java.text.*;
+import java.util.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import lombok.*;
 
 public class OsuBeatmap {
     public static final String LS = "\r\n";

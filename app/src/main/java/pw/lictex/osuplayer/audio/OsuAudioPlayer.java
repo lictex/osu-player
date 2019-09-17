@@ -1,33 +1,33 @@
 package pw.lictex.osuplayer.audio;
 
-import android.content.Context;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.var;
-import pw.lictex.libosu.beatmap.HitObject;
-import pw.lictex.libosu.beatmap.OsuBeatmap;
-import pw.lictex.libosu.beatmap.SampleSet;
-import pw.lictex.libosu.beatmap.TimingPoint;
-import pw.lictex.osuplayer.R;
+import android.content.*;
+import android.graphics.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.*;
 
-import static com.un4seen.bass.BASS.BASS_SampleFree;
+import lombok.*;
+import pw.lictex.libosu.beatmap.*;
+import pw.lictex.osuplayer.*;
+
+import static com.un4seen.bass.BASS.*;
 
 /**
  * Created by kpx on 2019/2/26.
  */
 public class OsuAudioPlayer {
-    private final AtomicInteger lastHitsoundTime = new AtomicInteger();
     @Getter private final AudioEngine engine;
-    @Getter @Setter private int sampleOffset = 36;
-    @Getter @Setter private int musicVolume = 100;
-    @Getter @Setter private int soundVolume = 100;
+    private final AtomicInteger lastHitsoundTime = new AtomicInteger();
+    private final AtomicInteger lastNightcoreBeat = new AtomicInteger();
+
+    @Getter @Setter private boolean sliderslideEnabled = true;
+    @Getter @Setter private boolean spinnerspinEnabled = true;
+    @Getter @Setter private boolean spinnerbonusEnabled = true;
+    @Getter @Setter private int sampleOffset = 25;
+    @Getter @Setter private int musicVolume = 80;
+    @Getter @Setter private int soundVolume = 80;
+
     private volatile AudioEngine.Sample currentSpinnerSpinSound = null;
     private volatile AudioEngine.Sample currentSliderSlideSound = null;
     private volatile AudioEngine.Sample currentSliderWhistleSound = null;
@@ -36,6 +36,7 @@ public class OsuAudioPlayer {
     private String currentBeatmapSetPath;
     private OsuBeatmap currentBeatmap = null;
     private List<HitObject> hitObjectsRemains = new ArrayList<>();
+    @Getter private Mod currentMod = Mod.None;
 
     public OsuAudioPlayer(Context context) {
         this.context = context;
@@ -43,6 +44,66 @@ public class OsuAudioPlayer {
         sampleManager = new SampleManager();
 
         engine.setTickCallback(this::tick);
+    }
+
+    public void setOnBeatmapEndCallback(Runnable onBeatmapEndCallback) {
+        engine.setOnTrackEndCallback(onBeatmapEndCallback);
+    }
+
+    public String getRomanisedTitle() {
+        try {
+            return currentBeatmap.getMetadataSection().getTitle();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public String getTitle() {
+        try {
+            return currentBeatmap.getMetadataSection().getTitleUnicode();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public String getArtist() {
+        try {
+            return currentBeatmap.getMetadataSection().getArtistUnicode();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public Bitmap getBackground() {
+        try {
+            String backgroundImage = currentBeatmap.getEventsSection().getBackgroundImage();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            return BitmapFactory.decodeFile(currentBeatmapSetPath + backgroundImage, options);
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public String getRomanisedArtist() {
+        try {
+            return currentBeatmap.getMetadataSection().getArtist();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public String getMapper() {
+        try {
+            return currentBeatmap.getMetadataSection().getCreator();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public String getVersion() {
+        try {
+            return currentBeatmap.getMetadataSection().getVersion();
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    public void destroy() {
+        engine.destroy();
     }
 
     private void tick() {
@@ -164,7 +225,9 @@ public class OsuAudioPlayer {
                         lastHs = Math.max(lastHs, spinner.getTime() + x);
                         int t = 200;
                         while (currentTime - lastHs > t) {
-                            sampleManager.getSample("spinnerbonus").play(timingVolume, 0);
+                            if (spinnerbonusEnabled) {
+                                sampleManager.getSample("spinnerbonus").play(timingVolume, 0);
+                            }
                             lastHs += t;
                         }
                     }
@@ -174,7 +237,7 @@ public class OsuAudioPlayer {
 
         lastHitsoundTime.set(lastHs);
 
-        if (sliderSliding) {
+        if (sliderslideEnabled && sliderSliding && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
             var slideSample = sampleManager.getSample(sliderSampleSet, "sliderslide", timingCustomSampleSet);
             if (currentSliderSlideSound != slideSample) {
                 if (currentSliderSlideSound != null) currentSliderSlideSound.endLoop();
@@ -201,7 +264,7 @@ public class OsuAudioPlayer {
             }
         }
 
-        if (spinnerSpinning) {
+        if (spinnerspinEnabled && spinnerSpinning && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
             var spinnerSample = sampleManager.getSample("spinnerspin");
             if (currentSpinnerSpinSound != spinnerSample) {
                 if (currentSpinnerSpinSound != null) currentSpinnerSpinSound.endLoop();
@@ -214,70 +277,88 @@ public class OsuAudioPlayer {
                 currentSpinnerSpinSound = null;
             }
         }
+
+        if (currentMod == Mod.NC) {
+            float nightcoreVolume = musicVolume / 100f; //seems nightcore samples should use music volume..?
+            var np = currentBeatmap.notInheritedTimingPoingAt((int) currentTime);
+            int beat = (int) ((currentTime - np.getOffset()) * 2 / np.getBeatLength());
+            int bar = beat % np.getTimeSignature();
+            if (bar == lastNightcoreBeat.get()) return;
+            lastNightcoreBeat.set(bar);
+
+            if (beat % (8 * np.getTimeSignature()) == 0) {
+                sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
+                if (!np.isEffectEnabled(TimingPoint.Effect.OmitFirstBarLine) || bar > 0)
+                    sampleManager.getDefaultSample("nightcore-finish").play(nightcoreVolume, 0);
+            } else if (bar % 4 == 0) {
+                sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
+            } else if (bar % 4 == 2) {
+                sampleManager.getDefaultSample("nightcore-clap").play(nightcoreVolume, 0);
+            } else if (currentBeatmap.getDifficultySection().getSliderTickRate() % 2 == 0) {
+                sampleManager.getDefaultSample("nightcore-hat").play(nightcoreVolume, 0);
+            }
+        }
     }
 
     public void play() {
-        engine.queueTaskSync(engine::resume);
+        if (currentBeatmap != null) engine.resume();
     }
 
     public void pause() {
-        engine.queueTaskSync(engine::pause);
+        engine.pause();
     }
 
     public void setMusicVolume(int vol) {
         this.musicVolume = vol;
-        engine.queueTaskSync(() -> engine.setMainTrackVolume(this.musicVolume / 100f));
+        engine.setMainTrackVolume(this.musicVolume / 100f);
     }
 
     public void setMod(Mod m) {
-        engine.queueTaskSync(() -> {
-            switch (m) {
-                case DT:
-                    engine.setTempo(1.5f);
-                    engine.setPitch(1f);
-                    break;
-                case HT:
-                    engine.setTempo(0.75f);
-                    engine.setPitch(1f);
-                    break;
-                case NC:
-                    engine.setTempo(1.5f);
-                    engine.setPitch(1.5f);
-                    break;
-                case None:
-                    engine.setTempo(1f);
-                    engine.setPitch(1f);
-                    break;
-            }
-        });
+        currentMod = m;
+        switch (m) {
+            case DT:
+                engine.setTempo(1.5f);
+                engine.setPitch(1f);
+                break;
+            case HT:
+                engine.setTempo(0.75f);
+                engine.setPitch(1f);
+                break;
+            case NC:
+                engine.setTempo(1.5f);
+                engine.setPitch(1.5f);
+                break;
+            case None:
+                engine.setTempo(1f);
+                engine.setPitch(1f);
+                break;
+        }
     }
 
     public void seekTo(long ms) {
-        engine.queueTaskSync(() -> {
-            engine.pause();
-            engine.setTime(ms);
-        });
+        var saved = engine.getPlaybackStatus();
+        engine.pause();
+        engine.setTime(ms);
         lastHitsoundTime.set((int) ms);
         hitObjectsRemains.clear();
-        hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
-        engine.queueTaskSync(engine::resume);
+        if (currentBeatmap != null) hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
+        if (saved == AudioEngine.PlaybackStatus.Playing) engine.resume();
     }
 
     public void openBeatmapSet(String dir) {
-        engine.queueTaskSync(engine::stopMainTrack);
+        engine.stopMainTrack();
         currentBeatmap = null;
         sampleManager.setDirectory(dir);
         currentBeatmapSetPath = dir;
     }
 
-    public void openBeatmap(String filename) {
-        engine.queueTaskSync(engine::stopMainTrack);
+    public void playBeatmap(String filename) {
+        engine.stopMainTrack();
         currentBeatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
-        engine.queueTaskSync(() -> {
-            engine.playMainTrack(currentBeatmapSetPath + currentBeatmap.getGeneralSection().getAudioFilename());
-            engine.setMainTrackVolume(this.musicVolume / 100f);
-        });
         seekTo(0);
+        engine.playMainTrack(currentBeatmapSetPath + currentBeatmap.getGeneralSection().getAudioFilename());
+        engine.setMainTrackVolume(this.musicVolume / 100f);
+        setMod(currentMod);
     }
 
     public long getAudioLength() {
@@ -323,6 +404,11 @@ public class OsuAudioPlayer {
 
             addSample(defaultSet, "spinnerbonus", context.getResources().openRawResource(R.raw.spinnerbonus));
             addSample(defaultSet, "spinnerspin", context.getResources().openRawResource(R.raw.spinnerspin));
+
+            addSample(defaultSet, "nightcore-clap", context.getResources().openRawResource(R.raw.nightcore_clap));
+            addSample(defaultSet, "nightcore-hat", context.getResources().openRawResource(R.raw.nightcore_hat));
+            addSample(defaultSet, "nightcore-finish", context.getResources().openRawResource(R.raw.nightcore_finish));
+            addSample(defaultSet, "nightcore-kick", context.getResources().openRawResource(R.raw.nightcore_kick));
         }
 
         void addSample(Map<String, AudioEngine.Sample> m, String name, InputStream stream) {
