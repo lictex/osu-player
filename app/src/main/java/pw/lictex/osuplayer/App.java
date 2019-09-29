@@ -4,6 +4,8 @@ import android.app.*;
 import android.content.*;
 import android.os.*;
 
+import pw.lictex.osuplayer.storage.*;
+
 /**
  * Created by kpx on 2019/9/7.
  */
@@ -11,6 +13,8 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        BeatmapIndex.Build(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "Service";

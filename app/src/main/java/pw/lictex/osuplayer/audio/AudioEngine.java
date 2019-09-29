@@ -42,11 +42,6 @@ public class AudioEngine {
         } catch (Throwable ignored) {}
     }
 
-    //TODO shouldn't be public
-    public long getAudioClockFreq() {
-        return currentTPS.get();
-    }
-
     //TODO ???
     private void runOnAudioThread(Runnable r) {
         if (Thread.currentThread() == audioThread) {

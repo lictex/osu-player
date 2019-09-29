@@ -16,12 +16,11 @@ import androidx.cardview.widget.*;
 import butterknife.*;
 import eightbitlab.com.blurview.*;
 import lombok.*;
-import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.R;
+import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.audio.*;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final int animDuration = 250;
     private static final Interpolator animInterpolator = new AccelerateDecelerateInterpolator();
     private static final float blurRadius = 24f;
@@ -38,23 +37,24 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.version) TextView version;
     @BindView(R.id.playlist_wrapper) View playlistWrapper;
     @BindView(R.id.audio_setting_wrapper) View audioSettingWrapper;
+    @BindView(R.id.preference_wrapper) View preferenceWrapper;
     @BindView(R.id.buttonPlayPause) ImageButton buttonPlayPause;
     @BindView(R.id.buttonLoopMode) ImageButton buttonLoopMode;
 
     private Content current = Content.None;
     private ServiceConnection playerServiceConnection;
     private Handler handler = new Handler();
+    private AudioSettingFragment audioSettingFragment;
+    private PlaylistFragment playlistFragment;
+    private PreferenceFragment preferenceFragment;
+    @Getter private PlayerService playerService;
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             seekBar.setProgress((int) (((double) playerService.getOsuAudioPlayer().getCurrentTime() / playerService.getOsuAudioPlayer().getAudioLength()) * seekBar.getMax()));
-
             handler.postDelayed(this, 1000);
         }
     };
-    private AudioSettingFragment audioSettingFragment;
-    private PlaylistFragment playlistFragment;
-    @Getter private PlayerService playerService;
 
     @Override
     protected void onDestroy() {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
 
@@ -83,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 .setBlurRadius(blurRadius);
         setContentSize(0, 0);
 
-        audioSettingFragment = (AudioSettingFragment) getSupportFragmentManager().findFragmentById(R.id.audio_setting_fragment);
-        playlistFragment = (PlaylistFragment) getSupportFragmentManager().findFragmentById(R.id.playlist_fragment);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -106,8 +104,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 playerService = ((PlayerService.PlayerServiceBinder) service).getService();
-                playerService.setOnNewTrackCallback(() -> runOnUiThread(() -> updateStatus()));
-                updateStatus();
+                playerService.setOnUpdateCallback(() -> runOnUiThread(() -> updateStatus()));
+
+                audioSettingFragment = new AudioSettingFragment();
+                playlistFragment = new PlaylistFragment();
+                preferenceFragment = new PreferenceFragment();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.audio_setting_wrapper, audioSettingFragment, "audioSettingFragment")
+                        .replace(R.id.playlist_wrapper, playlistFragment, "playlistFragment")
+                        .replace(R.id.preference_wrapper, preferenceFragment, "preferenceFragment")
+                        .commit();
+
+                handler.post(() -> updateStatus());
                 handler.postDelayed(runnable, 32);
             }
         };
@@ -116,9 +124,9 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.buttonPlayPause) void onPauseClick() {
         if (playerService.getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing)
-            getPlayerService().getOsuAudioPlayer().pause();
+            getPlayerService().pause();
         else {
-            getPlayerService().getOsuAudioPlayer().play();
+            getPlayerService().resume();
         }
         updateStatus();
     }
@@ -143,20 +151,20 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.buttonAudioSetting) void onAudioSettingClick() {
         if (current != Content.AudioSetting)
-            setCurrent(Content.AudioSetting);
-        else setCurrent(Content.None);
+            setCurrentContent(Content.AudioSetting);
+        else setCurrentContent(Content.None);
     }
 
     @OnClick(R.id.buttonPlaylist) void onPlaylistClick() {
         if (current != Content.Playlist)
-            setCurrent(Content.Playlist);
-        else setCurrent(Content.None);
+            setCurrentContent(Content.Playlist);
+        else setCurrentContent(Content.None);
     }
 
     @OnClick(R.id.buttonSetting) void onSettingClick() {
         if (current != Content.Setting)
-            setCurrent(Content.Setting);
-        else setCurrent(Content.None);
+            setCurrentContent(Content.Setting);
+        else setCurrentContent(Content.None);
     }
 
     private void updateStatus() {
@@ -222,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         heightAnim.start();
     }
 
-    private void setCurrent(Content current) {
+    private void setCurrentContent(Content current) {
         this.current = current;
         int statusBarHeight = 0;
         int resourceId = getApplicationContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -234,22 +242,25 @@ public class MainActivity extends AppCompatActivity {
                 setContentSize(0, animDuration);
                 audioSettingWrapper.animate().alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
+                preferenceWrapper.animate().alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
                 break;
             case Setting:
                 setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.controllerBlur).getMeasuredHeight() - statusBarHeight) - 32, animDuration, true);
-                //TODO
                 audioSettingWrapper.animate().alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
+                preferenceWrapper.animate().alpha(1).withStartAction(() -> preferenceWrapper.setVisibility(View.VISIBLE)).start();
                 break;
             case AudioSetting:
                 setContentSize(192, animDuration);
                 audioSettingWrapper.animate().alpha(1).withStartAction(() -> audioSettingWrapper.setVisibility(View.VISIBLE)).start();
                 playlistWrapper.animate().alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
+                preferenceWrapper.animate().alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
                 break;
             case Playlist:
                 setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.controllerBlur).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight) - 48, animDuration);
                 audioSettingWrapper.animate().alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().alpha(1).withStartAction(() -> playlistWrapper.setVisibility(View.VISIBLE)).start();
+                preferenceWrapper.animate().alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
                 break;
         }
     }

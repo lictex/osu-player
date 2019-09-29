@@ -6,6 +6,7 @@ import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.*;
+import androidx.preference.*;
 
 import com.h6ah4i.android.widget.verticalseekbar.*;
 
@@ -57,6 +58,8 @@ public class AudioSettingFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_audiosetting, container, false);
         ButterKnife.bind(this, view);
 
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
         CompoundButton.OnCheckedChangeListener listener = (compoundButton, b) -> {
             if (!checkBoxDt.isChecked() && !checkBoxNc.isChecked() && !checkBoxHt.isChecked()) {
                 AudioSettingFragment.this.setModCheckBox(OsuAudioPlayer.Mod.None);
@@ -78,14 +81,24 @@ public class AudioSettingFragment extends Fragment {
         checkBoxNc.setOnCheckedChangeListener(listener);
         checkBoxHt.setOnCheckedChangeListener(listener);
 
-        checkBoxSliderslide.setOnCheckedChangeListener((a, b) -> ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setSliderslideEnabled(b));
-        checkBoxSpinnerspin.setOnCheckedChangeListener((a, b) -> ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setSpinnerspinEnabled(b));
-        checkBoxSpinnerBonus.setOnCheckedChangeListener((a, b) -> ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setSpinnerbonusEnabled(b));
+        checkBoxSliderslide.setOnCheckedChangeListener((a, b) -> {
+            sharedPreferences.edit().putBoolean("sliderslide_enabled", b).apply();
+            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
+        });
+        checkBoxSpinnerspin.setOnCheckedChangeListener((a, b) -> {
+            sharedPreferences.edit().putBoolean("spinnerspin_enabled", b).apply();
+            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
+        });
+        checkBoxSpinnerBonus.setOnCheckedChangeListener((a, b) -> {
+            sharedPreferences.edit().putBoolean("spinnerbonus_enabled", b).apply();
+            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
+        });
 
         seekBarMusicVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setMusicVolume(i);
+                sharedPreferences.edit().putInt("music_volume", i).apply();
+                ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) { }
@@ -95,7 +108,8 @@ public class AudioSettingFragment extends Fragment {
         seekBarSoundVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setSoundVolume(i);
+                sharedPreferences.edit().putInt("sound_volume", i).apply();
+                ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) { }

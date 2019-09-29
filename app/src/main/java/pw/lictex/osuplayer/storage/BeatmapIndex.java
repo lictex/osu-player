@@ -1,6 +1,9 @@
 package pw.lictex.osuplayer.storage;
 
+import android.content.*;
 import android.util.*;
+
+import androidx.preference.*;
 
 import java.io.*;
 import java.util.*;
@@ -12,17 +15,22 @@ import pw.lictex.libosu.beatmap.*;
  * Created by kpx on 2019/3/30.
  */
 public class BeatmapIndex {
-    @Getter private static BeatmapIndex instance = new BeatmapIndex();
+    private static String pathDef = "/storage/emulated/0/osu!droid/Songs/";
+    @Getter private static BeatmapIndex instance = new BeatmapIndex(pathDef);
 
     private HashMap<String, Metadata> cache = new LinkedHashMap<>();
-    private String path = "/storage/emulated/0/osu!droid/Songs/";
 
-    private BeatmapIndex() {
-        //SQLiteDatabase.openOrCreateDatabase(context.getFilesDir().getPath() + "osuplayer.db", null);
+    private BeatmapIndex(String path) {
+        if (path == null) path = pathDef;
         refresh(path);
         for (Map.Entry<String, Metadata> entry : cache.entrySet()) {
             Log.i("WTJB", entry.getValue().getTitle() + " - " + entry.getValue().getArtist() + " [" + entry.getValue().getVersion() + "]");
         }
+    }
+
+    public static void Build(Context c) {
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+        instance = new BeatmapIndex(sharedPreferences.getString("storage_path", null));
     }
 
     private void refresh(String p) {

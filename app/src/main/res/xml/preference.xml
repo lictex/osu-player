@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:layout="@layout/item_preference_category"
+        android:title="常规">
+        <EditTextPreference
+            android:key="storage_path"
+            android:layout="@layout/item_preference"
+            android:summary="Songs文件夹"
+            android:title="存储路径" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/item_preference_category"
+        android:title="播放器">
+
+        <EditTextPreference
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="audio_latency"
+            android:layout="@layout/item_preference"
+            android:summary="增加该值使音效更早响起"
+            android:title="音频延迟" />
+
+        <CheckBoxPreference
+            android:key="nightcore_sound_volume"
+            android:layout="@layout/item_preference"
+            android:summary="Nightcore模式的打击声将由音效音量控制"
+            android:title="Nightcore使用音效音量"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>

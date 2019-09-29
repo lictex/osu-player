@@ -1,8 +1,6 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -14,7 +12,15 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="alertDialogTheme">@style/Dialog</item>
+        <item name="editTextStyle">@style/LightEditText</item>
+    </style>
+
+    <style name="Dialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:colorBackground">#121212</item>
+        <item name="android:textColor">#FFF</item>
+    </style>
+    <style name="LightEditText" parent="android:style/Widget.EditText">
+        <item name="android:textColor">#FFF</item>
     </style>
 </resources>

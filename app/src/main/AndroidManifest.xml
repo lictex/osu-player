@@ -13,7 +13,8 @@
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/HomeTheme">
+            android:theme="@style/HomeTheme"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,6 +26,15 @@
             android:name=".PlayerService"
             android:enabled="true"
             android:exported="true"></service>
+
+        <receiver
+            android:name=".MediaBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

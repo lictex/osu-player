@@ -3,13 +3,15 @@ package pw.lictex.osuplayer.audio;
 import android.content.*;
 import android.graphics.*;
 
+import androidx.preference.*;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
-import pw.lictex.osuplayer.*;
+import pw.lictex.osuplayer.R;
 
 import static com.un4seen.bass.BASS.*;
 
@@ -21,6 +23,7 @@ public class OsuAudioPlayer {
     private final AtomicInteger lastHitsoundTime = new AtomicInteger();
     private final AtomicInteger lastNightcoreBeat = new AtomicInteger();
 
+    @Getter @Setter private boolean nightcoreUseSoundVolume = false;
     @Getter @Setter private boolean sliderslideEnabled = true;
     @Getter @Setter private boolean spinnerspinEnabled = true;
     @Getter @Setter private boolean spinnerbonusEnabled = true;
@@ -42,8 +45,30 @@ public class OsuAudioPlayer {
         this.context = context;
         engine = new AudioEngine();
         sampleManager = new SampleManager();
-
+        reloadSetting();
         engine.setTickCallback(this::tick);
+    }
+
+    public void reloadSetting() {
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int i = 0;
+        try {
+            i = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString("audio_latency", null)));
+        } catch (Throwable e) {
+            sharedPreferences.edit().putString("audio_latency", "0").apply();
+        }
+        setSampleOffset(i);
+
+        setNightcoreUseSoundVolume(sharedPreferences.getBoolean("nightcore_sound_volume", false));
+
+        setMusicVolume(sharedPreferences.getInt("music_volume", 80));
+        setSoundVolume(sharedPreferences.getInt("sound_volume", 80));
+
+        setSliderslideEnabled(sharedPreferences.getBoolean("sliderslide_enabled", false));
+        setSpinnerspinEnabled(sharedPreferences.getBoolean("spinnerspin_enabled", false));
+        setSpinnerbonusEnabled(sharedPreferences.getBoolean("spinnerbonus_enabled", false));
+
     }
 
     public void setOnBeatmapEndCallback(Runnable onBeatmapEndCallback) {
@@ -279,7 +304,7 @@ public class OsuAudioPlayer {
         }
 
         if (currentMod == Mod.NC) {
-            float nightcoreVolume = musicVolume / 100f; //seems nightcore samples should use music volume..?
+            float nightcoreVolume = (nightcoreUseSoundVolume ? soundVolume : musicVolume) / 100f;
             var np = currentBeatmap.notInheritedTimingPoingAt((int) currentTime);
             int beat = (int) ((currentTime - np.getOffset()) * 2 / np.getBeatLength());
             int bar = beat % np.getTimeSignature();

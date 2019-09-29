@@ -2,22 +2,38 @@ package pw.lictex.osuplayer;
 
 import android.app.*;
 import android.content.*;
+import android.media.*;
 import android.os.*;
 
 import java.io.*;
 import java.util.*;
 
 import lombok.*;
+import pw.lictex.osuplayer.activity.*;
 import pw.lictex.osuplayer.audio.*;
-import pw.lictex.osuplayer.activity.MainActivity;
 
 public class PlayerService extends Service {
     private final int ID = 141;
-
+    private AudioManager audioManager;
     @Getter private ArrayList<String> playlist = new ArrayList<>();
     @Getter private int currentIndex = 0;
     @Getter private OsuAudioPlayer osuAudioPlayer;
-    @Getter @Setter private Runnable onNewTrackCallback;
+    @Getter @Setter private Runnable onUpdateCallback;
+    private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                audioManager.unregisterMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
+                audioManager.registerMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
+                resume();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                audioManager.unregisterMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                pause();
+                break;
+        }
+    };
     @Getter @Setter private LoopMode loopMode = LoopMode.All;
 
     public String getCurrentPath() {
@@ -50,7 +66,16 @@ public class PlayerService extends Service {
             }
 
         });
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        ensureAudioFocus();
         startForeground(ID, getNotification());
+    }
+
+    private void ensureAudioFocus() {
+        audioManager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
+        audioManager.abandonAudioFocus(focusChangeListener);
+        audioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        audioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
     }
 
     @Override
@@ -58,6 +83,8 @@ public class PlayerService extends Service {
         super.onDestroy();
         osuAudioPlayer.destroy();
         osuAudioPlayer = null;
+        audioManager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
+        audioManager.abandonAudioFocus(focusChangeListener);
     }
 
     public void next() {
@@ -69,16 +96,27 @@ public class PlayerService extends Service {
     }
 
     public void play(int index) {
+        ensureAudioFocus();
         if (playlist.size() != 0) {
             index = (index < 0 || index >= playlist.size()) ? 0 : index;
             String s = playlist.get(index);
             osuAudioPlayer.openBeatmapSet(new File(s).getParent() + "/");
             osuAudioPlayer.playBeatmap(new File(s).getName());
             currentIndex = index;
-
-            if (onNewTrackCallback != null) onNewTrackCallback.run();
+            if (onUpdateCallback != null) onUpdateCallback.run();
         }
         refresh();
+    }
+
+    public void resume() {
+        ensureAudioFocus();
+        osuAudioPlayer.play();
+        if (onUpdateCallback != null) onUpdateCallback.run();
+    }
+
+    public void pause() {
+        osuAudioPlayer.pause();
+        if (onUpdateCallback != null) onUpdateCallback.run();
     }
 
     public void refresh() {

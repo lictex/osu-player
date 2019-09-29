@@ -77,6 +77,11 @@ public class PlaylistFragment extends Fragment {
         mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
+    public void rebuildList() {
+        ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(BeatmapIndex.getInstance().getAllBeatmaps());
+        refreshList();
+    }
+
     protected class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.PlaylistViewHolder> {
         List<String> list = new ArrayList<>();
 
