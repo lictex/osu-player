@@ -26,6 +26,7 @@ public class PlaylistFragment extends Fragment {
     @BindView(R.id.status) View statusAll;
     @BindView(R.id.buttonAll) Button buttonAll;
     @BindView(R.id.buttonFavorite) Button buttonFavorite;
+    private boolean showCollectionList = false;
 
     @OnTextChanged(R.id.searchText) void onTextChanged() {
         refreshList();
@@ -44,6 +45,9 @@ public class PlaylistFragment extends Fragment {
 
         buttonAll.animate().alpha(1).setDuration(200).start();
         buttonFavorite.animate().alpha(.75f).setDuration(200).start();
+
+        showCollectionList = false;
+        rebuildList();
     }
 
     @OnClick(R.id.buttonFavorite) void onFavoriteClick() {
@@ -58,6 +62,9 @@ public class PlaylistFragment extends Fragment {
 
         buttonAll.animate().alpha(.75f).setDuration(200).start();
         buttonFavorite.animate().alpha(1).setDuration(200).start();
+
+        showCollectionList = true;
+        rebuildList();
     }
 
     @Override
@@ -67,9 +74,9 @@ public class PlaylistFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         HomeAdapter adapter = new HomeAdapter();
-        adapter.list = new ArrayList<>(BeatmapIndex.getInstance().getAllBeatmaps());
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        rebuildList();
         return view;
     }
 
@@ -78,7 +85,16 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void rebuildList() {
-        ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(BeatmapIndex.getInstance().getAllBeatmaps());
+        var playerService = ((MainActivity) getActivity()).getPlayerService();
+        List<String> collectionBeatmaps = BeatmapIndex.getInstance().getFavoriteBeatmaps();
+        List<String> allBeatmaps = BeatmapIndex.getInstance().getAllBeatmaps();
+
+        ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? collectionBeatmaps : allBeatmaps);
+        playerService.getAllMapList().clear();
+        playerService.getCollectionMapList().clear();
+        playerService.getAllMapList().addAll(allBeatmaps);
+        playerService.getCollectionMapList().addAll(collectionBeatmaps);
+
         refreshList();
     }
 
@@ -110,6 +126,7 @@ public class PlaylistFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
+            var playerService = ((MainActivity) getActivity()).getPlayerService();
             String path = list.get(position);
             var x = BeatmapIndex.getInstance().getMetadata(path);
             if (holder.isNull) return;
@@ -118,13 +135,27 @@ public class PlaylistFragment extends Fragment {
             holder.getVersion().setText(x.getVersion() + " by " + x.getMapper());
             String currentPath = ((MainActivity) getActivity()).getPlayerService().getCurrentPath();
             holder.getPlaying().setVisibility(currentPath.equals(path) ? View.VISIBLE : View.GONE);
-            holder.getFavorite().setAlpha(0.75f); //TODO
+
+            if (BeatmapIndex.getInstance().isInCollection(path)) {
+                holder.getFavorite().setAlpha(1f);
+                holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart));
+            } else {
+                holder.getFavorite().setAlpha(0.75f);
+                holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_outline));
+            }
+            holder.getFavorite().setOnClickListener(a -> {
+                if (BeatmapIndex.getInstance().isInCollection(path))
+                    BeatmapIndex.getInstance().removeCollection(path);
+                else
+                    BeatmapIndex.getInstance().addCollection(path);
+
+                if (playerService.isPlayCollectionList()) rebuildList();
+                else refreshList();
+            });
+
             holder.getRoot().setOnClickListener(a -> {
-                var playerService = ((MainActivity) getActivity()).getPlayerService();
-                playerService.getPlaylist().clear();
-                List<String> allBeatmaps = BeatmapIndex.getInstance().getAllBeatmaps();
-                playerService.getPlaylist().addAll(allBeatmaps);
-                playerService.play(allBeatmaps.indexOf(path));
+                playerService.setPlayCollectionList(showCollectionList);
+                playerService.play(playerService.getPlaylist().indexOf(path));
             });
         }
 

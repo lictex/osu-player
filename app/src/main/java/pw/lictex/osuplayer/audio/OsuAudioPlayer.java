@@ -135,192 +135,194 @@ public class OsuAudioPlayer {
         //no beatmap
         if (currentBeatmap == null) return;
 
-        long currentTime = engine.getMainTrackCurrentTime() + sampleOffset;
-        TimingPoint timingPoint = currentBeatmap.timingPoingAt((int) currentTime);
+        synchronized (this) {
+            long currentTime = engine.getMainTrackCurrentTime() + sampleOffset;
+            TimingPoint timingPoint = currentBeatmap.timingPoingAt((int) currentTime);
 
-        SampleSet timingSampleSet = timingPoint != null ? timingPoint.getSampleSet() : SampleSet.Normal;
-        int timingCustomSampleSet = timingPoint != null ? timingPoint.getCustomSampleSet() : 0;
-        float timingVolume = (timingPoint != null ? timingPoint.getVolume() : 0) * soundVolume / 100f / 100f;
+            SampleSet timingSampleSet = timingPoint != null ? timingPoint.getSampleSet() : SampleSet.Normal;
+            int timingCustomSampleSet = timingPoint != null ? timingPoint.getCustomSampleSet() : 0;
+            float timingVolume = (timingPoint != null ? timingPoint.getVolume() : 0) * soundVolume / 100f / 100f;
 
-        boolean sliderSliding = false;
-        boolean sliderWhistling = false;
-        boolean spinnerSpinning = false;
-        float spinnerCompletion = 0;
-        SampleSet sliderSampleSet = SampleSet.Normal;
-        SampleSet sliderAdditionSet = SampleSet.Normal;
+            boolean sliderSliding = false;
+            boolean sliderWhistling = false;
+            boolean spinnerSpinning = false;
+            float spinnerCompletion = 0;
+            SampleSet sliderSampleSet = SampleSet.Normal;
+            SampleSet sliderAdditionSet = SampleSet.Normal;
 
-        int lastHs = lastHitsoundTime.get();
+            int lastHs = lastHitsoundTime.get();
 
-        Iterator<HitObject> iterator = hitObjectsRemains.iterator();
-        while (iterator.hasNext()) {
-            HitObject hitObject = iterator.next();
-            if (hitObject.getTime() > currentTime) break;
+            Iterator<HitObject> iterator = hitObjectsRemains.iterator();
+            while (iterator.hasNext()) {
+                HitObject hitObject = iterator.next();
+                if (hitObject.getTime() > currentTime) break;
 
-            int objectCustomSampleSet = (hitObject.getCustomSampleSetIndex() != 0) ? hitObject.getCustomSampleSetIndex() : timingCustomSampleSet;
-            float objectVolume = (hitObject.getVolume() != 0) ? hitObject.getVolume() * soundVolume / 100f / 100f : timingVolume;
+                int objectCustomSampleSet = (hitObject.getCustomSampleSetIndex() != 0) ? hitObject.getCustomSampleSetIndex() : timingCustomSampleSet;
+                float objectVolume = (hitObject.getVolume() != 0) ? hitObject.getVolume() * soundVolume / 100f / 100f : timingVolume;
 
-            if (hitObject instanceof HitObject.Slider) {
-                HitObject.Slider slider = (HitObject.Slider) hitObject;
+                if (hitObject instanceof HitObject.Slider) {
+                    HitObject.Slider slider = (HitObject.Slider) hitObject;
 
-                sliderWhistling = (slider.getHitSounds() & 1 << 1) > 0;
-                sliderSampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
-                sliderAdditionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sliderSampleSet;
+                    sliderWhistling = (slider.getHitSounds() & 1 << 1) > 0;
+                    sliderSampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
+                    sliderAdditionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sliderSampleSet;
 
-                //region playSliderSample();
-                double sliderDuration = currentBeatmap.getSliderDuration(slider);
-                for (int i = 0; i < slider.getRepeat() + 1; i++) {
-                    if (slider.getTime() + sliderDuration * i <= currentTime && slider.getTime() + sliderDuration * i > lastHitsoundTime.get()) {
-                        SampleSet sampleSet = (slider.getEdgeSampleSet().get(i) != SampleSet.None) ? slider.getEdgeSampleSet().get(i) : timingSampleSet;
-                        SampleSet additionSet = (slider.getEdgeAdditionSet().get(i) != SampleSet.None) ? slider.getEdgeAdditionSet().get(i) : sampleSet;
+                    //region playSliderSample();
+                    double sliderDuration = currentBeatmap.getSliderDuration(slider);
+                    for (int i = 0; i < slider.getRepeat() + 1; i++) {
+                        if (slider.getTime() + sliderDuration * i <= currentTime && slider.getTime() + sliderDuration * i > lastHitsoundTime.get()) {
+                            SampleSet sampleSet = (slider.getEdgeSampleSet().get(i) != SampleSet.None) ? slider.getEdgeSampleSet().get(i) : timingSampleSet;
+                            SampleSet additionSet = (slider.getEdgeAdditionSet().get(i) != SampleSet.None) ? slider.getEdgeAdditionSet().get(i) : sampleSet;
 
-                        float pan = ((i % 2 == 0 ? slider.getX() : slider.getCurvePoints().get(slider.getCurvePoints().size() - 1)[0]) / 512f - 0.5f) * 0.8f;
-                        int hitSounds = slider.getEdgeHitsounds().get(i);
+                            float pan = ((i % 2 == 0 ? slider.getX() : slider.getCurvePoints().get(slider.getCurvePoints().size() - 1)[0]) / 512f - 0.5f) * 0.8f;
+                            int hitSounds = slider.getEdgeHitsounds().get(i);
 
-                        //seems sliders are not affected by hitsounds override..?
-                        sampleManager.getSample(sampleSet, "hitnormal", timingCustomSampleSet).play(timingVolume, pan);
-                        if ((hitSounds & 1 << 1) > 0)
-                            sampleManager.getSample(additionSet, "hitwhistle", timingCustomSampleSet).play(timingVolume, pan);
-                        if ((hitSounds & 1 << 2) > 0)
-                            sampleManager.getSample(additionSet, "hitfinish", timingCustomSampleSet).play(timingVolume, pan);
-                        if ((hitSounds & 1 << 3) > 0)
-                            sampleManager.getSample(additionSet, "hitclap", timingCustomSampleSet).play(timingVolume, pan);
+                            //seems sliders are not affected by hitsounds override..?
+                            sampleManager.getSample(sampleSet, "hitnormal", timingCustomSampleSet).play(timingVolume, pan);
+                            if ((hitSounds & 1 << 1) > 0)
+                                sampleManager.getSample(additionSet, "hitwhistle", timingCustomSampleSet).play(timingVolume, pan);
+                            if ((hitSounds & 1 << 2) > 0)
+                                sampleManager.getSample(additionSet, "hitfinish", timingCustomSampleSet).play(timingVolume, pan);
+                            if ((hitSounds & 1 << 3) > 0)
+                                sampleManager.getSample(additionSet, "hitclap", timingCustomSampleSet).play(timingVolume, pan);
 
-                        lastHs = (int) Math.ceil(slider.getTime() + sliderDuration * i);
+                            lastHs = (int) Math.ceil(slider.getTime() + sliderDuration * i);
+                        }
                     }
-                }
-                //endregion
-                if (slider.getTime() + sliderDuration * slider.getRepeat() < currentTime) iterator.remove();
-                else sliderSliding = true;
-            }
-
-            if (hitObject instanceof HitObject.Circle) {
-                //region playCircleSample();
-                if (lastHitsoundTime.get() <= hitObject.getTime()) {
-                    SampleSet sampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
-                    SampleSet additionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sampleSet;
-
-                    float pan = (hitObject.getX() / 512f - 0.5f) * 0.8f;
-                    int hitSounds = hitObject.getHitSounds();
-
-                    if (!hitObject.getSampleFile().isEmpty())
-                        sampleManager.getSample(hitObject.getSampleFile().substring(0, hitObject.getSampleFile().lastIndexOf("."))).play(objectVolume, pan);
-                    else
-                        sampleManager.getSample(sampleSet, "hitnormal", objectCustomSampleSet).play(objectVolume, pan);
-
-                    if ((hitSounds & 1 << 1) > 0)
-                        sampleManager.getSample(additionSet, "hitwhistle", objectCustomSampleSet).play(objectVolume, pan);
-                    if ((hitSounds & 1 << 2) > 0)
-                        sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, pan);
-                    if ((hitSounds & 1 << 3) > 0)
-                        sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, pan);
-                    lastHs = (int) Math.ceil(hitObject.getTime());
+                    //endregion
+                    if (slider.getTime() + sliderDuration * slider.getRepeat() < currentTime) iterator.remove();
+                    else sliderSliding = true;
                 }
 
-                //endregion
-                iterator.remove();
-            }
+                if (hitObject instanceof HitObject.Circle) {
+                    //region playCircleSample();
+                    if (lastHitsoundTime.get() <= hitObject.getTime()) {
+                        SampleSet sampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
+                        SampleSet additionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sampleSet;
 
-            if (hitObject instanceof HitObject.Spinner) {
-                HitObject.Spinner spinner = (HitObject.Spinner) hitObject;
-                if (spinner.getEndTime() < currentTime) {
-                    SampleSet sampleSet = (spinner.getSampleSet() != SampleSet.None) ? spinner.getSampleSet() : timingSampleSet;
-                    SampleSet additionSet = (spinner.getAdditions() != SampleSet.None) ? spinner.getAdditions() : sampleSet;
+                        float pan = (hitObject.getX() / 512f - 0.5f) * 0.8f;
+                        int hitSounds = hitObject.getHitSounds();
 
-                    int hitSounds = spinner.getHitSounds();
+                        if (!hitObject.getSampleFile().isEmpty())
+                            sampleManager.getSample(hitObject.getSampleFile().substring(0, hitObject.getSampleFile().lastIndexOf("."))).play(objectVolume, pan);
+                        else
+                            sampleManager.getSample(sampleSet, "hitnormal", objectCustomSampleSet).play(objectVolume, pan);
 
-                    if (!spinner.getSampleFile().isEmpty())
-                        sampleManager.getSample(spinner.getSampleFile().substring(0, spinner.getSampleFile().lastIndexOf("."))).play(objectVolume, 0);
-                    else
-                        sampleManager.getSample(sampleSet, "hitnormal", objectCustomSampleSet).play(objectVolume, 0);
+                        if ((hitSounds & 1 << 1) > 0)
+                            sampleManager.getSample(additionSet, "hitwhistle", objectCustomSampleSet).play(objectVolume, pan);
+                        if ((hitSounds & 1 << 2) > 0)
+                            sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, pan);
+                        if ((hitSounds & 1 << 3) > 0)
+                            sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, pan);
+                        lastHs = (int) Math.ceil(hitObject.getTime());
+                    }
 
-                    if ((hitSounds & 1 << 1) > 0)
-                        sampleManager.getSample(additionSet, "hitwhistle", objectCustomSampleSet).play(objectVolume, 0);
-                    if ((hitSounds & 1 << 2) > 0)
-                        sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, 0);
-                    if ((hitSounds & 1 << 3) > 0)
-                        sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, 0);
-                    lastHs = (int) Math.ceil(spinner.getTime());
-
+                    //endregion
                     iterator.remove();
-                } else {
-                    spinnerSpinning = true;
-                    spinnerCompletion = (float) (currentTime - spinner.getTime()) / (spinner.getEndTime() - spinner.getTime()) * 2;
-                    if (spinnerCompletion >= 1) {
-                        int x = (spinner.getEndTime() - spinner.getTime()) / 2;
-                        lastHs = Math.max(lastHs, spinner.getTime() + x);
-                        int t = 200;
-                        while (currentTime - lastHs > t) {
-                            if (spinnerbonusEnabled) {
-                                sampleManager.getSample("spinnerbonus").play(timingVolume, 0);
+                }
+
+                if (hitObject instanceof HitObject.Spinner) {
+                    HitObject.Spinner spinner = (HitObject.Spinner) hitObject;
+                    if (spinner.getEndTime() < currentTime) {
+                        SampleSet sampleSet = (spinner.getSampleSet() != SampleSet.None) ? spinner.getSampleSet() : timingSampleSet;
+                        SampleSet additionSet = (spinner.getAdditions() != SampleSet.None) ? spinner.getAdditions() : sampleSet;
+
+                        int hitSounds = spinner.getHitSounds();
+
+                        if (!spinner.getSampleFile().isEmpty())
+                            sampleManager.getSample(spinner.getSampleFile().substring(0, spinner.getSampleFile().lastIndexOf("."))).play(objectVolume, 0);
+                        else
+                            sampleManager.getSample(sampleSet, "hitnormal", objectCustomSampleSet).play(objectVolume, 0);
+
+                        if ((hitSounds & 1 << 1) > 0)
+                            sampleManager.getSample(additionSet, "hitwhistle", objectCustomSampleSet).play(objectVolume, 0);
+                        if ((hitSounds & 1 << 2) > 0)
+                            sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, 0);
+                        if ((hitSounds & 1 << 3) > 0)
+                            sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, 0);
+                        lastHs = (int) Math.ceil(spinner.getTime());
+
+                        iterator.remove();
+                    } else {
+                        spinnerSpinning = true;
+                        spinnerCompletion = (float) (currentTime - spinner.getTime()) / (spinner.getEndTime() - spinner.getTime()) * 2;
+                        if (spinnerCompletion >= 1) {
+                            int x = (spinner.getEndTime() - spinner.getTime()) / 2;
+                            lastHs = Math.max(lastHs, spinner.getTime() + x);
+                            int t = 200;
+                            while (currentTime - lastHs > t) {
+                                if (spinnerbonusEnabled) {
+                                    sampleManager.getSample("spinnerbonus").play(timingVolume, 0);
+                                }
+                                lastHs += t;
                             }
-                            lastHs += t;
                         }
                     }
                 }
             }
-        }
 
-        lastHitsoundTime.set(lastHs);
+            lastHitsoundTime.set(lastHs);
 
-        if (sliderslideEnabled && sliderSliding && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
-            var slideSample = sampleManager.getSample(sliderSampleSet, "sliderslide", timingCustomSampleSet);
-            if (currentSliderSlideSound != slideSample) {
-                if (currentSliderSlideSound != null) currentSliderSlideSound.endLoop();
-                currentSliderSlideSound = slideSample;
-            }
-            slideSample.loop(timingVolume);
-
-            if (sliderWhistling) {
-                var whistleSample = sampleManager.getSample(sliderAdditionSet, "sliderwhistle", timingCustomSampleSet);
-                if (currentSliderWhistleSound != whistleSample) {
-                    if (currentSliderWhistleSound != null) currentSliderWhistleSound.endLoop();
-                    currentSliderWhistleSound = whistleSample;
+            if (sliderslideEnabled && sliderSliding && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
+                var slideSample = sampleManager.getSample(sliderSampleSet, "sliderslide", timingCustomSampleSet);
+                if (currentSliderSlideSound != slideSample) {
+                    if (currentSliderSlideSound != null) currentSliderSlideSound.endLoop();
+                    currentSliderSlideSound = slideSample;
                 }
-                whistleSample.loop(timingVolume);
-            }
-        } else {
-            if (currentSliderSlideSound != null) {
-                currentSliderSlideSound.endLoop();
-                currentSliderSlideSound = null;
-            }
-            if (currentSliderWhistleSound != null) {
-                currentSliderWhistleSound.endLoop();
-                currentSliderWhistleSound = null;
-            }
-        }
+                slideSample.loop(timingVolume);
 
-        if (spinnerspinEnabled && spinnerSpinning && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
-            var spinnerSample = sampleManager.getSample("spinnerspin");
-            if (currentSpinnerSpinSound != spinnerSample) {
-                if (currentSpinnerSpinSound != null) currentSpinnerSpinSound.endLoop();
-                currentSpinnerSpinSound = spinnerSample;
+                if (sliderWhistling) {
+                    var whistleSample = sampleManager.getSample(sliderAdditionSet, "sliderwhistle", timingCustomSampleSet);
+                    if (currentSliderWhistleSound != whistleSample) {
+                        if (currentSliderWhistleSound != null) currentSliderWhistleSound.endLoop();
+                        currentSliderWhistleSound = whistleSample;
+                    }
+                    whistleSample.loop(timingVolume);
+                }
+            } else {
+                if (currentSliderSlideSound != null) {
+                    currentSliderSlideSound.endLoop();
+                    currentSliderSlideSound = null;
+                }
+                if (currentSliderWhistleSound != null) {
+                    currentSliderWhistleSound.endLoop();
+                    currentSliderWhistleSound = null;
+                }
             }
-            spinnerSample.loop(timingVolume, Math.min(100000, 20000 + (int) (40000 * spinnerCompletion)));
-        } else {
-            if (currentSpinnerSpinSound != null) {
-                currentSpinnerSpinSound.endLoop();
-                currentSpinnerSpinSound = null;
+
+            if (spinnerspinEnabled && spinnerSpinning && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
+                var spinnerSample = sampleManager.getSample("spinnerspin");
+                if (currentSpinnerSpinSound != spinnerSample) {
+                    if (currentSpinnerSpinSound != null) currentSpinnerSpinSound.endLoop();
+                    currentSpinnerSpinSound = spinnerSample;
+                }
+                spinnerSample.loop(timingVolume, Math.min(100000, 20000 + (int) (40000 * spinnerCompletion)));
+            } else {
+                if (currentSpinnerSpinSound != null) {
+                    currentSpinnerSpinSound.endLoop();
+                    currentSpinnerSpinSound = null;
+                }
             }
-        }
 
-        if (currentMod == Mod.NC) {
-            float nightcoreVolume = (nightcoreUseSoundVolume ? soundVolume : musicVolume) / 100f;
-            var np = currentBeatmap.notInheritedTimingPoingAt((int) currentTime);
-            int beat = (int) ((currentTime - np.getOffset()) * 2 / np.getBeatLength());
-            int bar = beat % np.getTimeSignature();
-            if (bar == lastNightcoreBeat.get()) return;
-            lastNightcoreBeat.set(bar);
+            if (currentMod == Mod.NC) {
+                float nightcoreVolume = (nightcoreUseSoundVolume ? soundVolume : musicVolume) / 100f;
+                var np = currentBeatmap.notInheritedTimingPoingAt((int) currentTime);
+                int beat = (int) ((currentTime - np.getOffset()) * 2 / np.getBeatLength());
+                int bar = beat % np.getTimeSignature();
+                if (bar == lastNightcoreBeat.get()) return;
+                lastNightcoreBeat.set(bar);
 
-            if (beat % (8 * np.getTimeSignature()) == 0) {
-                sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
-                if (!np.isEffectEnabled(TimingPoint.Effect.OmitFirstBarLine) || bar > 0)
-                    sampleManager.getDefaultSample("nightcore-finish").play(nightcoreVolume, 0);
-            } else if (bar % 4 == 0) {
-                sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
-            } else if (bar % 4 == 2) {
-                sampleManager.getDefaultSample("nightcore-clap").play(nightcoreVolume, 0);
-            } else if (currentBeatmap.getDifficultySection().getSliderTickRate() % 2 == 0) {
-                sampleManager.getDefaultSample("nightcore-hat").play(nightcoreVolume, 0);
+                if (beat % (8 * np.getTimeSignature()) == 0) {
+                    sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
+                    if (!np.isEffectEnabled(TimingPoint.Effect.OmitFirstBarLine) || bar > 0)
+                        sampleManager.getDefaultSample("nightcore-finish").play(nightcoreVolume, 0);
+                } else if (bar % 4 == 0) {
+                    sampleManager.getDefaultSample("nightcore-kick").play(nightcoreVolume, 0);
+                } else if (bar % 4 == 2) {
+                    sampleManager.getDefaultSample("nightcore-clap").play(nightcoreVolume, 0);
+                } else if (currentBeatmap.getDifficultySection().getSliderTickRate() % 2 == 0) {
+                    sampleManager.getDefaultSample("nightcore-hat").play(nightcoreVolume, 0);
+                }
             }
         }
     }
@@ -371,19 +373,24 @@ public class OsuAudioPlayer {
     }
 
     public void openBeatmapSet(String dir) {
+        synchronized (this) {
+            currentBeatmap = null;
+        }
         engine.stopMainTrack();
-        currentBeatmap = null;
         sampleManager.setDirectory(dir);
         currentBeatmapSetPath = dir;
     }
 
     public void playBeatmap(String filename) {
+        OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
         engine.stopMainTrack();
-        currentBeatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
         seekTo(0);
-        engine.playMainTrack(currentBeatmapSetPath + currentBeatmap.getGeneralSection().getAudioFilename());
+        engine.playMainTrack(currentBeatmapSetPath + beatmap.getGeneralSection().getAudioFilename());
         engine.setMainTrackVolume(this.musicVolume / 100f);
         setMod(currentMod);
+        synchronized (this) {
+            this.currentBeatmap = beatmap;
+        }
     }
 
     public long getAudioLength() {

@@ -5,8 +5,11 @@ import android.util.*;
 
 import androidx.preference.*;
 
+import com.annimon.stream.*;
+
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
@@ -16,21 +19,23 @@ import pw.lictex.libosu.beatmap.*;
  */
 public class BeatmapIndex {
     private static String pathDef = "/storage/emulated/0/osu!droid/Songs/";
-    @Getter private static BeatmapIndex instance = new BeatmapIndex(pathDef);
-
+    @Getter private static BeatmapIndex instance;
+    @Getter private static String currentPath = pathDef;
+    private static SharedPreferences sharedPreferences;
     private HashMap<String, Metadata> cache = new LinkedHashMap<>();
+    private Set<String> collection = new LinkedHashSet<>();
 
     private BeatmapIndex(String path) {
         if (path == null) path = pathDef;
+        collection = sharedPreferences.getStringSet("collection", collection);
         refresh(path);
-        for (Map.Entry<String, Metadata> entry : cache.entrySet()) {
-            Log.i("WTJB", entry.getValue().getTitle() + " - " + entry.getValue().getArtist() + " [" + entry.getValue().getVersion() + "]");
-        }
     }
 
     public static void Build(Context c) {
-        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-        instance = new BeatmapIndex(sharedPreferences.getString("storage_path", null));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+        currentPath = sharedPreferences.getString("storage_path", pathDef);
+        if (!currentPath.endsWith("/")) currentPath += "/";
+        instance = new BeatmapIndex(currentPath);
     }
 
     private void refresh(String p) {
@@ -74,6 +79,28 @@ public class BeatmapIndex {
 
     public List<String> getAllBeatmaps() {
         return new ArrayList<>(cache.keySet());
+    }
+
+    public List<String> getFavoriteBeatmaps() {
+        return Collections.unmodifiableList(Stream.of(collection).map(s -> currentPath + s).toList());
+    }
+
+    public void addCollection(String s) {
+        collection.add(m(s));
+        sharedPreferences.edit().putStringSet("collection", collection).apply();
+    }
+
+    public boolean isInCollection(String s) {
+        return collection.contains(m(s));
+    }
+
+    public void removeCollection(String s) {
+        collection.remove(m(s));
+        sharedPreferences.edit().putStringSet("collection", collection).apply();
+    }
+
+    private String m(String s) {
+        return s.replaceFirst(Pattern.quote(currentPath), "").replaceAll("^/*", "");
     }
 
     public Metadata getMetadata(String path) {

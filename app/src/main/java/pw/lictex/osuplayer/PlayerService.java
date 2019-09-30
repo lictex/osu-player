@@ -15,8 +15,10 @@ import pw.lictex.osuplayer.audio.*;
 public class PlayerService extends Service {
     private final int ID = 141;
     private AudioManager audioManager;
-    @Getter private ArrayList<String> playlist = new ArrayList<>();
-    @Getter private int currentIndex = 0;
+    @Getter private ArrayList<String> allMapList = new ArrayList<>();
+    @Getter private ArrayList<String> collectionMapList = new ArrayList<>();
+    @Getter @Setter private boolean playCollectionList = false;
+    @Getter private int currentIndex = -1;
     @Getter private OsuAudioPlayer osuAudioPlayer;
     @Getter @Setter private Runnable onUpdateCallback;
     private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
@@ -38,7 +40,7 @@ public class PlayerService extends Service {
 
     public String getCurrentPath() {
         try {
-            return playlist.get(currentIndex);
+            return getPlaylist().get(currentIndex);
         } catch (Throwable e) {
             return "";
         }
@@ -62,7 +64,7 @@ public class PlayerService extends Service {
                     play(currentIndex + 1);
                     break;
                 case Random:
-                    play(((int) (Math.random() * playlist.size())));
+                    play(((int) (Math.random() * getPlaylist().size())));
             }
 
         });
@@ -97,9 +99,9 @@ public class PlayerService extends Service {
 
     public void play(int index) {
         ensureAudioFocus();
-        if (playlist.size() != 0) {
-            index = (index < 0 || index >= playlist.size()) ? 0 : index;
-            String s = playlist.get(index);
+        if (getPlaylist().size() != 0) {
+            index = (index < 0 || index >= getPlaylist().size()) ? 0 : index;
+            String s = getPlaylist().get(index);
             osuAudioPlayer.openBeatmapSet(new File(s).getParent() + "/");
             osuAudioPlayer.playBeatmap(new File(s).getName());
             currentIndex = index;
@@ -124,12 +126,16 @@ public class PlayerService extends Service {
         notificationManager.notify(ID, getNotification());
     }
 
+    public List<String> getPlaylist() {
+        return playCollectionList ? collectionMapList : allMapList;
+    }
+
     private Notification getNotification() {
         var builder = new Notification.Builder(getApplication()).setAutoCancel(true).setSmallIcon(R.drawable.ic_osu_96)
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) builder.setChannelId("Service");
 
-        if (playlist.size() == 0 || osuAudioPlayer.getTitle() == null) builder.setContentTitle("闲置中");
+        if (allMapList.size() == 0 || osuAudioPlayer.getTitle() == null) builder.setContentTitle("闲置中");
         else builder.setContentTitle(osuAudioPlayer.getTitle() + " - " + osuAudioPlayer.getArtist()).
                 setContentText(osuAudioPlayer.getVersion() + " by " + osuAudioPlayer.getMapper());
 
