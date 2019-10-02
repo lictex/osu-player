@@ -83,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
                 .setBlurRadius(blurRadius);
         setContentSize(0, 0);
 
+        title.setText(null);
+        artist.setText(null);
+        version.setText(null);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -174,7 +177,10 @@ public class MainActivity extends AppCompatActivity {
 
         title.setText(playerService.getOsuAudioPlayer().getTitle());
         artist.setText(playerService.getOsuAudioPlayer().getArtist());
-        version.setText(playerService.getOsuAudioPlayer().getVersion() + " by " + playerService.getOsuAudioPlayer().getMapper());
+        if (playerService.getOsuAudioPlayer().getVersion() != null)
+            version.setText(playerService.getOsuAudioPlayer().getVersion() + " by " + playerService.getOsuAudioPlayer().getMapper());
+        else
+            version.setText(null);
 
         OsuAudioPlayer player = getPlayerService().getOsuAudioPlayer();
         audioSettingFragment.update(player.getMusicVolume(), player.getSoundVolume(), player.getCurrentMod(), player.isSliderslideEnabled(), player.isSpinnerspinEnabled(), player.isSpinnerbonusEnabled());

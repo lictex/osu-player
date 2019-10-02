@@ -77,6 +77,11 @@ public class PlaylistFragment extends Fragment {
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         rebuildList();
+
+        var playerService = ((MainActivity) getActivity()).getPlayerService();
+        showCollectionList = playerService.isPlayCollectionList();
+        if (showCollectionList) onFavoriteClick();
+
         return view;
     }
 
@@ -134,7 +139,7 @@ public class PlaylistFragment extends Fragment {
             holder.getTitle().setText(x.getTitle() + " - " + x.getArtist());
             holder.getVersion().setText(x.getVersion() + " by " + x.getMapper());
             String currentPath = ((MainActivity) getActivity()).getPlayerService().getCurrentPath();
-            holder.getPlaying().setVisibility(currentPath.equals(path) ? View.VISIBLE : View.GONE);
+            holder.getPlaying().setVisibility(path.equals(currentPath) ? View.VISIBLE : View.GONE);
 
             if (BeatmapIndex.getInstance().isInCollection(path)) {
                 holder.getFavorite().setAlpha(1f);
@@ -149,7 +154,7 @@ public class PlaylistFragment extends Fragment {
                 else
                     BeatmapIndex.getInstance().addCollection(path);
 
-                if (playerService.isPlayCollectionList()) rebuildList();
+                if (showCollectionList) rebuildList();
                 else refreshList();
             });
 

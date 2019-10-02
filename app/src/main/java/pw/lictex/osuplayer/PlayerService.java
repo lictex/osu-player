@@ -18,7 +18,7 @@ public class PlayerService extends Service {
     @Getter private ArrayList<String> allMapList = new ArrayList<>();
     @Getter private ArrayList<String> collectionMapList = new ArrayList<>();
     @Getter @Setter private boolean playCollectionList = false;
-    @Getter private int currentIndex = -1;
+    @Getter private String currentPath = null;
     @Getter private OsuAudioPlayer osuAudioPlayer;
     @Getter @Setter private Runnable onUpdateCallback;
     private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
@@ -38,14 +38,6 @@ public class PlayerService extends Service {
     };
     @Getter @Setter private LoopMode loopMode = LoopMode.All;
 
-    public String getCurrentPath() {
-        try {
-            return getPlaylist().get(currentIndex);
-        } catch (Throwable e) {
-            return "";
-        }
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return new PlayerServiceBinder();
@@ -58,10 +50,10 @@ public class PlayerService extends Service {
         osuAudioPlayer.setOnBeatmapEndCallback(() -> {
             switch (loopMode) {
                 case Single:
-                    play(currentIndex);
+                    play(getPlaylist().indexOf(currentPath));
                     break;
                 case All:
-                    play(currentIndex + 1);
+                    play(getPlaylist().indexOf(currentPath) + 1);
                     break;
                 case Random:
                     play(((int) (Math.random() * getPlaylist().size())));
@@ -90,21 +82,20 @@ public class PlayerService extends Service {
     }
 
     public void next() {
-        play(currentIndex + 1);
+        play(getPlaylist().indexOf(currentPath) + 1);
     }
 
     public void previous() {
-        play(currentIndex - 1);
+        play(getPlaylist().indexOf(currentPath) - 1);
     }
 
     public void play(int index) {
         ensureAudioFocus();
         if (getPlaylist().size() != 0) {
             index = (index < 0 || index >= getPlaylist().size()) ? 0 : index;
-            String s = getPlaylist().get(index);
-            osuAudioPlayer.openBeatmapSet(new File(s).getParent() + "/");
-            osuAudioPlayer.playBeatmap(new File(s).getName());
-            currentIndex = index;
+            currentPath = getPlaylist().get(index);
+            osuAudioPlayer.openBeatmapSet(new File(currentPath).getParent() + "/");
+            osuAudioPlayer.playBeatmap(new File(currentPath).getName());
             if (onUpdateCallback != null) onUpdateCallback.run();
         }
         refresh();

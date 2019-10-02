@@ -363,13 +363,12 @@ public class OsuAudioPlayer {
     }
 
     public void seekTo(long ms) {
-        var saved = engine.getPlaybackStatus();
-        engine.pause();
         engine.setTime(ms);
         lastHitsoundTime.set((int) ms);
-        hitObjectsRemains.clear();
-        if (currentBeatmap != null) hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
-        if (saved == AudioEngine.PlaybackStatus.Playing) engine.resume();
+        synchronized (this) {
+            hitObjectsRemains.clear();
+            if (currentBeatmap != null) hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
+        }
     }
 
     public void openBeatmapSet(String dir) {
@@ -384,13 +383,14 @@ public class OsuAudioPlayer {
     public void playBeatmap(String filename) {
         OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
         engine.stopMainTrack();
-        seekTo(0);
+        hitObjectsRemains.clear();
         engine.playMainTrack(currentBeatmapSetPath + beatmap.getGeneralSection().getAudioFilename());
         engine.setMainTrackVolume(this.musicVolume / 100f);
         setMod(currentMod);
         synchronized (this) {
             this.currentBeatmap = beatmap;
         }
+        seekTo(0);
     }
 
     public long getAudioLength() {

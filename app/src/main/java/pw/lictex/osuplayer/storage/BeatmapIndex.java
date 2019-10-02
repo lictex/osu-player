@@ -27,7 +27,8 @@ public class BeatmapIndex {
 
     private BeatmapIndex(String path) {
         if (path == null) path = pathDef;
-        collection = sharedPreferences.getStringSet("collection", collection);
+        collection.clear();
+        collection.addAll(sharedPreferences.getStringSet("collection", collection));
         refresh(path);
     }
 
