@@ -63,6 +63,7 @@ public class BeatmapIndex {
     private void searchOsuFiles(List<String> out, File dir) {
         if (!dir.isDirectory()) return;
         var p = dir.listFiles();
+        if (p == null) return;
         for (var file : p) {
             if (file.isDirectory()) {
                 searchOsuFiles(out, file);

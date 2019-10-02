@@ -39,6 +39,7 @@ public class OsuAudioPlayer {
     private String currentBeatmapSetPath;
     private OsuBeatmap currentBeatmap = null;
     private List<HitObject> hitObjectsRemains = new ArrayList<>();
+    private List<OsuBeatmap.Events.Sample> storyboardSampleRemains = new ArrayList<>();
     @Getter private Mod currentMod = Mod.None;
 
     public OsuAudioPlayer(Context context) {
@@ -152,6 +153,18 @@ public class OsuAudioPlayer {
 
             int lastHs = lastHitsoundTime.get();
 
+            Iterator<OsuBeatmap.Events.Sample> sampleIterator = storyboardSampleRemains.iterator();
+            while (sampleIterator.hasNext()) {
+                var sample = sampleIterator.next();
+                if (sample.getTime() > currentTime) break;
+
+                if (lastHitsoundTime.get() <= sample.getTime()) {
+                    sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() / 100f, 0);
+                    lastHs = (int) Math.ceil(sample.getTime());
+                }
+                sampleIterator.remove();
+            }
+
             Iterator<HitObject> iterator = hitObjectsRemains.iterator();
             while (iterator.hasNext()) {
                 HitObject hitObject = iterator.next();
@@ -258,6 +271,30 @@ public class OsuAudioPlayer {
                             }
                         }
                     }
+                }
+
+                if (hitObject instanceof HitObject.Hold) {
+                    if (lastHitsoundTime.get() <= hitObject.getTime()) {
+                        SampleSet sampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
+                        SampleSet additionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sampleSet;
+
+                        float pan = (hitObject.getX() / 512f - 0.5f) * 0.8f; //TODO maybe unnecessary..?
+                        int hitSounds = hitObject.getHitSounds();
+
+                        if (!hitObject.getSampleFile().isEmpty())
+                            sampleManager.getSample(hitObject.getSampleFile().substring(0, hitObject.getSampleFile().lastIndexOf("."))).play(objectVolume, pan);
+                        else
+                            sampleManager.getSample(sampleSet, "hitnormal", objectCustomSampleSet).play(objectVolume, pan);
+
+                        if ((hitSounds & 1 << 1) > 0)
+                            sampleManager.getSample(additionSet, "hitwhistle", objectCustomSampleSet).play(objectVolume, pan);
+                        if ((hitSounds & 1 << 2) > 0)
+                            sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, pan);
+                        if ((hitSounds & 1 << 3) > 0)
+                            sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, pan);
+                        lastHs = (int) Math.ceil(hitObject.getTime());
+                    }
+                    iterator.remove();
                 }
             }
 
@@ -367,7 +404,11 @@ public class OsuAudioPlayer {
         lastHitsoundTime.set((int) ms);
         synchronized (this) {
             hitObjectsRemains.clear();
-            if (currentBeatmap != null) hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
+            storyboardSampleRemains.clear();
+            if (currentBeatmap != null) {
+                hitObjectsRemains.addAll(currentBeatmap.getHitObjectsSection().getHitObjects());
+                storyboardSampleRemains.addAll(currentBeatmap.getEventsSection().getSamples());
+            }
         }
     }
 
@@ -384,6 +425,7 @@ public class OsuAudioPlayer {
         OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
         engine.stopMainTrack();
         hitObjectsRemains.clear();
+        storyboardSampleRemains.clear();
         engine.playMainTrack(currentBeatmapSetPath + beatmap.getGeneralSection().getAudioFilename());
         engine.setMainTrackVolume(this.musicVolume / 100f);
         setMod(currentMod);
@@ -463,8 +505,7 @@ public class OsuAudioPlayer {
                     if (file.getName().toLowerCase().endsWith(".wav")) return true;
                     if (file.getName().toLowerCase().endsWith(".ogg")) return true;
 
-                    //mp3 samples is not supported
-                    //if (file.getName().toLowerCase().endsWith(".mp3")) return true;
+                    if (file.getName().toLowerCase().endsWith(".mp3")) return true;
                     return false;
                 });
                 for (var file : files) {

@@ -1,7 +1,9 @@
 package pw.lictex.osuplayer.activity;
 
+import android.*;
 import android.animation.*;
 import android.content.*;
+import android.content.pm.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
@@ -10,8 +12,11 @@ import android.view.animation.Interpolator;
 import android.view.animation.*;
 import android.widget.*;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.*;
 import androidx.cardview.widget.*;
+import androidx.core.app.*;
+import androidx.core.content.*;
 
 import butterknife.*;
 import eightbitlab.com.blurview.*;
@@ -69,10 +74,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        recreate();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
 
         ViewGroup rootView = getWindow().getDecorView().findViewById(android.R.id.content);
         contentBlur.setupWith(rootView).setFrameClearDrawable(new ColorDrawable(0xFF000000))

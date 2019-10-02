@@ -57,7 +57,7 @@ public class OsuBeatmap {
 
     public TimingPoint timingPoingAt(int ms) {
         List<TimingPoint> pointList = getTimingPointsSection().getTimingPoints();
-        for (int i = 0; i < pointList.size(); i++) if (pointList.get(i).getOffset() > ms) return i > 0 ? pointList.get(i - 1) : null;
+        for (int i = 0; i < pointList.size(); i++) if (pointList.get(i).getOffset() > ms) return i > 0 ? pointList.get(i - 1) : pointList.get(0);
         return pointList.get(pointList.size() - 1);
     }
 
@@ -416,6 +416,7 @@ public class OsuBeatmap {
         @Getter private String content = "";
         @Getter private String backgroundImage = "";
         @Getter private String backgroundVideo = "";
+        @Getter private List<Sample> samples = new ArrayList<>();
         @Getter private int videoOffset = 0;
         private List<int[]> breaks = new ArrayList<>();
 
@@ -483,6 +484,10 @@ public class OsuBeatmap {
                     var pt = s.trim().split(",");
                     breaks.add(new int[]{Integer.valueOf(pt[1]), Integer.valueOf(pt[2])});
                 }
+                if (s.trim().matches("Sample,.*")) {
+                    var split = s.trim().split(",");
+                    samples.add(new Sample(Integer.parseInt(split[1]), split[3].replace("\"", ""), Integer.parseInt(split[2]), split.length > 4 ? Integer.parseInt(split[4]) : 100));
+                }
             }
         }
 
@@ -490,6 +495,14 @@ public class OsuBeatmap {
         public String toString() {
             return "[Events]" + LS +
                     content + LS + LS;
+        }
+
+        @AllArgsConstructor @Getter @Setter
+        public class Sample {
+            private int time;
+            private String file;
+            private int layer;
+            private int volume;
         }
     }
 

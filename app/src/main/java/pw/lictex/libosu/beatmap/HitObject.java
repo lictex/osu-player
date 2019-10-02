@@ -1,5 +1,7 @@
 package pw.lictex.libosu.beatmap;
 
+import android.text.*;
+
 import java.util.*;
 
 import lombok.*;
@@ -34,11 +36,14 @@ public abstract class HitObject {
         var skippedColors = (typeRaw & 0b01111111) >> 4;
         int hitsound = Integer.valueOf(sp[i++]);
 
+        String extras = null;
         if (isCircle) {
             object = new HitObject.Circle(x, y, time, hitsound, isNewCombo, skippedColors);
+            if (i < sp.length) extras = sp[i];
         } else if (isSpinner) {
             int endTime = Integer.valueOf(sp[i++]);
             object = new HitObject.Spinner(x, y, time, hitsound, isNewCombo, skippedColors, endTime);
+            if (i < sp.length) extras = sp[i];
         } else if (isSlider) {
             var cpsArr = sp[i++].split("\\|");
             var cpsIdx = 0;
@@ -68,19 +73,19 @@ public abstract class HitObject {
                 edgeSampleSet.add(SampleSet.None);
                 edgeAdditionSet.add(SampleSet.None);
             }
-            if (i < sp.length) {
-                var exa = sp[i].split(":");
-
-            }
-
             object = new HitObject.Slider(x, y, time, hitsound, isNewCombo, skippedColors, type, cpList, repeat, pixelLength, edgeHitsounds, edgeSampleSet, edgeAdditionSet);
+            if (i < sp.length) extras = sp[i];
         } else if (isManiaHold) {
-            throw new RuntimeException();  //TODO mania hold
+            var c = sp[i++];
+            var split = c.split(":");
+            int endTime = Integer.valueOf(split[0]);
+            object = new HitObject.Hold(x, y, time, hitsound, endTime);
+            if (split.length > 1) extras = TextUtils.join(":", Arrays.copyOfRange(split, 1, split.length));
         }
 
         //extras?
-        if (i < sp.length) {
-            var exArr = sp[i].split(":");
+        if (extras != null) {
+            var exArr = extras.split(":");
             object.setSampleSet(SampleSet.fromInt(Integer.valueOf(exArr[0])));
             object.setAdditions(SampleSet.fromInt(Integer.valueOf(exArr[1])));
             object.setCustomSampleSetIndex(Integer.valueOf(exArr[2]));
@@ -238,6 +243,33 @@ public abstract class HitObject {
                     (0b00001000 + (newCombo ? 0b00000100 : 0) + (skippedColors << 4)) + "," +
                     hitSounds + "," +
                     endTime + "," +
+                    sampleSet.asInt() + ":" +
+                    additions.asInt() + ":" +
+                    customSampleSetIndex + ":" +
+                    volume + ":" +
+                    sampleFile;
+        }
+    }
+
+    public static class Hold extends HitObject {
+        private int endTime;
+
+        public Hold(int x, int y, int time, int hitSounds, int endTime) {
+            //super(x, y, time, hitSounds, newCombo, skippedColors);
+            this.x = x;
+            this.y = y;
+            this.time = time;
+            this.hitSounds = hitSounds;
+        }
+
+        @Override
+        public String toString() {
+            return x + "," +
+                    y + "," +
+                    time + "," +
+                    (0b10000000) + "," +
+                    hitSounds + "," +
+                    endTime + ":" +
                     sampleSet.asInt() + ":" +
                     additions.asInt() + ":" +
                     customSampleSetIndex + ":" +
