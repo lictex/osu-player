@@ -58,15 +58,15 @@ public class AudioEngine {
         }
         try {
             var lock = new Object();
-            synchronized (audioThread.eventQueue) {
-                audioThread.eventQueue.offer(() -> {
-                    r.run();
-                    synchronized (lock) {
-                        lock.notifyAll();
-                    }
-                });
-            }
             synchronized (lock) {
+                synchronized (audioThread.eventQueue) {
+                    audioThread.eventQueue.offer(() -> {
+                        synchronized (lock) {
+                            r.run();
+                            lock.notifyAll();
+                        }
+                    });
+                }
                 lock.wait();
             }
         } catch (InterruptedException e) {
