@@ -5,6 +5,8 @@ import android.content.*;
 import android.media.*;
 import android.os.*;
 
+import androidx.preference.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -98,7 +100,7 @@ public class PlayerService extends Service {
             osuAudioPlayer.playBeatmap(new File(currentPath).getName());
             if (onUpdateCallback != null) onUpdateCallback.run();
         }
-        refresh();
+        rebuildNotification();
     }
 
     public void resume() {
@@ -112,7 +114,7 @@ public class PlayerService extends Service {
         if (onUpdateCallback != null) onUpdateCallback.run();
     }
 
-    public void refresh() {
+    public void rebuildNotification() {
         var notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(ID, getNotification());
     }
@@ -122,13 +124,17 @@ public class PlayerService extends Service {
     }
 
     private Notification getNotification() {
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         var builder = new Notification.Builder(getApplication()).setAutoCancel(true).setSmallIcon(R.drawable.ic_osu_96)
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) builder.setChannelId("Service");
 
         if (allMapList.size() == 0 || osuAudioPlayer.getTitle() == null) builder.setContentTitle("闲置中");
-        else builder.setContentTitle(osuAudioPlayer.getTitle() + " - " + osuAudioPlayer.getArtist()).
-                setContentText(osuAudioPlayer.getVersion() + " by " + osuAudioPlayer.getMapper());
+        else if (sharedPreferences.getBoolean("use_unicode_metadata", false))
+            builder.setContentTitle(osuAudioPlayer.getTitle() + " - " + osuAudioPlayer.getArtist()).
+                    setContentText(getString(R.string.version_by_mapper, osuAudioPlayer.getVersion(), osuAudioPlayer.getMapper()));
+        else builder.setContentTitle(osuAudioPlayer.getRomanisedTitle() + " - " + osuAudioPlayer.getRomanisedArtist()).
+                    setContentText(getString(R.string.version_by_mapper, osuAudioPlayer.getVersion(), osuAudioPlayer.getMapper()));
 
         return builder.build();
     }

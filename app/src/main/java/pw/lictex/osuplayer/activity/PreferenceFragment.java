@@ -2,11 +2,9 @@ package pw.lictex.osuplayer.activity;
 
 import android.content.*;
 import android.os.*;
-import android.widget.*;
 
 import androidx.annotation.*;
 import androidx.preference.*;
-import androidx.recyclerview.widget.*;
 
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.storage.*;
@@ -24,7 +22,14 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                 break;
             case "audio_latency":
             case "nightcore_sound_volume":
+            case "sliderslide_enabled":
+            case "spinnerspin_enabled":
+            case "spinnerbonus_enabled":
                 activity.getPlayerService().getOsuAudioPlayer().reloadSetting();
+                break;
+            case "use_unicode_metadata":
+                activity.getPlayerService().rebuildNotification();
+                activity.updateStatus();
                 break;
         }
     };

@@ -2,31 +2,67 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:layout="@layout/item_preference_category"
-        android:title="常规">
+        android:title="@string/pref_category_general">
+
         <EditTextPreference
             android:key="storage_path"
             android:layout="@layout/item_preference"
-            android:summary="Songs文件夹"
-            android:title="存储路径" />
+            android:summary="@string/pref_storage_path_summary"
+            android:title="@string/pref_storage_path_title" />
+
+        <CheckBoxPreference
+            android:key="use_unicode_metadata"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_use_unicode_metadata_summary"
+            android:title="@string/pref_use_unicode_metadata_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:layout="@layout/item_preference_category"
-        android:title="播放器">
+        android:title="@string/pref_category_player">
 
         <EditTextPreference
             android:digits="0123456789"
             android:inputType="numberDecimal"
             android:key="audio_latency"
             android:layout="@layout/item_preference"
-            android:summary="增加该值使音效更早响起"
-            android:title="音频延迟" />
+            android:summary="@string/pref_audio_latency_summary"
+            android:title="@string/pref_audio_latency_title" />
 
         <CheckBoxPreference
             android:key="nightcore_sound_volume"
             android:layout="@layout/item_preference"
-            android:summary="Nightcore模式的打击声将由音效音量控制"
-            android:title="Nightcore使用音效音量"
+            android:summary="@string/pref_nightcore_sound_volume_summary"
+            android:title="@string/pref_nightcore_sound_volume_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:key="sliderslide_enabled"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_sliderslide_enabled_summary"
+            android:title="@string/pref_sliderslide_enabled_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:key="spinnerspin_enabled"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_spinnerspin_enabled_summary"
+            android:title="@string/pref_spinnerspin_enabled_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:key="spinnerbonus_enabled"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_spinnerbonus_enabled_summary"
+            android:title="@string/pref_spinnerbonus_enabled_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
 
     </PreferenceCategory>

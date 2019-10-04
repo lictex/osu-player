@@ -17,9 +17,6 @@ import pw.lictex.osuplayer.audio.*;
 
 
 public class AudioSettingFragment extends Fragment {
-    @BindView(pw.lictex.osuplayer.R.id.checkboxSliderslide) protected CheckBox checkBoxSliderslide;
-    @BindView(R.id.checkboxSpinnerspin) protected CheckBox checkBoxSpinnerspin;
-    @BindView(R.id.checkboxSpinnerBonus) protected CheckBox checkBoxSpinnerBonus;
     @BindView(R.id.seekBarMusicVolume) VerticalSeekBar seekBarMusicVolume;
     @BindView(R.id.seekBarSoundVolume) VerticalSeekBar seekBarSoundVolume;
     @BindView(R.id.checkboxDT) CheckBox checkBoxDt;
@@ -43,12 +40,9 @@ public class AudioSettingFragment extends Fragment {
         }
     }
 
-    public void update(int musicVol, int soundVol, OsuAudioPlayer.Mod mod, boolean sliderslide, boolean spinnerspin, boolean spinnerbonus) {
+    public void update(int musicVol, int soundVol, OsuAudioPlayer.Mod mod) {
         seekBarMusicVolume.setProgress(musicVol);
         seekBarSoundVolume.setProgress(soundVol);
-        checkBoxSliderslide.setChecked(sliderslide);
-        checkBoxSpinnerspin.setChecked(spinnerspin);
-        checkBoxSpinnerBonus.setChecked(spinnerbonus);
 
         setModCheckBox(mod);
     }
@@ -80,19 +74,6 @@ public class AudioSettingFragment extends Fragment {
         checkBoxDt.setOnCheckedChangeListener(listener);
         checkBoxNc.setOnCheckedChangeListener(listener);
         checkBoxHt.setOnCheckedChangeListener(listener);
-
-        checkBoxSliderslide.setOnCheckedChangeListener((a, b) -> {
-            sharedPreferences.edit().putBoolean("sliderslide_enabled", b).apply();
-            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
-        });
-        checkBoxSpinnerspin.setOnCheckedChangeListener((a, b) -> {
-            sharedPreferences.edit().putBoolean("spinnerspin_enabled", b).apply();
-            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
-        });
-        checkBoxSpinnerBonus.setOnCheckedChangeListener((a, b) -> {
-            sharedPreferences.edit().putBoolean("spinnerbonus_enabled", b).apply();
-            ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().reloadSetting();
-        });
 
         seekBarMusicVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

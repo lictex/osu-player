@@ -8,6 +8,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.*;
 import androidx.fragment.app.*;
+import androidx.preference.*;
 import androidx.recyclerview.widget.*;
 
 import java.util.*;
@@ -136,8 +137,13 @@ public class PlaylistFragment extends Fragment {
             var x = BeatmapIndex.getInstance().getMetadata(path);
             if (holder.isNull) return;
 
-            holder.getTitle().setText(x.getTitle() + " - " + x.getArtist());
-            holder.getVersion().setText(x.getVersion() + " by " + x.getMapper());
+            var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            if (sharedPreferences.getBoolean("use_unicode_metadata", false))
+                holder.getTitle().setText(getString(R.string.title_artist, x.getTitle(), x.getArtist()));
+            else
+                holder.getTitle().setText(getString(R.string.title_artist, x.getRomanisedTitle(), x.getRomanisedArtist()));
+
+            holder.getVersion().setText(getString(R.string.version_by_mapper, x.getVersion(), x.getMapper()));
             String currentPath = ((MainActivity) getActivity()).getPlayerService().getCurrentPath();
             holder.getPlaying().setVisibility(path.equals(currentPath) ? View.VISIBLE : View.GONE);
 

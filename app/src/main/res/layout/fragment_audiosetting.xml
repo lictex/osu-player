@@ -13,50 +13,6 @@
         tools:context=".activity.PlaylistFragment">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/linearLayout"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.appcompat.widget.AppCompatCheckBox
-                android:id="@+id/checkboxSliderslide"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:text="滑条音效"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
-
-            <androidx.appcompat.widget.AppCompatCheckBox
-                android:id="@+id/checkboxSpinnerspin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:paddingLeft="8dp"
-                android:text="转盘音效"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
-
-            <androidx.appcompat.widget.AppCompatCheckBox
-                android:id="@+id/checkboxSpinnerBonus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:paddingLeft="8dp"
-                android:text="转盘加分"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/linearLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -73,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
-                android:text="DT"
+                android:text="@string/double_time"
                 android:textColor="#FFF"
                 android:textSize="14dp"
                 app:buttonCompat="@drawable/checkbox_circle" />
@@ -84,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:paddingLeft="8dp"
-                android:text="HT"
+                android:text="@string/half_time"
                 android:textColor="#FFF"
                 android:textSize="14dp"
                 app:buttonCompat="@drawable/checkbox_circle" />
@@ -95,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:paddingLeft="8dp"
-                android:text="NC"
+                android:text="@string/nightcore"
                 android:textColor="#FFF"
                 android:textSize="14dp"
                 app:buttonCompat="@drawable/checkbox_circle" />
@@ -108,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginBottom="24dp"
-            android:text="音乐"
+            android:text="@string/music_volume"
             android:textColor="#FFF"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -120,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginBottom="24dp"
-            android:text="音效"
+            android:text="@string/sound_volume"
             android:textColor="#FFF"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"

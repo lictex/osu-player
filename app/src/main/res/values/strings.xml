@@ -1,6 +1,28 @@
 <resources>
     <string name="app_name">osu!player</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_artist">%1$s - %2$s</string>
+    <string name="version_by_mapper">%1$s by %2$s</string>
+    <string name="double_time">Double Time</string>
+    <string name="half_time">Half Time</string>
+    <string name="nightcore">Nightcore</string>
+    <string name="music_volume">音乐</string>
+    <string name="sound_volume">音效</string>
+    <string name="pref_storage_path_title">存储路径</string>
+    <string name="pref_storage_path_summary">Songs文件夹</string>
+    <string name="pref_use_unicode_metadata_summary">仅在文件中包含这些信息时</string>
+    <string name="pref_use_unicode_metadata_title">使用原语言显示歌曲信息</string>
+    <string name="pref_category_general">常规</string>
+    <string name="pref_category_player">播放器</string>
+    <string name="pref_audio_latency_summary">增加该值使音效更早响起</string>
+    <string name="pref_audio_latency_title">音频延迟</string>
+    <string name="pref_nightcore_sound_volume_title">Nightcore使用音效音量</string>
+    <string name="pref_nightcore_sound_volume_summary">Nightcore模式的打击声将由音效音量控制</string>
+    <string name="pref_sliderslide_enabled_title">启用sliderslide</string>
+    <string name="pref_sliderslide_enabled_summary">播放滑条音效</string>
+    <string name="pref_spinnerspin_enabled_summary">播放转盘音效</string>
+    <string name="pref_spinnerspin_enabled_title">启用spinnerspin</string>
+    <string name="pref_spinnerbonus_enabled_summary">播放转盘加分音效</string>
+    <string name="pref_spinnerbonus_enabled_title">启用spinnerbonus</string>
+    <string name="playlist_all">全部</string>
+    <string name="playlist_collection">收藏</string>
 </resources>

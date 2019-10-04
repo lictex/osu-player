@@ -17,6 +17,7 @@ import androidx.appcompat.app.*;
 import androidx.cardview.widget.*;
 import androidx.core.app.*;
 import androidx.core.content.*;
+import androidx.preference.*;
 
 import butterknife.*;
 import eightbitlab.com.blurview.*;
@@ -183,20 +184,27 @@ public class MainActivity extends AppCompatActivity {
         else setCurrentContent(Content.None);
     }
 
-    private void updateStatus() {
+    protected void updateStatus() {
         Bitmap background = playerService.getOsuAudioPlayer().getBackground();
         if (background != null) bg.setImageBitmap(background);
         else bg.setImageDrawable(getResources().getDrawable(R.drawable.defaultbg));
 
-        title.setText(playerService.getOsuAudioPlayer().getTitle());
-        artist.setText(playerService.getOsuAudioPlayer().getArtist());
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (sharedPreferences.getBoolean("use_unicode_metadata", false)) {
+            title.setText(playerService.getOsuAudioPlayer().getTitle());
+            artist.setText(playerService.getOsuAudioPlayer().getArtist());
+        } else {
+            title.setText(playerService.getOsuAudioPlayer().getRomanisedTitle());
+            artist.setText(playerService.getOsuAudioPlayer().getRomanisedArtist());
+        }
+
         if (playerService.getOsuAudioPlayer().getVersion() != null)
-            version.setText(playerService.getOsuAudioPlayer().getVersion() + " by " + playerService.getOsuAudioPlayer().getMapper());
+            version.setText(getString(R.string.version_by_mapper, playerService.getOsuAudioPlayer().getVersion(), playerService.getOsuAudioPlayer().getMapper()));
         else
             version.setText(null);
 
         OsuAudioPlayer player = getPlayerService().getOsuAudioPlayer();
-        audioSettingFragment.update(player.getMusicVolume(), player.getSoundVolume(), player.getCurrentMod(), player.isSliderslideEnabled(), player.isSpinnerspinEnabled(), player.isSpinnerbonusEnabled());
+        audioSettingFragment.update(player.getMusicVolume(), player.getSoundVolume(), player.getCurrentMod());
 
         playlistFragment.refreshList();
 
