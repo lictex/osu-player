@@ -21,6 +21,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                 ((PlaylistFragment) activity.getSupportFragmentManager().findFragmentByTag("playlistFragment")).rebuildList();
                 break;
             case "audio_latency":
+            case "storyboard_sound_volume":
             case "nightcore_sound_volume":
             case "sliderslide_enabled":
             case "spinnerspin_enabled":

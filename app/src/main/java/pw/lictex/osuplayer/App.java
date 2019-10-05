@@ -4,6 +4,8 @@ import android.app.*;
 import android.content.*;
 import android.os.*;
 
+import androidx.preference.*;
+
 import pw.lictex.osuplayer.storage.*;
 
 /**
@@ -14,6 +16,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        PreferenceManager.setDefaultValues(this, R.xml.preference, false);
         BeatmapIndex.Build(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

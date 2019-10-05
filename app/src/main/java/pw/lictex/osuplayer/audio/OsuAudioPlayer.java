@@ -24,6 +24,7 @@ public class OsuAudioPlayer {
     private final AtomicInteger lastNightcoreBeat = new AtomicInteger();
 
     @Getter @Setter private boolean nightcoreUseSoundVolume = false;
+    @Getter @Setter private boolean storyboardUseSoundVolume = false;
     @Getter @Setter private boolean sliderslideEnabled = true;
     @Getter @Setter private boolean spinnerspinEnabled = true;
     @Getter @Setter private boolean spinnerbonusEnabled = true;
@@ -62,6 +63,7 @@ public class OsuAudioPlayer {
         setSampleOffset(i);
 
         setNightcoreUseSoundVolume(sharedPreferences.getBoolean("nightcore_sound_volume", false));
+        setStoryboardUseSoundVolume(sharedPreferences.getBoolean("storyboard_sound_volume", false));
 
         setMusicVolume(sharedPreferences.getInt("music_volume", 80));
         setSoundVolume(sharedPreferences.getInt("sound_volume", 80));
@@ -159,7 +161,7 @@ public class OsuAudioPlayer {
                 if (sample.getTime() > currentTime) break;
 
                 if (lastHitsoundTime.get() <= sample.getTime()) {
-                    sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() / 100f, 0);
+                    sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() * (storyboardUseSoundVolume ? soundVolume : musicVolume) / 100f / 100f, 0);
                     lastHs = (int) Math.ceil(sample.getTime());
                 }
                 sampleIterator.remove();

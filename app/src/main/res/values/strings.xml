@@ -15,8 +15,10 @@
     <string name="pref_category_player">播放器</string>
     <string name="pref_audio_latency_summary">增加该值使音效更早响起</string>
     <string name="pref_audio_latency_title">音频延迟</string>
-    <string name="pref_nightcore_sound_volume_title">Nightcore使用音效音量</string>
-    <string name="pref_nightcore_sound_volume_summary">Nightcore模式的打击声将由音效音量控制</string>
+    <string name="pref_nightcore_sound_volume_title">Nightcore音效由音效音量控制</string>
+    <string name="pref_nightcore_sound_volume_summary">取消则使用音乐音量</string>
+    <string name="pref_storyboard_sound_volume_title">Storyboard音效由音效音量控制</string>
+    <string name="pref_storyboard_sound_volume_summary">取消则使用音乐音量</string>
     <string name="pref_sliderslide_enabled_title">启用sliderslide</string>
     <string name="pref_sliderslide_enabled_summary">播放滑条音效</string>
     <string name="pref_spinnerspin_enabled_summary">播放转盘音效</string>
