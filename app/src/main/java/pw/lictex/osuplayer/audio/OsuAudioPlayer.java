@@ -415,6 +415,7 @@ public class OsuAudioPlayer {
     }
 
     public void openBeatmapSet(String dir) {
+        if (dir.equals(currentBeatmapSetPath)) return;
         synchronized (this) {
             currentBeatmap = null;
         }
@@ -424,10 +425,13 @@ public class OsuAudioPlayer {
     }
 
     public void playBeatmap(String filename) {
-        OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
         engine.stopMainTrack();
         hitObjectsRemains.clear();
         storyboardSampleRemains.clear();
+
+        OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
+        if (beatmap == null) return; //TODO invalid beatmap
+
         engine.playMainTrack(currentBeatmapSetPath + beatmap.getGeneralSection().getAudioFilename());
         engine.setMainTrackVolume(this.musicVolume / 100f);
         setMod(currentMod);

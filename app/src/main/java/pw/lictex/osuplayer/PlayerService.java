@@ -91,7 +91,7 @@ public class PlayerService extends Service {
         play(getPlaylist().indexOf(currentPath) - 1);
     }
 
-    public void play(int index) {
+    public synchronized void play(int index) {
         ensureAudioFocus();
         if (getPlaylist().size() != 0) {
             index = (index < 0 || index >= getPlaylist().size()) ? 0 : index;
