@@ -10,7 +10,7 @@ public class TimingPoint {
     private SampleSet sampleSet;
     private int customSampleSet;
     private int volume;
-    private boolean timingChange;
+    private boolean inherit;
     private int effects;
 
     public TimingPoint(String s) {
@@ -21,7 +21,7 @@ public class TimingPoint {
         sampleSet = SampleSet.fromInt(Integer.valueOf(arr[3]));
         customSampleSet = Integer.valueOf(arr[4]);
         volume = Integer.valueOf(arr[5]);
-        timingChange = Integer.valueOf(arr[6]) == 1;
+        inherit = Integer.valueOf(arr[6]) == 0;
         effects = Integer.valueOf(arr[7]);
     }
 
@@ -33,7 +33,7 @@ public class TimingPoint {
                 sampleSet.asInt() + "," +
                 customSampleSet + "," +
                 volume + "," +
-                (timingChange ? 1 : 0) + "," +
+                (inherit ? 0 : 1) + "," +
                 effects;
     }
 

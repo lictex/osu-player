@@ -26,6 +26,7 @@ public class OsuAudioPlayer {
     @Getter @Setter private boolean nightcoreUseSoundVolume = false;
     @Getter @Setter private boolean storyboardUseSoundVolume = false;
     @Getter @Setter private boolean sliderslideEnabled = true;
+    @Getter @Setter private boolean slidertickEnabled = true;
     @Getter @Setter private boolean spinnerspinEnabled = true;
     @Getter @Setter private boolean spinnerbonusEnabled = true;
     @Getter @Setter private int sampleOffset = 25;
@@ -69,6 +70,7 @@ public class OsuAudioPlayer {
         setSoundVolume(sharedPreferences.getInt("sound_volume", 80));
 
         setSliderslideEnabled(sharedPreferences.getBoolean("sliderslide_enabled", false));
+        setSlidertickEnabled(sharedPreferences.getBoolean("slidertick_enabled", false));
         setSpinnerspinEnabled(sharedPreferences.getBoolean("spinnerspin_enabled", false));
         setSpinnerbonusEnabled(sharedPreferences.getBoolean("spinnerbonus_enabled", false));
 
@@ -152,6 +154,7 @@ public class OsuAudioPlayer {
             float spinnerCompletion = 0;
             SampleSet sliderSampleSet = SampleSet.Normal;
             SampleSet sliderAdditionSet = SampleSet.Normal;
+            int sliderCustomSampleSet = 0;
 
             int lastHs = lastHitsoundTime.get();
 
@@ -162,7 +165,7 @@ public class OsuAudioPlayer {
 
                 if (lastHitsoundTime.get() <= sample.getTime()) {
                     sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() * (storyboardUseSoundVolume ? soundVolume : musicVolume) / 100f / 100f, 0);
-                    lastHs = (int) Math.ceil(sample.getTime());
+                    lastHs = Math.max(lastHs, (int) Math.ceil(sample.getTime()));
                 }
                 sampleIterator.remove();
             }
@@ -181,6 +184,7 @@ public class OsuAudioPlayer {
                     sliderWhistling = (slider.getHitSounds() & 1 << 1) > 0;
                     sliderSampleSet = (hitObject.getSampleSet() != SampleSet.None) ? hitObject.getSampleSet() : timingSampleSet;
                     sliderAdditionSet = (hitObject.getAdditions() != SampleSet.None) ? hitObject.getAdditions() : sliderSampleSet;
+                    sliderCustomSampleSet = (hitObject.getCustomSampleSetIndex() != 0) ? hitObject.getCustomSampleSetIndex() : timingCustomSampleSet;
 
                     //region playSliderSample();
                     double sliderDuration = currentBeatmap.getSliderDuration(slider);
@@ -201,7 +205,28 @@ public class OsuAudioPlayer {
                             if ((hitSounds & 1 << 3) > 0)
                                 sampleManager.getSample(additionSet, "hitclap", timingCustomSampleSet).play(timingVolume, pan);
 
-                            lastHs = (int) Math.ceil(slider.getTime() + sliderDuration * i);
+                            lastHs = Math.max(lastHs, (int) Math.ceil(slider.getTime() + sliderDuration * i));
+                        }
+                    }
+                    if (slidertickEnabled) {
+                        var tickLength = currentBeatmap.notInheritedTimingPoingAt(slider.getTime()).getBeatLength() / currentBeatmap.getDifficultySection().getSliderTickRate();
+                        SampleSet sampleSet = (slider.getSampleSet() != SampleSet.None) ? slider.getSampleSet() : timingSampleSet;
+                        int repeat = 0;
+                        for (var i = slider.getTime() + tickLength; i <= currentTime; i += tickLength) {
+                            var tl = i - slider.getTime();
+                            var r = ((int) Math.ceil(tl)) / ((int) sliderDuration);
+                            if (r != repeat) {
+                                repeat = r;
+                                i = slider.getTime() + repeat * sliderDuration;
+                            }
+                            if (i <= lastHitsoundTime.get()) continue;
+
+                            if (Math.abs(tl - sliderDuration * repeat) > 4) {
+                                float[] position = currentBeatmap.getSliderPositionAt(slider, (int) i);
+                                float pan = ((position[0]) / 512f - 0.5f) * 0.8f;
+                                sampleManager.getSample(sampleSet, "slidertick", objectCustomSampleSet).play(objectVolume, pan);
+                                lastHs = Math.max(lastHs, (int) Math.ceil(i));
+                            }
                         }
                     }
                     //endregion
@@ -229,7 +254,7 @@ public class OsuAudioPlayer {
                             sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, pan);
                         if ((hitSounds & 1 << 3) > 0)
                             sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, pan);
-                        lastHs = (int) Math.ceil(hitObject.getTime());
+                        lastHs = Math.max(lastHs, (int) Math.ceil(hitObject.getTime()));
                     }
 
                     //endregion
@@ -255,7 +280,7 @@ public class OsuAudioPlayer {
                             sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, 0);
                         if ((hitSounds & 1 << 3) > 0)
                             sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, 0);
-                        lastHs = (int) Math.ceil(spinner.getTime());
+                        lastHs = Math.max(lastHs, (int) Math.ceil(spinner.getTime()));
 
                         iterator.remove();
                     } else {
@@ -294,7 +319,7 @@ public class OsuAudioPlayer {
                             sampleManager.getSample(additionSet, "hitfinish", objectCustomSampleSet).play(objectVolume, pan);
                         if ((hitSounds & 1 << 3) > 0)
                             sampleManager.getSample(additionSet, "hitclap", objectCustomSampleSet).play(objectVolume, pan);
-                        lastHs = (int) Math.ceil(hitObject.getTime());
+                        lastHs = Math.max(lastHs, (int) Math.ceil(hitObject.getTime()));
                     }
                     iterator.remove();
                 }
@@ -303,7 +328,7 @@ public class OsuAudioPlayer {
             lastHitsoundTime.set(lastHs);
 
             if (sliderslideEnabled && sliderSliding && getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing) {
-                var slideSample = sampleManager.getSample(sliderSampleSet, "sliderslide", timingCustomSampleSet);
+                var slideSample = sampleManager.getSample(sliderSampleSet, "sliderslide", sliderCustomSampleSet);
                 if (currentSliderSlideSound != slideSample) {
                     if (currentSliderSlideSound != null) currentSliderSlideSound.endLoop();
                     currentSliderSlideSound = slideSample;
@@ -311,7 +336,7 @@ public class OsuAudioPlayer {
                 slideSample.loop(timingVolume);
 
                 if (sliderWhistling) {
-                    var whistleSample = sampleManager.getSample(sliderAdditionSet, "sliderwhistle", timingCustomSampleSet);
+                    var whistleSample = sampleManager.getSample(sliderAdditionSet, "sliderwhistle", sliderCustomSampleSet);
                     if (currentSliderWhistleSound != whistleSample) {
                         if (currentSliderWhistleSound != null) currentSliderWhistleSound.endLoop();
                         currentSliderWhistleSound = whistleSample;

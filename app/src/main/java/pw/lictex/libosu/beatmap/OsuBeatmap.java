@@ -71,6 +71,7 @@ public class OsuBeatmap {
         return lp;
     }
 
+    //region slider
     public double getSliderDuration(HitObject.Slider s) {
         TimingPoint p = notInheritedTimingPoingAt(s.getTime());
         TimingPoint rp = timingPoingAt(s.getTime());
@@ -80,6 +81,117 @@ public class OsuBeatmap {
         }
         return s.getPixelLength() / (100.0 * getDifficultySection().getSliderMultiplier()) * b;
     }
+
+    public float[] getSliderPositionAt(HitObject.Slider s, int time) {
+        float e = getCurveEnd(s);
+        int sliderDuration = (int) getSliderDuration(s);
+        int repeat = (time - s.getTime()) / sliderDuration;
+        int dt = (time - s.getTime()) % sliderDuration;
+
+        float t = dt / ((float) sliderDuration);
+        float v = (repeat % 2 == 0 ? t : 1 - t) * e;
+        return curvePointAt(s, v);
+    }
+
+    private static float getAngle(float[] centerPt, int[] targetPt) {
+        float a = (float) Math.atan2((float) targetPt[1] - centerPt[1], (float) targetPt[0] - centerPt[0]);
+        a += (float) Math.PI;
+        if (a < 0) a += (float) Math.PI * 2f;
+        return a;
+    }
+
+    private static float[] getCircleCenter(int[] p1, int[] p2, int[] p3) {
+        float[] center = new float[2];
+        float ax = ((float) p1[0] + p2[0]) / 2f;
+        float ay = ((float) p1[1] + p2[1]) / 2f;
+        float ux = ((float) p1[1] - p2[1]);
+        float uy = ((float) p2[0] - p1[0]);
+        float bx = ((float) p2[0] + p3[0]) / 2f;
+        float by = ((float) p2[1] + p3[1]) / 2f;
+        float vx = ((float) p2[1] - p3[1]);
+        float vy = ((float) p3[0] - p2[0]);
+        float dx = ax - bx;
+        float dy = ay - by;
+        float vu = vx * uy - vy * ux;
+        if (vu == 0) return null;
+        float g = (dx * uy - dy * ux) / vu;
+        center[0] = bx + g * vx;
+        center[1] = by + g * vy;
+        return center;
+    }
+
+    private static float getArcDirection(int[] a, int[] b, int[] c) {
+        return ((float) b[0] - a[0]) * ((float) c[1] - b[1]) - ((float) b[1] - a[1]) * ((float) c[0] - b[0]);
+    }
+
+    private static float fact(int n) {
+        float fact = 1;
+        for (int i = 1; i <= n; i++) fact *= i;
+        return fact;
+    }
+
+    private float getCurveEnd(HitObject.Slider s) {
+        double sum = 0;
+        float t = (float) (2 / s.getPixelLength());
+        var lp = curvePointAt(s, 0);
+        for (; t <= 1; t += (float) (2 / s.getPixelLength())) {
+            var cp = curvePointAt(s, t);
+            sum += Math.sqrt((cp[0] - lp[0]) * (cp[0] - lp[0]) + (cp[1] - lp[1]) * (cp[1] - lp[1]));
+            if (sum >= s.getPixelLength()) {
+                break;
+            }
+            lp = cp;
+        }
+        return t;
+    }
+
+    private float[] curvePointAt(HitObject.Slider s, float t) {
+        var curvePoints = s.getCurvePoints();
+        switch (s.getSliderType()) {
+            case Bezier: {
+                float startX = s.getX(), startY = s.getY();
+                int length = curvePoints.size() + 1;
+                float[] bp = new float[length];
+                for (int i = 0; i < length; i++)
+                    bp[i] = (float) (fact(length) / (fact(i + 1) * fact(length - (i + 1))) * Math.pow(1 - t, length - (i + 1)) * Math.pow(t, i + 1));
+                float x = 0, y = 0;
+                for (int i = 1; i < curvePoints.size(); i++) {
+                    x += bp[i] * (curvePoints.get(i - 1)[0] - startX);
+                    y += bp[i] * (curvePoints.get(i - 1)[1] - startY);
+                }
+
+                return new float[]{x + startX, y + startY};
+            }
+            case Catmull: {
+                return new float[]{256, 192}; //TODO ...
+            }
+            case Perfect: {
+                int[] a = new int[]{s.getX(), s.getY()};
+                int[] b = curvePoints.get(0);
+                int[] c = curvePoints.get(1);
+
+                float[] center;
+                if ((center = getCircleCenter(a, b, c)) != null) {
+                    var d = getArcDirection(a, b, c);
+                    var ao = (float) Math.abs(Math.sqrt((a[0] - center[0]) * (a[0] - center[0]) + (a[1] - center[1]) * (a[1] - center[1])));
+
+                    var aox = getAngle(center, a);
+                    var cox = getAngle(center, c);
+                    var all = cox - aox;
+                    if (d < 0) all = (float) Math.PI * 2f - all;
+                    var an = aox + ((d > 0 ? 1 : -1) * all * t);
+                    var jjj = new float[]{center[0] + ao * (float) Math.cos(an - Math.PI), center[1] + ao * (float) Math.sin(an - Math.PI)};
+                    return new float[]{jjj[0], jjj[1]};
+                }
+                //else goto Linear:
+            }
+            default:
+            case Linear: {
+                return new float[]{(s.getX() + curvePoints.get(0)[0]) / 2f, (s.getY() + curvePoints.get(0)[1]) / 2f};
+            }
+        }
+    }
+    //endregion
 
     private static class Reader {
         private BufferedReader in;

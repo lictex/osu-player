@@ -51,19 +51,28 @@
             android:widgetLayout="@layout/item_preference_checkbox" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:defaultValue="true"
             android:key="sliderslide_enabled"
             android:layout="@layout/item_preference"
             android:summary="@string/pref_sliderslide_enabled_summary"
             android:title="@string/pref_sliderslide_enabled_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
-
         <CheckBoxPreference
-            android:defaultValue="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="slidertick_enabled"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_slidertick_enabled_summary"
+            android:title="@string/pref_slidertick_enabled_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
             android:key="spinnerspin_enabled"
             android:layout="@layout/item_preference"
             android:summary="@string/pref_spinnerspin_enabled_summary"
@@ -71,9 +80,9 @@
             android:widgetLayout="@layout/item_preference_checkbox" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:defaultValue="true"
             android:key="spinnerbonus_enabled"
             android:layout="@layout/item_preference"
             android:summary="@string/pref_spinnerbonus_enabled_summary"

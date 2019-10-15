@@ -124,13 +124,13 @@ public abstract class HitObject {
 
     @Getter
     public static class Slider extends HitObject {
-        Type sliderType;
-        List<int[]> curvePoints;
-        int repeat;
-        double pixelLength;
-        List<Integer> edgeHitsounds;
-        List<SampleSet> edgeSampleSet;
-        List<SampleSet> edgeAdditionSet;
+        private Type sliderType;
+        private List<int[]> curvePoints;
+        private int repeat;
+        private double pixelLength;
+        private List<Integer> edgeHitsounds;
+        private List<SampleSet> edgeSampleSet;
+        private List<SampleSet> edgeAdditionSet;
 
         public Slider(int x, int y, int time, int hitSounds, boolean newCombo, int skippedColors, Type sliderType, List<int[]> curvePoints, int repeat, double pixelLength, List<Integer> edgeHitsounds, List<SampleSet> edgeSampleSet, List<SampleSet> edgeAdditionSet) {
             //super(x, y, time, hitSounds, newCombo, skippedColors);
@@ -141,7 +141,7 @@ public abstract class HitObject {
             this.newCombo = newCombo;
             this.skippedColors = skippedColors;
 
-            this.sliderType = sliderType;
+            this.sliderType = curvePoints.size() <= 1 ? Type.Linear : sliderType; //1 point bezier = linear..?
             this.curvePoints = curvePoints;
             this.repeat = repeat;
             this.pixelLength = pixelLength;
@@ -251,6 +251,7 @@ public abstract class HitObject {
         }
     }
 
+    @Getter
     public static class Hold extends HitObject {
         private int endTime;
 

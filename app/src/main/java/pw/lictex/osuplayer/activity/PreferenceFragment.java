@@ -24,6 +24,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
             case "storyboard_sound_volume":
             case "nightcore_sound_volume":
             case "sliderslide_enabled":
+            case "slidertick_enabled":
             case "spinnerspin_enabled":
             case "spinnerbonus_enabled":
                 activity.getPlayerService().getOsuAudioPlayer().reloadSetting();
