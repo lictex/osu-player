@@ -164,7 +164,11 @@ public class OsuAudioPlayer {
                 if (sample.getTime() > currentTime) break;
 
                 if (lastHitsoundTime.get() <= sample.getTime()) {
-                    sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() * (storyboardUseSoundVolume ? soundVolume : musicVolume) / 100f / 100f, 0);
+                    //sampleManager.getSample(sample.getFile().replaceAll("\\..+$", "")).play(sample.getVolume() * (storyboardUseSoundVolume ? soundVolume : musicVolume) / 100f / 100f, 0);
+
+                    //seems replaceAll has performance issue so use substring instead..?
+                    String file = sample.getFile();
+                    sampleManager.getSample(file.substring(0, file.length() - 4)).play(sample.getVolume() * (storyboardUseSoundVolume ? soundVolume : musicVolume) / 100f / 100f, 0);
                     lastHs = Math.max(lastHs, (int) Math.ceil(sample.getTime()));
                 }
                 sampleIterator.remove();

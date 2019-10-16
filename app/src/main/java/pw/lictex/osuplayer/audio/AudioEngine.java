@@ -258,8 +258,8 @@ public class AudioEngine {
                         Runnable r;
                         while ((r = eventQueue.poll()) != null) r.run();
                     }
-                    //long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f - (SystemClock.elapsedRealtime() - s));
-                    long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f);
+                    long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f - (SystemClock.elapsedRealtime() - s));
+                    //long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f);
                     if (sleepms > 0) SystemClock.sleep(sleepms);
                 }
             } catch (Throwable e) {
