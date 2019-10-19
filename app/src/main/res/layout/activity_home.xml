@@ -2,296 +2,307 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:clipChildren="false"
     android:fitsSystemWindows="false"
-    tools:context=".activity.MainActivity">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/backgroundImage"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#000000"
+        android:clipChildren="false"
+        app:layout_constraintBottom_toTopOf="@+id/llc"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/defaultbg" />
+        tools:context=".activity.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/fullscreenDim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0"
-        android:background="#33000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </FrameLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:clipChildren="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <FrameLayout
-            android:id="@+id/controllerDim"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="#80000000"
+        <ImageView
+            android:id="@+id/backgroundImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="0dp"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/controllerBlur">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:srcCompat="@drawable/defaultbg" />
 
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/infoDim"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/gradient_black50_transparent"
-            app:layout_constraintBottom_toTopOf="@+id/controllerBlur"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        </FrameLayout>
-
-        <LinearLayout
-            android:id="@+id/infoLayout"
-            android:layout_width="0dp"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="16dp"
-            android:clipChildren="false"
-            android:gravity="right"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/contentLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="232dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <TextView
-                android:id="@+id/artist"
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:alpha="0.75"
-                android:singleLine="true"
-                tools:text="Artist"
-                android:textAlignment="viewEnd"
-                android:textColor="#FFFFFF"
-                android:textSize="16dp"
-                app:layout_constraintBottom_toTopOf="@+id/title"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:singleLine="true"
-                tools:text="Title"
-                android:textAlignment="viewEnd"
-                android:textColor="#FFFFFF"
-                android:textSize="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/version"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <TextView
-                android:id="@+id/version"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.75"
-                android:singleLine="true"
-                tools:text="Version"
-                android:textAlignment="viewEnd"
-                android:textColor="#FFFFFF"
-                android:textSize="12dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </LinearLayout>
-
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/contentLayout"
-            android:layout_width="0dp"
-            android:layout_height="192dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="#00000000"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:cardPreventCornerOverlap="false"
-            app:cardUseCompatPadding="true"
-            app:contentPadding="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/controllerBlur"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <eightbitlab.com.blurview.BlurView
-                android:id="@+id/contentBlur"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:blurOverlayColor="#00FFFFFF">
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#33FFFFFF">
+                    android:layout_height="32dp"
+                    android:background="@drawable/shadow">
 
                 </FrameLayout>
 
-                <FrameLayout
-                    android:id="@+id/audio_setting_wrapper"
+                <eightbitlab.com.blurview.BlurView
+                    android:id="@+id/controllerBlur"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0"
-                    android:visibility="gone" />
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:paddingBottom="72dp"
+                    app:blurOverlayColor="#B3000000"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_conversion_absoluteHeight="72dp"
+                    tools:layout_conversion_absoluteWidth="0dp">
 
-                <FrameLayout
-                    android:id="@+id/playlist_wrapper"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0"
-                    android:visibility="gone" />
-
-                <FrameLayout
-                    android:id="@+id/preference_wrapper"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0"
-                    android:visibility="gone" />
-            </eightbitlab.com.blurview.BlurView>
-        </androidx.cardview.widget.CardView>
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_noise"
+                        android:clipChildren="false"
+                        tools:layout_conversion_absoluteHeight="72dp"
+                        tools:layout_conversion_absoluteWidth="0dp"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="659dp">
 
 
-        <eightbitlab.com.blurview.BlurView
-            android:id="@+id/controllerBlur"
-            android:layout_width="0dp"
-            android:layout_height="72dp"
-            android:clipChildren="false"
-            app:blurOverlayColor="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
+                        <FrameLayout
+                            android:id="@+id/contentLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="512dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/infoLayout"
+                            tools:visibility="visible">
+
+                            <FrameLayout
+                                android:id="@+id/playlist_wrapper"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="8dp"
+                                android:alpha="0"
+                                android:visibility="gone" />
+
+                            <FrameLayout
+                                android:id="@+id/preference_wrapper"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:alpha="0"
+                                android:visibility="gone" />
+
+                            <FrameLayout
+                                android:id="@+id/audio_setting_wrapper"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="8dp"
+                                android:alpha="0"
+                                android:visibility="gone" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:id="@+id/infoLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginTop="24dp"
+                            android:layout_marginEnd="24dp"
+                            android:clipChildren="false"
+                            android:gravity="right"
+                            android:orientation="vertical"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/artist"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:alpha="0.75"
+                                android:singleLine="true"
+                                android:textAlignment="viewStart"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16dp"
+                                tools:text="Artist" />
+
+                            <TextView
+                                android:id="@+id/title"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:singleLine="true"
+                                android:textAlignment="viewStart"
+                                android:textColor="#FFFFFF"
+                                android:textSize="20dp"
+                                tools:text="Title" />
+
+                            <TextView
+                                android:id="@+id/version"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:alpha="0.75"
+                                android:singleLine="true"
+                                android:textAlignment="viewStart"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                tools:text="Version" />
+
+                        </LinearLayout>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </eightbitlab.com.blurview.BlurView>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/llc"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom"
+        android:background="#000000"
+        android:clipChildren="false"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_conversion_absoluteHeight="72dp"
+        tools:layout_conversion_absoluteWidth="0dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:background="@drawable/shadow"
+            app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#33FFFFFF"
-                android:clipChildren="false">
+        </FrameLayout>
 
-                <ImageButton
-                    android:id="@+id/buttonSetting"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="17dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_tune"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/buttonSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_tune"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonAudioSetting"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_volume_source"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/buttonSetting"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/buttonAudioSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_volume_source"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/buttonSetting"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonPlayPause"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_pause"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/buttonNext"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.525" />
+        <ImageButton
+            android:id="@+id/buttonPlayPause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_pause"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/buttonNext"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonPrev"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_skip_previous"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/buttonPlayPause"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/buttonPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_skip_previous"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/buttonPlayPause"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonNext"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="17dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_skip_next"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/buttonNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_skip_next"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonLoopMode"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_refresh"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/buttonPrev"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/buttonLoopMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/ic_refresh"
+            android:theme="@style/LightRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/buttonPrev"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="32dp"
+            tools:layout_conversion_absoluteWidth="32dp" />
 
-                <ImageButton
-                    android:id="@+id/buttonPlaylist"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_playlist_music"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/buttonLoopMode"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/progressBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:max="2048"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:progressDrawable="@drawable/progress_bar_white_0"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:layout_conversion_absoluteHeight="18dp"
+            tools:layout_conversion_absoluteWidth="0dp" />
 
-                <androidx.appcompat.widget.AppCompatSeekBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:max="2048"
-                    android:paddingStart="0dp"
-                    android:paddingEnd="0dp"
-                    android:progressDrawable="@drawable/progress_bar_white_0"
-                    app:layout_constraintBottom_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </eightbitlab.com.blurview.BlurView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

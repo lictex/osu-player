@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">osu!player</string>
+    <string name="version">v0.2.0</string>
 
     <string name="title_artist">%1$s - %2$s</string>
     <string name="version_by_mapper">%1$s by %2$s</string>
@@ -34,4 +35,6 @@
 
     <string name="playlist_all">全部</string>
     <string name="playlist_collection">收藏</string>
+
+    <string name="slide_open_playlist">向上滑动打开播放列表</string>
 </resources>

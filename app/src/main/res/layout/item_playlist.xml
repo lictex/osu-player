@@ -5,14 +5,13 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    android:theme="@style/LightRipple">
 
 
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:alpha="0.75"
         android:background="#FFF"
         android:clipChildren="false"
@@ -25,10 +24,9 @@
 
     <ImageButton
         android:id="@+id/imageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:background="#00000000"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_heart_outline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,7 +36,6 @@
         android:id="@+id/playing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageButton"
@@ -53,13 +50,13 @@
         android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="Title - Artist"
         android:textColor="#FFF"
         android:textSize="14dp"
         app:layout_constraintEnd_toStartOf="@+id/playing"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Title - Artist" />
 
     <TextView
         android:id="@+id/version"
@@ -70,11 +67,11 @@
         android:alpha="0.75"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="Version by Mapper"
         android:textColor="#FFF"
         android:textSize="12dp"
         app:layout_constraintEnd_toStartOf="@+id/playing"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        tools:text="Version by Mapper" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,4 +23,8 @@
     <style name="LightEditText" parent="android:style/Widget.EditText">
         <item name="android:textColor">#FFF</item>
     </style>
+
+    <style name="LightRipple" parent="ThemeOverlay.AppCompat">
+        <item name="colorControlHighlight">#1AFFFFFF</item>
+    </style>
 </resources>

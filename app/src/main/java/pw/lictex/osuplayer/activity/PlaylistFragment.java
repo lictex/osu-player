@@ -16,6 +16,7 @@ import java.util.*;
 import butterknife.*;
 import lombok.*;
 import pw.lictex.osuplayer.R;
+import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.storage.*;
 
 
@@ -164,10 +165,10 @@ public class PlaylistFragment extends Fragment {
                 else refreshList();
             });
 
-            holder.getRoot().setOnClickListener(a -> {
+            holder.getRoot().setOnClickListener(a -> Utils.runTask(() -> {
                 playerService.setPlayCollectionList(showCollectionList);
                 playerService.play(playerService.getPlaylist().indexOf(path));
-            });
+            }));
         }
 
         @Override

@@ -223,9 +223,9 @@ public class OsuAudioPlayer {
                                 repeat = r;
                                 i = slider.getTime() + repeat * sliderDuration;
                             }
-                            if (i <= lastHitsoundTime.get()) continue;
+                            if (i <= lastHitsoundTime.get() || i > slider.getTime() + sliderDuration * slider.getRepeat()) continue;
 
-                            if (Math.abs(tl - sliderDuration * repeat) > 4) {
+                            if (Math.abs(tl - sliderDuration * repeat) > 16) {
                                 float[] position = currentBeatmap.getSliderPositionAt(slider, (int) i);
                                 float pan = ((position[0]) / 512f - 0.5f) * 0.8f;
                                 sampleManager.getSample(sampleSet, "slidertick", objectCustomSampleSet).play(objectVolume, pan);
