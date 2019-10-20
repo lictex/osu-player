@@ -271,24 +271,20 @@ public class MainActivity extends AppCompatActivity {
             statusBarHeight = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
         }
         switch (this.current) {
-            case Setting:
-                var parent = ((ViewGroup) preferenceWrapper.getParent());
-                parent.removeView(preferenceWrapper);
-                preferenceWrapper.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                setContentSize(Utils.px2dp(this, preferenceWrapper.getMeasuredHeight()) + 16, anim ? animDuration : 0);
-                parent.addView(preferenceWrapper);
-                audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
-                playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
-                preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).withStartAction(() -> preferenceWrapper.setVisibility(View.VISIBLE)).start();
-                break;
             case AudioSetting:
                 setContentSize(192, anim ? animDuration : 0);
                 audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).withStartAction(() -> audioSettingWrapper.setVisibility(View.VISIBLE)).start();
                 playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
                 preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
                 break;
+            case Setting:
+                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llc).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 48, anim ? animDuration : 0);
+                audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
+                playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
+                preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).withStartAction(() -> preferenceWrapper.setVisibility(View.VISIBLE)).start();
+                break;
             case Playlist:
-                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llc).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight) - 24 - 72, anim ? animDuration : 0);
+                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llc).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 48, anim ? animDuration : 0);
                 audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).withStartAction(() -> playlistWrapper.setVisibility(View.VISIBLE)).start();
                 preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();

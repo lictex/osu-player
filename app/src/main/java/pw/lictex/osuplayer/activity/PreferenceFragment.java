@@ -2,10 +2,13 @@ package pw.lictex.osuplayer.activity;
 
 import android.content.*;
 import android.os.*;
+import android.view.*;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.*;
 import androidx.preference.*;
 
+import lombok.*;
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.storage.*;
 
@@ -36,7 +39,16 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
         }
     };
 
-    @Override public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        var scrollView = new ScrollView(getActivity());
+        scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        scrollView.addView(super.onCreateView(inflater, container, savedInstanceState));
+        return scrollView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setDivider(null);
     }

@@ -3,7 +3,7 @@ package pw.lictex.libosu.beatmap;
 import lombok.*;
 
 @Getter @Setter
-public class TimingPoint {
+public class TimingPoint implements Comparable<Integer> {
     private double offset;
     private double beatLength;
     private int timeSignature;
@@ -39,6 +39,11 @@ public class TimingPoint {
 
     public boolean isEffectEnabled(Effect e) {
         return (getEffects() & e.asInt()) != 0;
+    }
+
+    @Override
+    public int compareTo(Integer o) {
+        return (int) (getOffset() - o);
     }
 
     public enum Effect {

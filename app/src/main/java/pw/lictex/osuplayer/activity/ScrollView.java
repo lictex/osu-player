@@ -4,18 +4,19 @@ import android.content.*;
 import android.util.*;
 
 import androidx.annotation.*;
+import androidx.core.widget.*;
 
-public class RecyclerView extends androidx.recyclerview.widget.RecyclerView {
-    public RecyclerView(@NonNull Context context) {
+public class ScrollView extends NestedScrollView {
+    public ScrollView(@NonNull Context context) {
         super(context);
     }
 
-    public RecyclerView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ScrollView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public RecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public ScrollView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     @Override

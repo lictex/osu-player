@@ -142,7 +142,7 @@ public class OsuAudioPlayer {
 
         synchronized (this) {
             long currentTime = engine.getMainTrackCurrentTime() + sampleOffset;
-            TimingPoint timingPoint = currentBeatmap.timingPoingAt((int) currentTime);
+            TimingPoint timingPoint = currentBeatmap.timingPointAt((int) currentTime);
 
             SampleSet timingSampleSet = timingPoint != null ? timingPoint.getSampleSet() : SampleSet.Normal;
             int timingCustomSampleSet = timingPoint != null ? timingPoint.getCustomSampleSet() : 0;
@@ -213,7 +213,7 @@ public class OsuAudioPlayer {
                         }
                     }
                     if (slidertickEnabled) {
-                        var tickLength = currentBeatmap.notInheritedTimingPoingAt(slider.getTime()).getBeatLength() / currentBeatmap.getDifficultySection().getSliderTickRate();
+                        var tickLength = currentBeatmap.notInheritedTimingPointAt(slider.getTime()).getBeatLength() / currentBeatmap.getDifficultySection().getSliderTickRate();
                         SampleSet sampleSet = (slider.getSampleSet() != SampleSet.None) ? slider.getSampleSet() : timingSampleSet;
                         int repeat = 0;
                         for (var i = slider.getTime() + tickLength; i <= currentTime; i += tickLength) {
@@ -374,7 +374,7 @@ public class OsuAudioPlayer {
 
             if (currentMod == Mod.NC) {
                 float nightcoreVolume = (nightcoreUseSoundVolume ? soundVolume : musicVolume) / 100f;
-                var np = currentBeatmap.notInheritedTimingPoingAt((int) currentTime);
+                var np = currentBeatmap.notInheritedTimingPointAt((int) currentTime);
                 int beat = (int) ((currentTime - np.getOffset()) * 2 / np.getBeatLength());
                 int bar = beat % np.getTimeSignature();
                 if (bar == lastNightcoreBeat.get()) return;
@@ -431,6 +431,10 @@ public class OsuAudioPlayer {
     }
 
     public void seekTo(long ms) {
+        synchronized (this) {
+            hitObjectsRemains.clear();
+            storyboardSampleRemains.clear();
+        }
         engine.setTime(ms);
         lastHitsoundTime.set((int) ms);
         synchronized (this) {

@@ -1,5 +1,7 @@
 package pw.lictex.libosu.beatmap;
 
+import com.annimon.stream.*;
+
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -55,26 +57,25 @@ public class OsuBeatmap {
                 hitObjectsSection.toString();
     }
 
-    public TimingPoint timingPoingAt(int ms) {
+    public TimingPoint timingPointAt(int ms) {
         List<TimingPoint> pointList = getTimingPointsSection().getTimingPoints();
-        for (int i = 0; i < pointList.size(); i++) if (pointList.get(i).getOffset() > ms) return i > 0 ? pointList.get(i - 1) : pointList.get(0);
-        return pointList.get(pointList.size() - 1);
+        var k = Collections.binarySearch(pointList, ms);
+        k = k < 0 ? (-k) - 2 : k;
+        return pointList.get(k < 0 ? 0 : k);
     }
 
-    public TimingPoint notInheritedTimingPoingAt(int ms) {
-        List<TimingPoint> pointList = getTimingPointsSection().getTimingPoints();
-        TimingPoint lp = null;
-        for (int i = 0; i < pointList.size(); i++) {
-            if (pointList.get(i).getBeatLength() >= 0) lp = pointList.get(i);
-            if (pointList.get(i).getOffset() > ms) return lp;
-        }
-        return lp;
+    public TimingPoint notInheritedTimingPointAt(int ms) {
+        List<TimingPoint> points = getTimingPointsSection().getNotInheritedTimingPoints();
+        var k = Collections.binarySearch(points, ms);
+        k = k < 0 ? (-k) - 2 : k;
+        TimingPoint timingPoint = points.get(k < 0 ? 0 : k);
+        return timingPoint.isInherit() ? points.get(0) : timingPoint;
     }
 
     //region slider
     public double getSliderDuration(HitObject.Slider s) {
-        TimingPoint p = notInheritedTimingPoingAt(s.getTime());
-        TimingPoint rp = timingPoingAt(s.getTime());
+        TimingPoint p = notInheritedTimingPointAt(s.getTime());
+        TimingPoint rp = timingPointAt(s.getTime());
         double b = p.getBeatLength();
         if (rp.getBeatLength() < 0) {
             b *= Math.abs(rp.getBeatLength()) / 100d;
@@ -521,14 +522,24 @@ public class OsuBeatmap {
 
     public class TimingPoints {
         private List<TimingPoint> timingPoints = new ArrayList<>();
+        private List<TimingPoint> notInheritedTimingPoints = new ArrayList<>();
 
         public List<TimingPoint> getTimingPoints() {
             return timingPoints;
         }
 
+        public List<TimingPoint> getNotInheritedTimingPoints() {
+            return notInheritedTimingPoints;
+        }
+
         public void addTImingPoint(TimingPoint p) {
             timingPoints.add(p);
+            sort();
+        }
+
+        private void sort() {
             Collections.sort(this.timingPoints, (o1, o2) -> (int) (o1.getOffset() - o2.getOffset()));
+            notInheritedTimingPoints = Stream.of(timingPoints).filter(value -> !value.isInherit()).toList();
         }
 
         @Override
