@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">osu!player</string>
-    <string name="version">v0.2.0</string>
+    <string name="version">v0.2.1</string>
 
     <string name="title_artist">%1$s - %2$s</string>
     <string name="version_by_mapper">%1$s by %2$s</string>
@@ -16,6 +16,8 @@
     <string name="pref_storage_path_summary">Songs文件夹</string>
     <string name="pref_use_unicode_metadata_title">使用原语言显示歌曲信息</string>
     <string name="pref_use_unicode_metadata_summary">仅在文件中包含这些信息时</string>
+    <string name="pref_use_light_theme_title">浅色模式</string>
+    <string name="pref_use_light_theme_summary">使用白色作为界面背景</string>
 
     <string name="pref_category_player">播放器</string>
     <string name="pref_audio_latency_title">音频延迟</string>

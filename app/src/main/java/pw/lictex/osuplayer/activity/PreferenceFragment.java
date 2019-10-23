@@ -36,6 +36,10 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                 activity.getPlayerService().rebuildNotification();
                 activity.updateStatus();
                 break;
+            case "use_light_theme":
+                activity.setTheme(sharedPreference.getBoolean("use_light_theme", false) ? R.style.LightTheme : R.style.DarkTheme);
+                activity.recreate();
+                break;
         }
     };
 

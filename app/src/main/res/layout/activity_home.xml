@@ -40,9 +40,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="232dp"
+            app:behavior_peekHeight="224dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,10 +50,8 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:background="@drawable/shadow">
-
-                </FrameLayout>
+                    android:layout_height="24dp"
+                    android:background="@drawable/shadow" />
 
                 <eightbitlab.com.blurview.BlurView
                     android:id="@+id/controllerBlur"
@@ -62,7 +59,6 @@
                     android:layout_height="wrap_content"
                     android:clipChildren="false"
                     android:paddingBottom="72dp"
-                    app:blurOverlayColor="#B3000000"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -80,13 +76,11 @@
                         tools:layout_editor_absoluteX="0dp"
                         tools:layout_editor_absoluteY="659dp">
 
-
                         <FrameLayout
                             android:id="@+id/contentLayout"
                             android:layout_width="0dp"
                             android:layout_height="512dp"
                             android:layout_marginTop="16dp"
-                            android:layout_marginBottom="8dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -140,7 +134,6 @@
                                 android:alpha="0.75"
                                 android:singleLine="true"
                                 android:textAlignment="viewStart"
-                                android:textColor="#FFFFFF"
                                 android:textSize="16dp"
                                 tools:text="Artist" />
 
@@ -151,7 +144,6 @@
                                 android:layout_marginBottom="8dp"
                                 android:singleLine="true"
                                 android:textAlignment="viewStart"
-                                android:textColor="#FFFFFF"
                                 android:textSize="20dp"
                                 tools:text="Title" />
 
@@ -162,19 +154,14 @@
                                 android:alpha="0.75"
                                 android:singleLine="true"
                                 android:textAlignment="viewStart"
-                                android:textColor="#FFFFFF"
                                 android:textSize="12dp"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 tools:text="Version" />
-
                         </LinearLayout>
-
-
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </eightbitlab.com.blurview.BlurView>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -182,7 +169,7 @@
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_gravity="bottom"
-        android:background="#000000"
+        android:background="?backgroundDrawable"
         android:clipChildren="false"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -193,13 +180,11 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="16dp"
+            android:layout_height="24dp"
             android:background="@drawable/shadow"
             app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-        </FrameLayout>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageButton
             android:id="@+id/buttonSetting"
@@ -210,6 +195,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_tune"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -224,6 +210,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_volume_source"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/buttonSetting"
             app:layout_constraintTop_toTopOf="parent"
@@ -238,6 +225,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_pause"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonNext"
             app:layout_constraintTop_toTopOf="parent"
@@ -252,6 +240,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_skip_previous"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/buttonPlayPause"
             app:layout_constraintTop_toTopOf="parent"
@@ -267,6 +256,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_skip_next"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -281,6 +271,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_refresh"
             android:theme="@style/LightRipple"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/buttonPrev"
             app:layout_constraintTop_toTopOf="parent"
@@ -294,7 +285,7 @@
             android:max="2048"
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
-            android:progressDrawable="@drawable/progress_bar_white_0"
+            android:progressDrawable="?progressBarDrawable"
             app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -302,7 +293,5 @@
             app:layout_constraintVertical_bias="1.0"
             tools:layout_conversion_absoluteHeight="18dp"
             tools:layout_conversion_absoluteWidth="0dp" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </FrameLayout>

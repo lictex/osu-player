@@ -1,27 +1,64 @@
 <resources>
+    <attr name="acrylicColor" format="reference" />
+    <attr name="colorDrawable" format="reference" />
+    <attr name="backgroundDrawable" format="reference" />
+    <attr name="volumeBarDrawable" format="reference" />
+    <attr name="progressBarDrawable" format="reference" />
+    <attr name="checkboxDrawable" format="reference" />
+    <attr name="rounded_rect_stroke_20_100" format="reference" />
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="HomeTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowActionBarOverlay">true</item>
-        <item name="alertDialogTheme">@style/Dialog</item>
-        <item name="editTextStyle">@style/LightEditText</item>
     </style>
 
-    <style name="Dialog" parent="Theme.AppCompat.Dialog.Alert">
-        <item name="android:colorBackground">#121212</item>
-        <item name="android:textColor">#FFF</item>
+    <style name="DarkTheme" parent="AppTheme">
+        <item name="acrylicColor">@color/acrylicColorDark</item>
+        <item name="android:textColor">@color/textColorDark</item>
+        <item name="rounded_rect_stroke_20_100">@drawable/rounded_rect_stroke_20_100</item>
+        <item name="colorDrawable">@drawable/color_dark</item>
+        <item name="backgroundDrawable">@drawable/color_background</item>
+        <item name="editTextStyle">@style/DarkEditText</item>
+        <item name="volumeBarDrawable">@drawable/progress_bar_100_50</item>
+        <item name="progressBarDrawable">@drawable/progress_bar_100_0</item>
+        <item name="checkboxDrawable">@drawable/checkbox_circle</item>
+        <item name="colorAccent">@color/textColorDark</item>
+        <item name="alertDialogTheme">@style/DarkDialog</item>
     </style>
+
+    <style name="LightTheme" parent="AppTheme">
+        <item name="acrylicColor">@color/acrylicColorLight</item>
+        <item name="android:textColor">@color/textColorLight</item>
+        <item name="rounded_rect_stroke_20_100">@drawable/rounded_rect_stroke_20_100_light</item>
+        <item name="colorDrawable">@drawable/color_light</item>
+        <item name="backgroundDrawable">@drawable/color_background_light</item>
+        <item name="editTextStyle">@style/LightEditText</item>
+        <item name="volumeBarDrawable">@drawable/progress_bar_100_50_light</item>
+        <item name="progressBarDrawable">@drawable/progress_bar_100_0_light</item>
+        <item name="checkboxDrawable">@drawable/checkbox_circle_light</item>
+        <item name="colorAccent">@color/textColorLight</item>
+        <item name="alertDialogTheme">@style/LightDialog</item>
+    </style>
+
+    <style name="DarkDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:colorBackground">@color/backgroundColorDark</item>
+        <item name="android:textColor">@color/textColorDark</item>
+    </style>
+
+    <style name="LightDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:colorBackground">@color/backgroundColorLight</item>
+        <item name="android:textColor">@color/textColorLight</item>
+    </style>
+
+    <style name="DarkEditText" parent="android:style/Widget.EditText">
+        <item name="android:textColor">@color/textColorDark</item>
+    </style>
+
     <style name="LightEditText" parent="android:style/Widget.EditText">
-        <item name="android:textColor">#FFF</item>
+        <item name="android:textColor">@color/textColorLight</item>
     </style>
 
     <style name="LightRipple" parent="ThemeOverlay.AppCompat">

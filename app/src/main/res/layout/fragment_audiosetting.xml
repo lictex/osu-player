@@ -28,34 +28,33 @@
                 android:id="@+id/checkboxDT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:button="?checkboxDrawable"
                 android:paddingLeft="8dp"
                 android:text="@string/double_time"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
+                android:textColor="?android:textColor"
+                android:textSize="14dp" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
                 android:id="@+id/checkboxHT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:button="?checkboxDrawable"
                 android:paddingLeft="8dp"
                 android:text="@string/half_time"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
+                android:textColor="?android:textColor"
+                android:textSize="14dp" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
                 android:id="@+id/checkboxNC"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:button="?checkboxDrawable"
                 android:paddingLeft="8dp"
                 android:text="@string/nightcore"
-                android:textColor="#FFF"
-                android:textSize="14dp"
-                app:buttonCompat="@drawable/checkbox_circle" />
-
+                android:textColor="?android:textColor"
+                android:textSize="14dp" />
         </LinearLayout>
 
         <TextView
@@ -65,7 +64,6 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="24dp"
             android:text="@string/music_volume"
-            android:textColor="#FFF"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -77,7 +75,6 @@
             android:layout_marginStart="24dp"
             android:layout_marginBottom="24dp"
             android:text="@string/sound_volume"
-            android:textColor="#FFF"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView2" />
@@ -101,7 +98,7 @@
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
                 android:progress="100"
-                android:progressDrawable="@drawable/progress_bar_white_white50"
+                android:progressDrawable="?attr/volumeBarDrawable"
                 android:splitTrack="false"
                 app:seekBarRotation="CW270" />
         </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
@@ -125,10 +122,9 @@
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
                 android:progress="100"
-                android:progressDrawable="@drawable/progress_bar_white_white50"
+                android:progressDrawable="?attr/volumeBarDrawable"
                 android:splitTrack="false"
                 app:seekBarRotation="CW270" />
         </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

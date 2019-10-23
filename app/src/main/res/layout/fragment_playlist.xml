@@ -33,7 +33,6 @@
             android:alpha="0.75"
             android:background="?attr/selectableItemBackground"
             android:text="@string/playlist_collection"
-            android:textColor="#FFF"
             android:textSize="16dp"
             android:theme="@style/LightRipple"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -48,7 +47,6 @@
             android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackground"
             android:text="@string/playlist_all"
-            android:textColor="#FFF"
             android:textSize="16dp"
             android:theme="@style/LightRipple"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -72,11 +70,8 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:background="#FFF">
-
-            </FrameLayout>
+                android:background="?colorDrawable" />
         </FrameLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -86,7 +81,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:alpha="0.75"
-        android:background="@drawable/rounded_rect_stroke_20_100"
+        android:background="?rounded_rect_stroke_20_100"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -99,6 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:src="@drawable/ic_magnify"
+            android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -112,13 +108,11 @@
             android:background="#00000000"
             android:ems="10"
             android:inputType="textPersonName"
-            android:textColor="#FFF"
             android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/searchIcon"
             app:layout_constraintTop_toTopOf="parent" />
-
     </LinearLayout>
 
     <pw.lictex.osuplayer.activity.RecyclerView
@@ -128,10 +122,10 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchView" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,4 +3,11 @@
     <color name="colorPrimary">#888888</color>
     <color name="colorPrimaryDark">#505050</color>
     <color name="colorAccent">#FFFFFF</color>
+
+    <color name="textColorLight">#000000</color>
+    <color name="textColorDark">#FFFFFF</color>
+    <color name="backgroundColorLight">#FFFFFF</color>
+    <color name="backgroundColorDark">#000000</color>
+    <color name="acrylicColorLight">#CCFFFFFF</color>
+    <color name="acrylicColorDark">#CC000000</color>
 </resources>

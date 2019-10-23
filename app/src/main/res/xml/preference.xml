@@ -19,6 +19,13 @@
             android:title="@string/pref_use_unicode_metadata_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="use_light_theme"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_use_light_theme_summary"
+            android:title="@string/pref_use_light_theme_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -88,6 +95,5 @@
             android:summary="@string/pref_spinnerbonus_enabled_summary"
             android:title="@string/pref_spinnerbonus_enabled_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
-
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

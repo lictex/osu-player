@@ -7,6 +7,7 @@ import android.content.pm.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
+import android.util.*;
 import android.view.*;
 import android.view.animation.Interpolator;
 import android.view.animation.*;
@@ -68,11 +69,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(runnable);
-        if (getPlayerService().getOsuAudioPlayer().getEngine().getPlaybackStatus() != AudioEngine.PlaybackStatus.Playing) {
-            unbindService(playerServiceConnection);
-            stopService(new Intent(this, PlayerService.class));
-            ((App) getApplication()).stop();
-        }
         unbindService(playerServiceConnection);
     }
 
@@ -83,17 +79,37 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED)
+        if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
             bottomSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        else
+        } else {
+            if (getPlayerService().getOsuAudioPlayer().getEngine().getPlaybackStatus() != AudioEngine.PlaybackStatus.Playing) {
+                unbindService(playerServiceConnection);
+                stopService(new Intent(this, PlayerService.class));
+                ((App) getApplication()).stop();
+            }
             super.onBackPressed();
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(null);
+        if (savedInstanceState != null) savedInstanceState.remove("android:support:fragments");
+        super.onCreate(savedInstanceState);
+        setTheme(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("use_light_theme", false) ? R.style.LightTheme : R.style.DarkTheme);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
+
+        TypedValue value = new TypedValue();
+        getTheme().resolveAttribute(R.attr.acrylicColor, value, true);
+        controllerBlur.setOverlayColor(value.data);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int color = Color.TRANSPARENT;
+            Drawable bg = findViewById(R.id.llc).getBackground();
+            if (bg instanceof ColorDrawable) color = ((ColorDrawable) bg).getColor();
+            getWindow().setNavigationBarColor(color);
+            if (color == 0xFFFFFFFF) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
@@ -102,13 +118,18 @@ public class MainActivity extends AppCompatActivity {
                 .setBlurAlgorithm(new RenderScriptBlur(this))
                 .setBlurRadius(blurRadius)
                 .setSaturation(1.25f);
-        getWindow().getDecorView().post(() -> setCurrentContent(Content.Playlist));
 
         title.setText(getResources().getString(R.string.app_name));
         artist.setText(getResources().getString(R.string.version));
         version.setText(getResources().getString(R.string.slide_open_playlist));
 
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
+
+        if (savedInstanceState != null) {
+            getWindow().getDecorView().post(() -> setCurrentContent(Content.values()[savedInstanceState.getInt("content")]));
+            bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else getWindow().getDecorView().post(() -> setCurrentContent(Content.Playlist));
+
         bottomSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override public void onStateChanged(@NonNull View view, int i) {
                 if (i == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -157,6 +178,12 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         bindService(new Intent(this.getApplicationContext(), PlayerService.class), playerServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("content", current.ordinal());
     }
 
     @OnClick(R.id.buttonPlayPause) void onPauseClick() {
@@ -272,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
         }
         switch (this.current) {
             case AudioSetting:
-                setContentSize(192, anim ? animDuration : 0);
+                setContentSize(200, anim ? animDuration : 0);
                 audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).withStartAction(() -> audioSettingWrapper.setVisibility(View.VISIBLE)).start();
                 playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
                 preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(0).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
