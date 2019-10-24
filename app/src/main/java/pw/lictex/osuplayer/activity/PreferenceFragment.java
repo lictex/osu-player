@@ -10,6 +10,7 @@ import androidx.preference.*;
 
 import lombok.*;
 import pw.lictex.osuplayer.R;
+import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.storage.*;
 
 
@@ -48,6 +49,9 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
         var scrollView = new ScrollView(getActivity());
         scrollView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         scrollView.addView(super.onCreateView(inflater, container, savedInstanceState));
+        scrollView.setClipToPadding(false);
+        scrollView.setVerticalScrollBarEnabled(false);
+        scrollView.setPadding(0, 0, 0, Utils.dp2px(getContext(), 16));
         return scrollView;
     }
 

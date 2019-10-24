@@ -22,7 +22,7 @@ public class BeatmapIndex {
     @Getter private static BeatmapIndex instance;
     @Getter private static String currentPath = pathDef;
     private static SharedPreferences sharedPreferences;
-    private HashMap<String, Metadata> cache = new LinkedHashMap<>();
+    private LinkedHashMap<String, Metadata> cache = new LinkedHashMap<>();
     private Set<String> collection = new LinkedHashSet<>();
 
     private BeatmapIndex(String path) {
@@ -80,7 +80,7 @@ public class BeatmapIndex {
     }
 
     public List<String> getAllBeatmaps() {
-        return new ArrayList<>(cache.keySet());
+        return Stream.of(cache).sorted((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getValue().getRomanisedTitle(), b.getValue().getRomanisedTitle())).map(Map.Entry::getKey).toList();
     }
 
     public List<String> getFavoriteBeatmaps() {
@@ -89,6 +89,7 @@ public class BeatmapIndex {
 
     public void addCollection(String s) {
         collection.add(m(s));
+        sortCollection();
         sharedPreferences.edit().putStringSet("collection", collection).apply();
     }
 
@@ -98,7 +99,12 @@ public class BeatmapIndex {
 
     public void removeCollection(String s) {
         collection.remove(m(s));
+        sortCollection();
         sharedPreferences.edit().putStringSet("collection", collection).apply();
+    }
+
+    private void sortCollection() {
+        collection = Stream.of(collection).sorted((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(getMetadata(currentPath + a).getRomanisedTitle(), getMetadata(currentPath + b).getRomanisedTitle())).collect(Collectors.toSet());
     }
 
     private String m(String s) {

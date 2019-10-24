@@ -63,6 +63,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    tools:background="?acrylicColor"
                     tools:layout_conversion_absoluteHeight="72dp"
                     tools:layout_conversion_absoluteWidth="0dp">
 
@@ -75,6 +76,23 @@
                         tools:layout_conversion_absoluteWidth="0dp"
                         tools:layout_editor_absoluteX="0dp"
                         tools:layout_editor_absoluteY="659dp">
+
+                        <ImageButton
+                            android:id="@+id/backButton"
+                            android:layout_width="32dp"
+                            android:layout_height="0dp"
+                            android:layout_marginStart="8dp"
+                            android:alpha="0"
+                            android:background="@null"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_arrow_back"
+                            android:tint="?android:textColor"
+                            app:layout_constraintBottom_toBottomOf="@+id/infoLayout"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/infoLayout"
+                            tools:alpha="0.75">
+
+                        </ImageButton>
 
                         <FrameLayout
                             android:id="@+id/contentLayout"
@@ -114,7 +132,7 @@
 
                         <LinearLayout
                             android:id="@+id/infoLayout"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="24dp"
                             android:layout_marginTop="24dp"
@@ -124,7 +142,8 @@
                             android:orientation="vertical"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:translationX="24dp">
 
                             <TextView
                                 android:id="@+id/artist"

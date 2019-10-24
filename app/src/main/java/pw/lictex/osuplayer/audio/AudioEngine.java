@@ -20,6 +20,7 @@ import static com.un4seen.bass.BASS_FX.*;
 public class AudioEngine {
     private static final int SAMPLERATE = 44100;
     private static final int AUDIOFREQ = 250;
+    private static final int LOWAUDIOFREQ = 44;
 
     private final AtomicLong currentTime = new AtomicLong();
     private final AtomicLong currentTPS = new AtomicLong();
@@ -258,7 +259,7 @@ public class AudioEngine {
                         Runnable r;
                         while ((r = eventQueue.poll()) != null) r.run();
                     }
-                    long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f - (SystemClock.elapsedRealtime() - s));
+                    long sleepms = (long) Math.ceil(1f / (playbackStatus == PlaybackStatus.Playing ? AUDIOFREQ : LOWAUDIOFREQ) * 1000f - (SystemClock.elapsedRealtime() - s));
                     //long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f);
                     if (sleepms > 0) SystemClock.sleep(sleepms);
                 }
