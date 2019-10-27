@@ -14,14 +14,15 @@ import java.util.*;
 import lombok.*;
 import pw.lictex.osuplayer.activity.*;
 import pw.lictex.osuplayer.audio.*;
+import pw.lictex.osuplayer.storage.*;
 
 public class PlayerService extends Service {
     private final int ID = 141;
     private AudioManager audioManager;
-    @Getter private ArrayList<String> allMapList = new ArrayList<>();
-    @Getter private ArrayList<String> collectionMapList = new ArrayList<>();
+    @Getter private ArrayList<BeatmapEntity> allMapList = new ArrayList<>();
+    @Getter private ArrayList<BeatmapEntity> collectionMapList = new ArrayList<>();
     @Getter @Setter private boolean playCollectionList = false;
-    @Getter private String currentPath = null;
+    @Getter private BeatmapEntity currentMap = null;
     @Getter private OsuAudioPlayer osuAudioPlayer;
     @Getter @Setter private Runnable onUpdateCallback;
     private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
@@ -53,10 +54,10 @@ public class PlayerService extends Service {
         osuAudioPlayer.setOnBeatmapEndCallback(() -> {
             switch (loopMode) {
                 case Single:
-                    play(getPlaylist().indexOf(currentPath));
+                    play(getPlaylist().indexOf(currentMap));
                     break;
                 case All:
-                    play(getPlaylist().indexOf(currentPath) + 1);
+                    play(getPlaylist().indexOf(currentMap) + 1);
                     break;
                 case Random:
                     play(((int) (Math.random() * getPlaylist().size())));
@@ -112,20 +113,22 @@ public class PlayerService extends Service {
     }
 
     public void next() {
-        play(getPlaylist().indexOf(currentPath) + 1);
+        play(getPlaylist().indexOf(currentMap) + 1);
     }
 
     public void previous() {
-        play(getPlaylist().indexOf(currentPath) - 1);
+        play(getPlaylist().indexOf(currentMap) - 1);
     }
 
     public synchronized void play(int index) {
         ensureAudioFocus();
         if (getPlaylist().size() != 0) {
-            index = (index < 0 || index >= getPlaylist().size()) ? 0 : index;
-            currentPath = getPlaylist().get(index);
-            osuAudioPlayer.openBeatmapSet(new File(currentPath).getParent() + "/");
-            osuAudioPlayer.playBeatmap(new File(currentPath).getName());
+            if (index < 0) index = getPlaylist().size() - 1;
+            else if (index >= getPlaylist().size()) index = 0;
+
+            currentMap = getPlaylist().get(index);
+            osuAudioPlayer.openBeatmapSet(new File(BeatmapIndex.getCurrentPath() + currentMap.path).getParent() + "/");
+            osuAudioPlayer.playBeatmap(new File(BeatmapIndex.getCurrentPath() + currentMap.path).getName());
             if (onUpdateCallback != null) onUpdateCallback.run();
         }
         rebuildNotification();
@@ -147,7 +150,7 @@ public class PlayerService extends Service {
         notificationManager.notify(ID, getNotification());
     }
 
-    public List<String> getPlaylist() {
+    public List<BeatmapEntity> getPlaylist() {
         return playCollectionList ? collectionMapList : allMapList;
     }
 

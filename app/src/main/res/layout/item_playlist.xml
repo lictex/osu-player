@@ -12,7 +12,7 @@
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:alpha="0.75"
+        android:alpha=".2"
         android:background="?colorDrawable"
         android:clipChildren="false"
         app:layout_constraintBottom_toBottomOf="parent"

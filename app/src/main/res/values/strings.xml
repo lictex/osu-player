@@ -14,6 +14,8 @@
     <string name="pref_category_general">常规</string>
     <string name="pref_storage_path_title">存储路径</string>
     <string name="pref_storage_path_summary">Songs文件夹</string>
+    <string name="pref_rebuild_database_title">重建索引</string>
+    <string name="pref_rebuild_database_summary">如果添加或删除了歌曲</string>
     <string name="pref_use_unicode_metadata_title">使用原语言显示歌曲信息</string>
     <string name="pref_use_unicode_metadata_summary">仅在文件中包含这些信息时</string>
     <string name="pref_use_light_theme_title">浅色模式</string>

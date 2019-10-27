@@ -17,7 +17,8 @@ public class App extends Application {
         super.onCreate();
 
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
-        BeatmapIndex.Build(getApplicationContext());
+
+        BeatmapIndex.Initialize(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "Service";

@@ -21,7 +21,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
         MainActivity activity = (MainActivity) getActivity();
         switch (k) {
             case "storage_path":
-                BeatmapIndex.Build(getContext());
+                BeatmapIndex.getInstance().refresh();
                 ((PlaylistFragment) activity.getSupportFragmentManager().findFragmentByTag("playlistFragment")).rebuildList();
                 break;
             case "audio_latency":
@@ -52,6 +52,10 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
         scrollView.setClipToPadding(false);
         scrollView.setVerticalScrollBarEnabled(false);
         scrollView.setPadding(0, 0, 0, Utils.dp2px(getContext(), 16));
+
+        findPreference("rebuild_database").setOnPreferenceClickListener(preference -> {
+            BeatmapIndex.getInstance().refresh(); return true;
+        });
         return scrollView;
     }
 

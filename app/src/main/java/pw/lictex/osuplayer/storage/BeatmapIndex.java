@@ -3,9 +3,9 @@ package pw.lictex.osuplayer.storage;
 import android.content.*;
 import android.util.*;
 
+import androidx.lifecycle.*;
 import androidx.preference.*;
-
-import com.annimon.stream.*;
+import androidx.room.*;
 
 import java.io.*;
 import java.util.*;
@@ -13,6 +13,7 @@ import java.util.regex.*;
 
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
+import pw.lictex.osuplayer.*;
 
 /**
  * Created by kpx on 2019/3/30.
@@ -22,42 +23,51 @@ public class BeatmapIndex {
     @Getter private static BeatmapIndex instance;
     @Getter private static String currentPath = pathDef;
     private static SharedPreferences sharedPreferences;
-    private LinkedHashMap<String, Metadata> cache = new LinkedHashMap<>();
-    private Set<String> collection = new LinkedHashSet<>();
+    private static BeatmapDatabase beatmap;
 
-    private BeatmapIndex(String path) {
-        if (path == null) path = pathDef;
-        collection.clear();
-        collection.addAll(sharedPreferences.getStringSet("collection", collection));
-        refresh(path);
-    }
+    private Context context;
 
-    public static void Build(Context c) {
+    private BeatmapIndex(Context c) {context = c; }
+
+    public static void Initialize(Context c) {
+        beatmap = Room.databaseBuilder(c, BeatmapDatabase.class, "beatmap").build();
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
         currentPath = sharedPreferences.getString("storage_path", pathDef);
         if (!currentPath.endsWith("/")) currentPath += "/";
-        instance = new BeatmapIndex(currentPath);
+
+        instance = new BeatmapIndex(c);
     }
 
-    private void refresh(String p) {
-        cache.clear();
-        LinkedList<String> pp = new LinkedList<>();
-        searchOsuFiles(pp, new File(p));
-        for (String s : pp) {
-            try {
-                var beatmap = OsuBeatmap.fromFile(s);
-                var m = new Metadata();
-                m.setArtist(beatmap.getMetadataSection().getArtistUnicode());
-                m.setRomanisedArtist(beatmap.getMetadataSection().getArtist());
-                m.setTitle(beatmap.getMetadataSection().getTitleUnicode());
-                m.setRomanisedTitle(beatmap.getMetadataSection().getTitle());
-                m.setVersion(beatmap.getMetadataSection().getVersion());
-                m.setMapper(beatmap.getMetadataSection().getCreator());
-                cache.put(s, m);
-            } catch (Throwable t) {
-                Log.w("B", "", t);
+    public void refresh() {
+        Utils.runTask(() -> {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            currentPath = sharedPreferences.getString("storage_path", pathDef);
+
+            BeatmapDAO dao = beatmap.getDAO();
+            dao.clear();
+            LinkedList<String> pp = new LinkedList<>();
+            searchOsuFiles(pp, new File(currentPath));
+            for (String s : pp) {
+                try {
+                    var m = new BeatmapEntity();
+                    var beatmap = OsuBeatmap.fromFile(s);
+
+                    m.path = m(s);
+                    m.unicode_artist = beatmap.getMetadataSection().getArtistUnicode();
+                    m.artist = beatmap.getMetadataSection().getArtist();
+                    m.unicode_title = beatmap.getMetadataSection().getTitleUnicode();
+                    m.title = beatmap.getMetadataSection().getTitle();
+                    m.version = beatmap.getMetadataSection().getVersion();
+                    m.creator = beatmap.getMetadataSection().getCreator();
+                    m.tags = beatmap.getMetadataSection().getTags();
+
+                    dao.insert(m);
+                } catch (Throwable t) {
+                    Log.w("B", "", t);
+                }
             }
-        }
+        });
     }
 
     private void searchOsuFiles(List<String> out, File dir) {
@@ -79,45 +89,24 @@ public class BeatmapIndex {
         }
     }
 
-    public List<String> getAllBeatmaps() {
-        return Stream.of(cache).sorted((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getValue().getRomanisedTitle(), b.getValue().getRomanisedTitle())).map(Map.Entry::getKey).toList();
+    public LiveData<List<BeatmapEntity>> getAllBeatmaps() {
+        return beatmap.getDAO().orderByTitle();
     }
 
-    public List<String> getFavoriteBeatmaps() {
-        return Collections.unmodifiableList(Stream.of(collection).map(s -> currentPath + s).toList());
+    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps() {
+        return beatmap.getDAO().orderCollectionByTitle();
     }
 
-    public void addCollection(String s) {
-        collection.add(m(s));
-        sortCollection();
-        sharedPreferences.edit().putStringSet("collection", collection).apply();
+    public void addCollection(BeatmapEntity s) {
+        Utils.runTask(() -> beatmap.getDAO().addCollection(s));
     }
 
-    public boolean isInCollection(String s) {
-        return collection.contains(m(s));
-    }
-
-    public void removeCollection(String s) {
-        collection.remove(m(s));
-        sortCollection();
-        sharedPreferences.edit().putStringSet("collection", collection).apply();
-    }
-
-    private void sortCollection() {
-        collection = Stream.of(collection).sorted((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(getMetadata(currentPath + a).getRomanisedTitle(), getMetadata(currentPath + b).getRomanisedTitle())).collect(Collectors.toSet());
+    public void removeCollection(BeatmapEntity s) {
+        Utils.runTask(() -> beatmap.getDAO().removeCollection(s));
     }
 
     private String m(String s) {
         return s.replaceFirst(Pattern.quote(currentPath), "").replaceAll("^/*", "");
     }
 
-    public Metadata getMetadata(String path) {
-        var n = cache.get(path);
-        return n == null ? new Metadata() : n;
-    }
-
-    @Getter @Setter
-    public class Metadata {
-        private String title, romanisedTitle, artist, romanisedArtist, version, mapper;
-    }
 }

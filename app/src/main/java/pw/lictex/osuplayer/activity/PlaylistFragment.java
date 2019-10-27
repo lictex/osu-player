@@ -93,20 +93,26 @@ public class PlaylistFragment extends Fragment {
 
     public void rebuildList() {
         var playerService = ((MainActivity) getActivity()).getPlayerService();
-        List<String> collectionBeatmaps = BeatmapIndex.getInstance().getFavoriteBeatmaps();
-        List<String> allBeatmaps = BeatmapIndex.getInstance().getAllBeatmaps();
 
-        ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? collectionBeatmaps : allBeatmaps);
-        playerService.getAllMapList().clear();
-        playerService.getCollectionMapList().clear();
-        playerService.getAllMapList().addAll(allBeatmaps);
-        playerService.getCollectionMapList().addAll(collectionBeatmaps);
+        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps();
+        allMapLiveData.observe(this, beatmapEntities -> {
+            playerService.getAllMapList().clear();
+            playerService.getAllMapList().addAll(beatmapEntities);
+            ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? playerService.getCollectionMapList() : playerService.getAllMapList());
+            refreshList();
+        });
+        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps();
+        collectionMapLiveData.observe(this, beatmapEntities -> {
+            playerService.getCollectionMapList().clear();
+            playerService.getCollectionMapList().addAll(beatmapEntities);
+            ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? playerService.getCollectionMapList() : playerService.getAllMapList());
+            refreshList();
+        });
 
-        refreshList();
     }
 
     protected class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.PlaylistViewHolder> {
-        List<String> list = new ArrayList<>();
+        List<BeatmapEntity> list = new ArrayList<>();
 
         @NonNull @Override
         public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -115,16 +121,16 @@ public class PlaylistFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            String path = list.get(position);
-            var x = BeatmapIndex.getInstance().getMetadata(path);
+            BeatmapEntity beatmapEntity = list.get(position);
             String input = searchText.getText().toString().trim().toLowerCase();
             if (!input.isEmpty()) {
-                if (!(x.getArtist().toLowerCase().contains(input) ||
-                        x.getTitle().toLowerCase().contains(input) ||
-                        x.getRomanisedArtist().toLowerCase().contains(input) ||
-                        x.getRomanisedTitle().toLowerCase().contains(input) ||
-                        x.getMapper().toLowerCase().contains(input) ||
-                        x.getVersion().toLowerCase().contains(input))) {
+                if (!(beatmapEntity.artist.toLowerCase().contains(input) ||
+                        beatmapEntity.title.toLowerCase().contains(input) ||
+                        beatmapEntity.unicode_title.toLowerCase().contains(input) ||
+                        beatmapEntity.unicode_artist.toLowerCase().contains(input) ||
+                        beatmapEntity.creator.toLowerCase().contains(input) ||
+                        beatmapEntity.tags.toLowerCase().contains(input) ||
+                        beatmapEntity.version.toLowerCase().contains(input))) {
                     return -1;
                 }
             }
@@ -134,21 +140,20 @@ public class PlaylistFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
             var playerService = ((MainActivity) getActivity()).getPlayerService();
-            String path = list.get(position);
-            var x = BeatmapIndex.getInstance().getMetadata(path);
+            BeatmapEntity beatmapEntity = list.get(position);
             if (holder.isNull) return;
 
             var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
             if (sharedPreferences.getBoolean("use_unicode_metadata", false))
-                holder.getTitle().setText(getString(R.string.title_artist, x.getTitle(), x.getArtist()));
+                holder.getTitle().setText(getString(R.string.title_artist, beatmapEntity.unicode_title, beatmapEntity.unicode_artist));
             else
-                holder.getTitle().setText(getString(R.string.title_artist, x.getRomanisedTitle(), x.getRomanisedArtist()));
+                holder.getTitle().setText(getString(R.string.title_artist, beatmapEntity.title, beatmapEntity.artist));
 
-            holder.getVersion().setText(getString(R.string.version_by_mapper, x.getVersion(), x.getMapper()));
-            String currentPath = ((MainActivity) getActivity()).getPlayerService().getCurrentPath();
-            holder.getPlaying().setVisibility(path.equals(currentPath) ? View.VISIBLE : View.GONE);
+            holder.getVersion().setText(getString(R.string.version_by_mapper, beatmapEntity.version, beatmapEntity.creator));
+            BeatmapEntity currentMap = ((MainActivity) getActivity()).getPlayerService().getCurrentMap();
+            holder.getPlaying().setVisibility(beatmapEntity.equals(currentMap) ? View.VISIBLE : View.GONE);
 
-            if (BeatmapIndex.getInstance().isInCollection(path)) {
+            if (playerService.getCollectionMapList().contains(beatmapEntity)) {
                 holder.getFavorite().setAlpha(1f);
                 holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart));
             } else {
@@ -156,10 +161,10 @@ public class PlaylistFragment extends Fragment {
                 holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_outline));
             }
             holder.getFavorite().setOnClickListener(a -> {
-                if (BeatmapIndex.getInstance().isInCollection(path))
-                    BeatmapIndex.getInstance().removeCollection(path);
+                if (playerService.getCollectionMapList().contains(beatmapEntity))
+                    BeatmapIndex.getInstance().removeCollection(beatmapEntity);
                 else
-                    BeatmapIndex.getInstance().addCollection(path);
+                    BeatmapIndex.getInstance().addCollection(beatmapEntity);
 
                 if (showCollectionList) rebuildList();
                 else refreshList();
@@ -167,7 +172,7 @@ public class PlaylistFragment extends Fragment {
 
             holder.getRoot().setOnClickListener(a -> Utils.runTask(() -> {
                 playerService.setPlayCollectionList(showCollectionList);
-                playerService.play(playerService.getPlaylist().indexOf(path));
+                playerService.play(playerService.getPlaylist().indexOf(beatmapEntity));
             }));
         }
 
