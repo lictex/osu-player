@@ -83,14 +83,7 @@ public class MainActivity extends AppCompatActivity {
         if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
             if (current != Content.Playlist) setCurrentContent(Content.Playlist);
             else bottomSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        } else {
-            if (getPlayerService().getOsuAudioPlayer().getEngine().getPlaybackStatus() != AudioEngine.PlaybackStatus.Playing) {
-                unbindService(playerServiceConnection);
-                stopService(new Intent(this, PlayerService.class));
-                ((App) getApplication()).stop();
-            }
-            super.onBackPressed();
-        }
+        } else super.onBackPressed();
     }
 
     @Override
@@ -164,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 playerService = ((PlayerService.PlayerServiceBinder) service).getService();
-                playerService.setOnUpdateCallback(() -> runOnUiThread(() -> updateStatus()));
+                playerService.setOnUpdateCallback(() -> { getPlayerService().rebuildNotification(); runOnUiThread(() -> updateStatus());});
 
                 audioSettingFragment = new AudioSettingFragment();
                 playlistFragment = new PlaylistFragment();

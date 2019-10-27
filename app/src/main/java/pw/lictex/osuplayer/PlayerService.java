@@ -5,6 +5,7 @@ import android.content.*;
 import android.media.*;
 import android.os.*;
 
+import androidx.core.app.*;
 import androidx.preference.*;
 
 import java.io.*;
@@ -67,6 +68,33 @@ public class PlayerService extends Service {
         startForeground(ID, getNotification());
     }
 
+    private static final String ACTION_RESUME = "pw.lictex.osuplayer.action_resume";
+    private static final String ACTION_PAUSE = "pw.lictex.osuplayer.action_pause";
+    private static final String ACTION_PREVIOUS = "pw.lictex.osuplayer.action_previous";
+    private static final String ACTION_NEXT = "pw.lictex.osuplayer.action_next";
+    private static final String ACTION_TERMINATE = "pw.lictex.osuplayer.action_stop";
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            var action = intent.getAction();
+            if (action != null) switch (action) {
+                case ACTION_RESUME:
+                    resume(); break;
+                case ACTION_PAUSE:
+                    pause(); break;
+                case ACTION_PREVIOUS:
+                    previous(); break;
+                case ACTION_NEXT:
+                    next(); break;
+                case ACTION_TERMINATE:
+                    stopSelf();
+                    ((App) getApplication()).stop();
+            }
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     private void ensureAudioFocus() {
         audioManager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
         audioManager.abandonAudioFocus(focusChangeListener);
@@ -125,9 +153,23 @@ public class PlayerService extends Service {
 
     private Notification getNotification() {
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        var builder = new Notification.Builder(getApplication()).setAutoCancel(true).setSmallIcon(R.drawable.ic_osu_96)
+        var builder = new NotificationCompat.Builder(getApplication(), "Service")
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_osu_96)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) builder.setChannelId("Service");
+
+        builder.addAction(R.drawable.ic_skip_previous, "Previous", PendingIntent.getService(getBaseContext(), 0, new Intent(this, PlayerService.class).setAction(ACTION_PREVIOUS), 0));
+        if (getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing)
+            builder.addAction(R.drawable.ic_pause, "Pause", PendingIntent.getService(getBaseContext(), 1, new Intent(this, PlayerService.class).setAction(ACTION_PAUSE), 0));
+        else
+            builder.addAction(R.drawable.ic_play, "Play", PendingIntent.getService(getBaseContext(), 2, new Intent(this, PlayerService.class).setAction(ACTION_RESUME), 0));
+        builder.addAction(R.drawable.ic_skip_next, "Next", PendingIntent.getService(getBaseContext(), 3, new Intent(this, PlayerService.class).setAction(ACTION_NEXT), 0));
+        builder.addAction(R.drawable.ic_close, "Terminate", PendingIntent.getService(getBaseContext(), 4, new Intent(this, PlayerService.class).setAction(ACTION_TERMINATE), 0));
+
+        builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(1, 2, 3).setShowCancelButton(true).setCancelButtonIntent(PendingIntent.getService(getBaseContext(), 3, new Intent(this, PlayerService.class).setAction(ACTION_TERMINATE), 0)))
+                .setLargeIcon(osuAudioPlayer.getBackground());
 
         if (allMapList.size() == 0 || osuAudioPlayer.getTitle() == null) builder.setContentTitle("闲置中");
         else if (sharedPreferences.getBoolean("use_unicode_metadata", false))
