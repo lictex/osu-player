@@ -186,9 +186,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/llc"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="96dp"
         android:layout_gravity="bottom"
-        android:background="?backgroundDrawable"
         android:clipChildren="false"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -198,12 +197,25 @@
         tools:layout_conversion_absoluteWidth="0dp">
 
         <FrameLayout
+            android:id="@+id/llcbg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?backgroundDrawable"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shadow">
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/shadow"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:background="@drawable/shadow"
-            app:layout_constraintBottom_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/buttonSetting"
@@ -217,7 +229,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -232,7 +244,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/buttonSetting"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -247,7 +259,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonNext"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -262,7 +274,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/buttonPlayPause"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -278,7 +290,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -293,7 +305,7 @@
             android:tint="?android:textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/buttonPrev"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             tools:layout_conversion_absoluteHeight="32dp"
             tools:layout_conversion_absoluteWidth="32dp" />
 
@@ -303,12 +315,14 @@
             android:layout_height="wrap_content"
             android:max="2048"
             android:paddingStart="0dp"
+            android:paddingTop="8dp"
             android:paddingEnd="0dp"
+            android:paddingBottom="8dp"
             android:progressDrawable="?progressBarDrawable"
-            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/shadow"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shadow"
             app:layout_constraintVertical_bias="1.0"
             tools:layout_conversion_absoluteHeight="18dp"
             tools:layout_conversion_absoluteWidth="0dp" />

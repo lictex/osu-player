@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int color = Color.TRANSPARENT;
-            Drawable bg = findViewById(R.id.llc).getBackground();
+            Drawable bg = findViewById(R.id.llcbg).getBackground();
             if (bg instanceof ColorDrawable) color = ((ColorDrawable) bg).getColor();
             getWindow().setNavigationBarColor(color);
             if (color == 0xFFFFFFFF) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
@@ -306,14 +306,14 @@ public class MainActivity extends AppCompatActivity {
                 preferenceWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.GONE)).start();
                 break;
             case Setting:
-                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llc).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
+                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
                 setBackArrowVisibility(true);
                 audioSettingWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.GONE)).start();
                 preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {preferenceWrapper.setTranslationX(offsetPx); preferenceWrapper.setVisibility(View.VISIBLE);}).start();
                 break;
             case Playlist:
-                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llc).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
+                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
                 setBackArrowVisibility(false);
                 audioSettingWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> audioSettingWrapper.setVisibility(View.GONE)).start();
                 playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {playlistWrapper.setTranslationX(-offsetPx); playlistWrapper.setVisibility(View.VISIBLE);}).start();

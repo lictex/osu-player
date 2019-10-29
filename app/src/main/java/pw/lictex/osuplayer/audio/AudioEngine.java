@@ -155,6 +155,7 @@ public class AudioEngine {
                 }
                 byte[] b = bs.toByteArray();
                 sample.ptr = BASS_SampleLoad(ByteBuffer.wrap(b), 0, b.length, 65535, BASS_SAMPLE_OVER_POS);
+                file.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 //TODO sth
@@ -235,6 +236,7 @@ public class AudioEngine {
             try {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 BASS_Init(-1, SAMPLERATE, 0);
+                BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
 
                 //audio event loop
                 long t = SystemClock.elapsedRealtime(), i = 0;

@@ -42,7 +42,6 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
                             playerService.previous();
                             break;
                     }
-                abortBroadcast();
             }
         }
     }
