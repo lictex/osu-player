@@ -33,16 +33,14 @@ public class BeatmapIndex {
         beatmap = Room.databaseBuilder(c, BeatmapDatabase.class, "beatmap").build();
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-        currentPath = sharedPreferences.getString("storage_path", pathDef);
-        if (!currentPath.endsWith("/")) currentPath += "/";
-
+        updateCurrentPath();
         instance = new BeatmapIndex(c);
     }
 
     public void refresh() {
         Utils.runTask(() -> {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            currentPath = sharedPreferences.getString("storage_path", pathDef);
+            updateCurrentPath();
 
             BeatmapDAO dao = beatmap.getDAO();
             dao.clear();
@@ -68,6 +66,11 @@ public class BeatmapIndex {
                 }
             }
         });
+    }
+
+    private static void updateCurrentPath() {
+        currentPath = sharedPreferences.getString("storage_path", pathDef);
+        if (!currentPath.endsWith("/")) currentPath += "/";
     }
 
     private void searchOsuFiles(List<String> out, File dir) {
