@@ -271,6 +271,10 @@ public class OsuBeatmap {
                         }
                     }
                 }
+
+                var metadata = beatmap.getMetadataSection();
+                if (metadata.getTitleUnicode() == null) metadata.setTitleUnicode(metadata.getTitle());
+                if (metadata.getArtistUnicode() == null) metadata.setArtistUnicode(metadata.getArtist());
             } catch (Exception e) {
                 e.printStackTrace();
                 this.beatmap = null;
@@ -487,19 +491,20 @@ public class OsuBeatmap {
         private void readBasicInfo() {
             breaks.clear();
             for (String s : content.split("\\n")) {
-                if (s.trim().matches("0,.*") || s.trim().matches("Background,.*")) {
-                    backgroundImage = s.split(",")[2].replace("\"", "");
+                String trim = s.trim();
+                if (trim.matches("0,.*") || trim.matches("Background,.*")) {
+                    backgroundImage = trim.split(",")[2].replace("\"", "");
                 }
-                if (s.trim().matches("1,.*") || s.trim().matches("Video,.*")) {
+                if (trim.matches("1,.*") || trim.matches("Video,.*")) {
                     videoOffset = Integer.valueOf(s.split(",")[1]);
-                    backgroundVideo = s.split(",")[2].replace("\"", "");
+                    backgroundVideo = trim.split(",")[2].replace("\"", "");
                 }
-                if (s.trim().matches("2,.*") || s.trim().matches("Break,.*")) {
-                    var pt = s.trim().split(",");
+                if (trim.matches("2,.*") || trim.matches("Break,.*")) {
+                    var pt = trim.split(",");
                     breaks.add(new int[]{Integer.valueOf(pt[1]), Integer.valueOf(pt[2])});
                 }
-                if (s.trim().matches("Sample,.*")) {
-                    var split = s.trim().split(",");
+                if (trim.matches("Sample,.*")) {
+                    var split = trim.split(",");
                     samples.add(new Sample(Integer.parseInt(split[1]), split[3].replace("\"", ""), Integer.parseInt(split[2]), split.length > 4 ? Integer.parseInt(split[4]) : 100));
                 }
             }

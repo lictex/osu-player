@@ -59,14 +59,19 @@ public abstract class HitObject {
             ArrayList<Integer> edgeHitsounds = new ArrayList<>(repeat + 1);
             ArrayList<SampleSet> edgeSampleSet = new ArrayList<>(repeat + 1);
             ArrayList<SampleSet> edgeAdditionSet = new ArrayList<>(repeat + 1);
-            if (i + 1 < sp.length) {
+            if (i < sp.length) {
                 var split = sp[i++].split("\\|");
                 for (int idx = 0; idx < repeat + 1; idx++) edgeHitsounds.add(Integer.valueOf(split[idx]));
-                split = sp[i++].split("\\|");
-                for (int idx = 0; idx < repeat + 1; idx++) {
-                    var e = split[idx].split(":");
-                    edgeSampleSet.add(SampleSet.fromInt(Integer.valueOf(e[0])));
-                    edgeAdditionSet.add(SampleSet.fromInt(Integer.valueOf(e[1])));
+                if (i + 1 < sp.length) {
+                    split = sp[i++].split("\\|");
+                    for (int idx = 0; idx < repeat + 1; idx++) {
+                        var e = split[idx].split(":");
+                        edgeSampleSet.add(SampleSet.fromInt(Integer.valueOf(e[0])));
+                        edgeAdditionSet.add(SampleSet.fromInt(Integer.valueOf(e[1])));
+                    }
+                } else for (int idx = 0; idx < repeat + 1; idx++) {
+                    edgeSampleSet.add(SampleSet.None);
+                    edgeAdditionSet.add(SampleSet.None);
                 }
             } else for (int idx = 0; idx < repeat + 1; idx++) {
                 edgeHitsounds.add(0);
