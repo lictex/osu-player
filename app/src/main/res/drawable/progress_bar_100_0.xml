@@ -10,7 +10,7 @@
                 <item android:state_enabled="false">
                     <color android:color="@android:color/transparent" />
                 </item>
-                <item android:drawable="@drawable/progress_bar_dark" />
+                <item android:drawable="@drawable/progress_bar_100" />
             </selector>
         </scale>
     </item>

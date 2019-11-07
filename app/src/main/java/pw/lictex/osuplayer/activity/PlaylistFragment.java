@@ -11,6 +11,7 @@ import androidx.fragment.app.*;
 import androidx.preference.*;
 import androidx.recyclerview.widget.*;
 
+import java.nio.charset.*;
 import java.util.*;
 
 import butterknife.*;
@@ -76,6 +77,7 @@ public class PlaylistFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         HomeAdapter adapter = new HomeAdapter();
+        adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         rebuildList();
@@ -174,6 +176,11 @@ public class PlaylistFragment extends Fragment {
                 playerService.setPlayCollectionList(showCollectionList);
                 playerService.play(playerService.getPlaylist().indexOf(beatmapEntity));
             }));
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return UUID.nameUUIDFromBytes(list.get(position).path.getBytes(Charset.forName("UTF-8"))).getMostSignificantBits(); //hope there will be no conflicts....
         }
 
         @Override

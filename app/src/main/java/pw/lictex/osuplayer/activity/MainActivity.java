@@ -191,11 +191,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.buttonNext) void onNextClick() {
-        getPlayerService().next();
+        Utils.runTask(() -> getPlayerService().next());
     }
 
     @OnClick(R.id.buttonPrev) void onPrevClick() {
-        getPlayerService().previous();
+        Utils.runTask(() -> getPlayerService().previous());
     }
 
     @OnClick(R.id.buttonLoopMode) void onLoopClick() {

@@ -17,6 +17,7 @@
 
     <style name="DarkTheme" parent="AppTheme">
         <item name="acrylicColor">@color/acrylicColorDark</item>
+        <item name="colorControlHighlight">#1AFFFFFF</item>
         <item name="android:textColor">@color/textColorDark</item>
         <item name="rounded_rect_stroke_20_100">@drawable/rounded_rect_stroke_20_100</item>
         <item name="colorDrawable">@drawable/color_dark</item>
@@ -31,6 +32,7 @@
 
     <style name="LightTheme" parent="AppTheme">
         <item name="acrylicColor">@color/acrylicColorLight</item>
+        <item name="colorControlHighlight">#1A000000</item>
         <item name="android:textColor">@color/textColorLight</item>
         <item name="rounded_rect_stroke_20_100">@drawable/rounded_rect_stroke_20_100_light</item>
         <item name="colorDrawable">@drawable/color_light</item>
@@ -59,9 +61,5 @@
 
     <style name="LightEditText" parent="android:style/Widget.EditText">
         <item name="android:textColor">@color/textColorLight</item>
-    </style>
-
-    <style name="LightRipple" parent="ThemeOverlay.AppCompat">
-        <item name="colorControlHighlight">#1AFFFFFF</item>
     </style>
 </resources>
