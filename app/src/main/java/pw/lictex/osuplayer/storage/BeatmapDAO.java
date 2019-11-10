@@ -11,13 +11,13 @@ public interface BeatmapDAO {
     void clear();
 
     @Query("SELECT * FROM beatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%'" +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY title COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderByTitle(String s);
 
@@ -26,13 +26,13 @@ public interface BeatmapDAO {
     LiveData<List<BeatmapEntity>> orderByTitle();
 
     @Query("SELECT * FROM collectionbeatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%' " +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY title COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderCollectionByTitle(String s);
 
@@ -41,13 +41,13 @@ public interface BeatmapDAO {
     LiveData<List<BeatmapEntity>> orderCollectionByTitle();
 
     @Query("SELECT * FROM beatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%' " +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY artist COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderByArtist(String s);
 
@@ -56,13 +56,13 @@ public interface BeatmapDAO {
     LiveData<List<BeatmapEntity>> orderByArtist();
 
     @Query("SELECT * FROM collectionbeatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%' " +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY artist COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderCollectionByArtist(String s);
 
@@ -71,13 +71,13 @@ public interface BeatmapDAO {
     LiveData<List<BeatmapEntity>> orderCollectionByArtist();
 
     @Query("SELECT * FROM beatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%' " +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY creator COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderByCreator(String s);
 
@@ -86,13 +86,13 @@ public interface BeatmapDAO {
     LiveData<List<BeatmapEntity>> orderByCreator();
 
     @Query("SELECT * FROM collectionbeatmapentity " +
-            "WHERE title LIKE :s " +
-            "OR unicode_title LIKE :s " +
-            "OR artist LIKE :s " +
-            "OR unicode_artist LIKE :s " +
-            "OR version LIKE :s " +
-            "OR creator LIKE :s " +
-            "OR tags LIKE :s " +
+            "WHERE title LIKE '%'||:s||'%' " +
+            "OR unicode_title LIKE '%'||:s||'%' " +
+            "OR artist LIKE '%'||:s||'%' " +
+            "OR unicode_artist LIKE '%'||:s||'%' " +
+            "OR version LIKE '%'||:s||'%' " +
+            "OR creator LIKE '%'||:s||'%' " +
+            "OR tags LIKE '%'||:s||'%' " +
             "ORDER BY creator COLLATE NOCASE")
     LiveData<List<BeatmapEntity>> orderCollectionByCreator(String s);
 

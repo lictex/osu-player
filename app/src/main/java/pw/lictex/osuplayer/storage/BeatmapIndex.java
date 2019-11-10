@@ -96,8 +96,17 @@ public class BeatmapIndex {
         return beatmap.getDAO().orderByTitle();
     }
 
+    public LiveData<List<BeatmapEntity>> getAllBeatmaps(String search) {
+        return beatmap.getDAO().orderByTitle(search);
+    }
+
+
     public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps() {
         return beatmap.getDAO().orderCollectionByTitle();
+    }
+
+    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps(String search) {
+        return beatmap.getDAO().orderCollectionByTitle(search);
     }
 
     public void addCollection(BeatmapEntity s) {

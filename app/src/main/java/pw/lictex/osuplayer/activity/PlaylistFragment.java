@@ -3,11 +3,15 @@ package pw.lictex.osuplayer.activity;
 import android.animation.*;
 import android.os.*;
 import android.view.*;
+import android.view.inputmethod.*;
 import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.*;
+import androidx.core.app.*;
 import androidx.fragment.app.*;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.*;
 import androidx.preference.*;
 import androidx.recyclerview.widget.*;
 
@@ -36,6 +40,12 @@ public class PlaylistFragment extends Fragment {
         searchView.animate().alpha(searchText.getText().toString().isEmpty() ? 0.75f : 1f).setDuration(200).start();
     }
 
+    @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
+        if (searchText.hasFocus()) return;
+        InputMethodManager inputMethodManager = ActivityCompat.getSystemService(getContext(), InputMethodManager.class);
+        inputMethodManager.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
+    }
+
     @OnClick(R.id.buttonAll) void onAllClick() {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
         var anim = ValueAnimator.ofFloat(params.horizontalBias, 0);
@@ -50,7 +60,7 @@ public class PlaylistFragment extends Fragment {
         buttonFavorite.animate().alpha(.75f).setDuration(200).start();
 
         showCollectionList = false;
-        rebuildList();
+        refreshList();
     }
 
     @OnClick(R.id.buttonFavorite) void onFavoriteClick() {
@@ -67,7 +77,7 @@ public class PlaylistFragment extends Fragment {
         buttonFavorite.animate().alpha(1).setDuration(200).start();
 
         showCollectionList = true;
-        rebuildList();
+        refreshList();
     }
 
     @Override
@@ -80,9 +90,22 @@ public class PlaylistFragment extends Fragment {
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        rebuildList();
 
         var playerService = ((MainActivity) getActivity()).getPlayerService();
+
+        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps();
+        allMapLiveData.observe(this, beatmapEntities -> {
+            playerService.getAllMapList().clear();
+            playerService.getAllMapList().addAll(beatmapEntities);
+            refreshList();
+        });
+        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps();
+        collectionMapLiveData.observe(this, beatmapEntities -> {
+            playerService.getCollectionMapList().clear();
+            playerService.getCollectionMapList().addAll(beatmapEntities);
+            refreshList();
+        });
+
         showCollectionList = playerService.isPlayCollectionList();
         if (showCollectionList) onFavoriteClick();
 
@@ -90,27 +113,14 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void refreshList() {
-        mRecyclerView.getAdapter().notifyDataSetChanged();
-    }
-
-    public void rebuildList() {
-        var playerService = ((MainActivity) getActivity()).getPlayerService();
-
-        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps();
-        allMapLiveData.observe(this, beatmapEntities -> {
-            playerService.getAllMapList().clear();
-            playerService.getAllMapList().addAll(beatmapEntities);
-            ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? playerService.getCollectionMapList() : playerService.getAllMapList());
-            refreshList();
+        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim()) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim());
+        beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
+            @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
+                ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+                beatmaps.removeObserver(this);
+            }
         });
-        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps();
-        collectionMapLiveData.observe(this, beatmapEntities -> {
-            playerService.getCollectionMapList().clear();
-            playerService.getCollectionMapList().addAll(beatmapEntities);
-            ((HomeAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).list = new ArrayList<>(showCollectionList ? playerService.getCollectionMapList() : playerService.getAllMapList());
-            refreshList();
-        });
-
     }
 
     protected class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.PlaylistViewHolder> {
@@ -118,32 +128,13 @@ public class PlaylistFragment extends Fragment {
 
         @NonNull @Override
         public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return viewType == -1 ? new PlaylistViewHolder() : new PlaylistViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.item_playlist, parent, false));
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            BeatmapEntity beatmapEntity = list.get(position);
-            String input = searchText.getText().toString().trim().toLowerCase();
-            if (!input.isEmpty()) {
-                if (!(beatmapEntity.artist.toLowerCase().contains(input) ||
-                        beatmapEntity.title.toLowerCase().contains(input) ||
-                        beatmapEntity.unicode_title.toLowerCase().contains(input) ||
-                        beatmapEntity.unicode_artist.toLowerCase().contains(input) ||
-                        beatmapEntity.creator.toLowerCase().contains(input) ||
-                        beatmapEntity.tags.toLowerCase().contains(input) ||
-                        beatmapEntity.version.toLowerCase().contains(input))) {
-                    return -1;
-                }
-            }
-            return 0;
+            return new PlaylistViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.item_playlist, parent, false));
         }
 
         @Override
         public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
             var playerService = ((MainActivity) getActivity()).getPlayerService();
             BeatmapEntity beatmapEntity = list.get(position);
-            if (holder.isNull) return;
 
             var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
             if (sharedPreferences.getBoolean("use_unicode_metadata", false))
@@ -167,9 +158,6 @@ public class PlaylistFragment extends Fragment {
                     BeatmapIndex.getInstance().removeCollection(beatmapEntity);
                 else
                     BeatmapIndex.getInstance().addCollection(beatmapEntity);
-
-                if (showCollectionList) rebuildList();
-                else refreshList();
             });
 
             holder.getRoot().setOnClickListener(a -> Utils.runTask(() -> {
@@ -195,16 +183,9 @@ public class PlaylistFragment extends Fragment {
             @Getter @BindView(R.id.playing) ImageView playing;
             @Getter @BindView(R.id.imageButton) ImageButton favorite;
 
-            boolean isNull = false;
-
             private PlaylistViewHolder(View view) {
                 super(view);
                 ButterKnife.bind(this, view);
-            }
-
-            private PlaylistViewHolder() {
-                super(new FrameLayout(PlaylistFragment.this.getContext()));
-                isNull = true;
             }
         }
     }

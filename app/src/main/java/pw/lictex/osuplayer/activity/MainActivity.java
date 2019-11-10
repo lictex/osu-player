@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onStateChanged(@NonNull View view, int i) {
                 if (i == BottomSheetBehavior.STATE_COLLAPSED) {
                     setCurrentContent(Content.Playlist);
+                    findViewById(R.id.llcbg).requestFocus();
                 }
             }
 

@@ -22,7 +22,6 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
         switch (k) {
             case "storage_path":
                 BeatmapIndex.getInstance().refresh();
-                ((PlaylistFragment) activity.getSupportFragmentManager().findFragmentByTag("playlistFragment")).rebuildList();
                 break;
             case "audio_latency":
             case "storyboard_sound_volume":
