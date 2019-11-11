@@ -25,17 +25,20 @@ public class PlayerService extends Service {
     @Getter private BeatmapEntity currentMap = null;
     @Getter private OsuAudioPlayer osuAudioPlayer;
     @Getter @Setter private Runnable onUpdateCallback;
+
+    private boolean focusPlaying = false;
     private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 audioManager.unregisterMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
                 audioManager.registerMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
-                resume();
+                if (focusPlaying) resume();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 audioManager.unregisterMediaButtonEventReceiver(new ComponentName(PlayerService.this.getPackageName(), MediaBroadcastReceiver.class.getName()));
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                focusPlaying = osuAudioPlayer.getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing;
                 pause();
                 break;
         }
@@ -97,6 +100,7 @@ public class PlayerService extends Service {
     }
 
     private void ensureAudioFocus() {
+        focusPlaying = false;
         audioManager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
         audioManager.abandonAudioFocus(focusChangeListener);
         audioManager.requestAudioFocus(focusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
