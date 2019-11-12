@@ -48,11 +48,17 @@
     <style name="DarkDialog" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:colorBackground">@color/backgroundColorDark</item>
         <item name="android:textColor">@color/textColorDark</item>
+        <item name="textColorAlertDialogListItem">@color/textColorDark</item>
+        <item name="colorAccent">@color/textColorDark</item>
+        <item name="android:textColorSecondary">@color/textColorDark</item>
     </style>
 
     <style name="LightDialog" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:colorBackground">@color/backgroundColorLight</item>
         <item name="android:textColor">@color/textColorLight</item>
+        <item name="textColorAlertDialogListItem">@color/textColorLight</item>
+        <item name="colorAccent">@color/textColorLight</item>
+        <item name="android:textColorSecondary">@color/textColorLight</item>
     </style>
 
     <style name="DarkEditText" parent="android:style/Widget.EditText">

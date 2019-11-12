@@ -26,13 +26,14 @@
             android:title="@string/pref_use_unicode_metadata_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="use_light_theme"
+        <ListPreference
+            android:defaultValue="dark"
+            android:entries="@array/ui_mode"
+            android:entryValues="@array/ui_mode_value"
+            android:key="theme"
             android:layout="@layout/item_preference"
-            android:summary="@string/pref_use_light_theme_summary"
-            android:title="@string/pref_use_light_theme_title"
-            android:widgetLayout="@layout/item_preference_checkbox" />
+            android:summary="@string/pref_theme_summary"
+            android:title="@string/pref_theme_title" />
     </PreferenceCategory>
 
     <PreferenceCategory

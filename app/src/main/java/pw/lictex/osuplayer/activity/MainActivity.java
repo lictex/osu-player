@@ -4,6 +4,7 @@ import android.*;
 import android.animation.*;
 import android.content.*;
 import android.content.pm.*;
+import android.content.res.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
@@ -90,7 +91,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) savedInstanceState.remove("android:support:fragments");
         super.onCreate(savedInstanceState);
-        setTheme(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("use_light_theme", false) ? R.style.LightTheme : R.style.DarkTheme);
+
+        String theme = PreferenceManager.getDefaultSharedPreferences(this).getString("theme", "dark");
+        switch (theme) {
+            case "default":
+                switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+                    case Configuration.UI_MODE_NIGHT_YES:
+                        setTheme(R.style.DarkTheme);
+                        break;
+                    case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                    case Configuration.UI_MODE_NIGHT_NO:
+                        setTheme(R.style.LightTheme);
+                        break;
+                }
+                break;
+            case "light":
+                setTheme(R.style.LightTheme);
+                break;
+            default:
+            case "dark":
+                setTheme(R.style.DarkTheme);
+                break;
+        }
+
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
 

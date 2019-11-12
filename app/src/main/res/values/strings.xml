@@ -18,8 +18,11 @@
     <string name="pref_rebuild_database_summary">如果添加或删除了歌曲</string>
     <string name="pref_use_unicode_metadata_title">使用原语言显示歌曲信息</string>
     <string name="pref_use_unicode_metadata_summary">仅在文件中包含这些信息时</string>
-    <string name="pref_use_light_theme_title">浅色模式</string>
-    <string name="pref_use_light_theme_summary">使用白色作为界面背景</string>
+    <string name="pref_theme_title">主题</string>
+    <string name="pref_theme_array_default">跟随系统</string>
+    <string name="pref_theme_array_dark">深色</string>
+    <string name="pref_theme_array_light">浅色</string>
+    <string name="pref_theme_summary">更改背景颜色模式</string>
 
     <string name="pref_category_player">播放器</string>
     <string name="pref_audio_latency_title">音频延迟</string>
