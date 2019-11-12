@@ -111,7 +111,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="8dp"
                                 android:alpha="0"
-                                android:visibility="gone" />
+                                android:visibility="invisible" />
 
                             <FrameLayout
                                 android:id="@+id/preference_wrapper"
@@ -119,7 +119,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:alpha="0"
-                                android:visibility="gone" />
+                                android:visibility="invisible" />
 
                             <FrameLayout
                                 android:id="@+id/audio_setting_wrapper"
@@ -127,7 +127,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="8dp"
                                 android:alpha="0"
-                                android:visibility="gone" />
+                                android:visibility="invisible" />
                         </FrameLayout>
 
                         <LinearLayout
