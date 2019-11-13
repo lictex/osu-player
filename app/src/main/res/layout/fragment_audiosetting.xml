@@ -19,10 +19,11 @@
         <LinearLayout
             android:id="@+id/linearLayout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="48dp"
+            android:gravity="bottom"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -32,33 +33,39 @@
                 android:id="@+id/checkboxDT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:buttonCompat="?checkboxDrawable"
                 android:paddingLeft="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/double_time"
                 android:textColor="?android:textColor"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                app:buttonCompat="?checkboxDrawable" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
                 android:id="@+id/checkboxHT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:buttonCompat="?checkboxDrawable"
+                android:layout_marginTop="8dp"
                 android:paddingLeft="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/half_time"
                 android:textColor="?android:textColor"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                app:buttonCompat="?checkboxDrawable" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
                 android:id="@+id/checkboxNC"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:buttonCompat="?checkboxDrawable"
+                android:layout_marginTop="8dp"
                 android:paddingLeft="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/nightcore"
                 android:textColor="?android:textColor"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                app:buttonCompat="?checkboxDrawable" />
         </LinearLayout>
 
         <TextView
@@ -86,8 +93,8 @@
         <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
             android:clipChildren="false"
             app:layout_constraintBottom_toTopOf="@+id/textView2"
             app:layout_constraintEnd_toEndOf="@+id/textView2"
@@ -99,8 +106,10 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:max="100"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
+                android:paddingStart="8dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="8dp"
                 android:progress="100"
                 android:progressDrawable="?attr/volumeBarDrawable"
                 android:splitTrack="false"
@@ -110,8 +119,8 @@
         <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
             android:clipChildren="false"
             app:layout_constraintBottom_toTopOf="@id/textView3"
             app:layout_constraintEnd_toEndOf="@id/textView3"
@@ -123,8 +132,10 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:max="100"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
+                android:paddingStart="8dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="8dp"
                 android:progress="100"
                 android:progressDrawable="?attr/volumeBarDrawable"
                 android:splitTrack="false"
