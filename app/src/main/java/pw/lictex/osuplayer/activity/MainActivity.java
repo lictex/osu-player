@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
             handler.postDelayed(this, 1000);
         }
     };
+
+    private Handler bottomSheetHandler = new Handler();
     private BottomSheetBehavior bottomSheet;
 
     @Override
@@ -150,10 +152,12 @@ public class MainActivity extends AppCompatActivity {
 
         bottomSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override public void onStateChanged(@NonNull View view, int i) {
-                if (i == BottomSheetBehavior.STATE_COLLAPSED) {
-                    setCurrentContent(Content.Playlist);
-                    findViewById(R.id.llcbg).requestFocus();
-                }
+                if (i == BottomSheetBehavior.STATE_COLLAPSED)
+                    bottomSheetHandler.postDelayed(() -> {
+                        setCurrentContent(Content.Playlist);
+                        findViewById(R.id.llcbg).requestFocus();
+                    }, 2000);
+                else bottomSheetHandler.removeCallbacksAndMessages(null);
             }
 
             @Override public void onSlide(@NonNull View view, float v) {
