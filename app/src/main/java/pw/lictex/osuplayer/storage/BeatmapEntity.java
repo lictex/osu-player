@@ -28,6 +28,9 @@ public class BeatmapEntity {
     @ColumnInfo(name = "creator")
     public String creator;
 
+    @ColumnInfo(name = "source")
+    public String source;
+
     @ColumnInfo(name = "tags")
     public String tags;
 

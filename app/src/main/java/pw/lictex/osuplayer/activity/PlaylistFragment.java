@@ -93,13 +93,13 @@ public class PlaylistFragment extends Fragment {
 
         var playerService = ((MainActivity) getActivity()).getPlayerService();
 
-        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps();
+        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps("");
         allMapLiveData.observe(this, beatmapEntities -> {
             playerService.getAllMapList().clear();
             playerService.getAllMapList().addAll(beatmapEntities);
             refreshList();
         });
-        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps();
+        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps("");
         collectionMapLiveData.observe(this, beatmapEntities -> {
             playerService.getCollectionMapList().clear();
             playerService.getCollectionMapList().addAll(beatmapEntities);

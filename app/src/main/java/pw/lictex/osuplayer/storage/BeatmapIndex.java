@@ -6,6 +6,8 @@ import android.util.*;
 import androidx.lifecycle.*;
 import androidx.preference.*;
 import androidx.room.*;
+import androidx.room.migration.*;
+import androidx.sqlite.db.*;
 
 import java.io.*;
 import java.util.*;
@@ -29,8 +31,16 @@ public class BeatmapIndex {
 
     private BeatmapIndex(Context c) {context = c; }
 
+    private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE BeatmapEntity ADD COLUMN source TEXT");
+            database.execSQL("ALTER TABLE CollectionBeatmapEntity ADD COLUMN source TEXT");
+        }
+    };
+
     public static void Initialize(Context c) {
-        beatmap = Room.databaseBuilder(c, BeatmapDatabase.class, "beatmap").build();
+        beatmap = Room.databaseBuilder(c, BeatmapDatabase.class, "beatmap").addMigrations(MIGRATION_1_2).build();
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
         updateCurrentPath();
@@ -59,6 +69,7 @@ public class BeatmapIndex {
                     m.version = beatmap.getMetadataSection().getVersion();
                     m.creator = beatmap.getMetadataSection().getCreator();
                     m.tags = beatmap.getMetadataSection().getTags();
+                    m.source = beatmap.getMetadataSection().getSource();
 
                     dao.insert(m);
                 } catch (Throwable t) {
@@ -92,21 +103,12 @@ public class BeatmapIndex {
         }
     }
 
-    public LiveData<List<BeatmapEntity>> getAllBeatmaps() {
-        return beatmap.getDAO().orderByTitle();
+    public LiveData<List<BeatmapEntity>> getAllBeatmaps(String filter) {
+        return beatmap.getDAO().orderByTitle(filter);
     }
 
-    public LiveData<List<BeatmapEntity>> getAllBeatmaps(String search) {
-        return beatmap.getDAO().orderByTitle(search);
-    }
-
-
-    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps() {
-        return beatmap.getDAO().orderCollectionByTitle();
-    }
-
-    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps(String search) {
-        return beatmap.getDAO().orderCollectionByTitle(search);
+    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps(String filter) {
+        return beatmap.getDAO().orderCollectionByTitle(filter);
     }
 
     public void addCollection(BeatmapEntity s) {
