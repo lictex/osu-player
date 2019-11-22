@@ -11,10 +11,13 @@ import java.util.*;
 @Dao
 public interface BeatmapDAO {
 
-    static SupportSQLiteQuery constructQuery(String table, List<String> kw, String order) {
+    static SupportSQLiteQuery constructQuery(List<String> kw, String order, boolean collection) {
         StringBuilder query = new StringBuilder();
         List<Object> args = new ArrayList<>();
-        query.append("SELECT * FROM ").append(table).append(" ");
+        query.append("SELECT * FROM BeatmapEntity ");
+
+        if (collection)
+            query.append("INNER JOIN CollectionBeatmapEntity ON BeatmapEntity.path = CollectionBeatmapEntity.path ");
 
         if (kw.size() > 0) {
             String[] f = {"title", "unicode_title", "artist", "unicode_artist", "version", "creator", "tags", "source"};
@@ -39,7 +42,7 @@ public interface BeatmapDAO {
     @RawQuery(observedEntities = BeatmapEntity.class)
     LiveData<List<BeatmapEntity>> queryBeatmapEntity(SupportSQLiteQuery s);
 
-    @RawQuery(observedEntities = CollectionBeatmapEntity.class)
+    @RawQuery(observedEntities = {BeatmapEntity.class, CollectionBeatmapEntity.class})
     LiveData<List<BeatmapEntity>> queryCollectionBeatmapEntity(SupportSQLiteQuery s);
 
     @Query("DELETE FROM beatmapentity")
@@ -47,8 +50,8 @@ public interface BeatmapDAO {
 
     default LiveData<List<BeatmapEntity>> query(String filter, boolean collection, String order) {
         List<String> kw = Stream.of(filter.split(" ")).filter(o -> !o.trim().isEmpty()).toList();
-        if (collection) return queryCollectionBeatmapEntity(constructQuery("collectionbeatmapentity", kw, order));
-        else return queryBeatmapEntity(constructQuery("beatmapentity", kw, order));
+        if (collection) return queryCollectionBeatmapEntity(constructQuery(kw, order,true));
+        else return queryBeatmapEntity(constructQuery(kw, order,false));
 
     }
 
@@ -76,16 +79,20 @@ public interface BeatmapDAO {
         return query(filter, true, "creator");
     }
 
+    default void addCollection(BeatmapEntity b) {
+        addCollection(b.path);
+    }
+
+    default void removeCollection(BeatmapEntity b) {
+        removeCollection(b.path);
+    }
+
     @Insert(entity = BeatmapEntity.class, onConflict = OnConflictStrategy.REPLACE)
     void insert(BeatmapEntity... b);
 
-    @Insert(entity = CollectionBeatmapEntity.class, onConflict = OnConflictStrategy.REPLACE)
-    void addCollection(BeatmapEntity... b);
+    @Query("INSERT INTO CollectionBeatmapEntity VALUES (:s)")
+    void addCollection(String s);
 
-    @Delete(entity = CollectionBeatmapEntity.class)
-    void removeCollection(BeatmapEntity... b);
-
-    @Update
-    void update(BeatmapEntity... b);
-
+    @Query("DELETE FROM CollectionBeatmapEntity WHERE path = :s")
+    void removeCollection(String s);
 }

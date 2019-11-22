@@ -6,6 +6,7 @@ import android.os.*;
 
 import androidx.preference.*;
 
+import lombok.*;
 import pw.lictex.osuplayer.storage.*;
 
 /**
@@ -19,6 +20,12 @@ public class App extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
 
         BeatmapIndex.Initialize(getApplicationContext());
+
+        var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!getResources().getString(R.string.version).equals(sharedPreferences.getString("version", null))) {
+            BeatmapIndex.getInstance().refresh();
+            sharedPreferences.edit().putString("version", getResources().getString(R.string.version)).apply();
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "Service";

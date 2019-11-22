@@ -29,6 +29,7 @@ import lombok.*;
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.audio.*;
+import pw.lictex.osuplayer.storage.*;
 
 public class MainActivity extends AppCompatActivity {
     private static final int animDuration = 200;
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        BeatmapIndex.getInstance().refresh();
         recreate();
     }
 

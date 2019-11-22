@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "e784449839b0f1c4dedcfb11a6268fa7",
+    "identityHash": "42d1477c553988a525082afc4d3c2df3",
     "entities": [
       {
         "tableName": "BeatmapEntity",
@@ -74,61 +74,13 @@
       },
       {
         "tableName": "CollectionBeatmapEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`path` TEXT NOT NULL, `unicode_artist` TEXT, `artist` TEXT, `unicode_title` TEXT, `title` TEXT, `version` TEXT, `creator` TEXT, `source` TEXT, `tags` TEXT, PRIMARY KEY(`path`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`path` TEXT NOT NULL, PRIMARY KEY(`path`))",
         "fields": [
           {
             "fieldPath": "path",
             "columnName": "path",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "unicode_artist",
-            "columnName": "unicode_artist",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "artist",
-            "columnName": "artist",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "unicode_title",
-            "columnName": "unicode_title",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "version",
-            "columnName": "version",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "creator",
-            "columnName": "creator",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "source",
-            "columnName": "source",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "tags",
-            "columnName": "tags",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
@@ -144,7 +96,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e784449839b0f1c4dedcfb11a6268fa7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '42d1477c553988a525082afc4d3c2df3')"
     ]
   }
 }

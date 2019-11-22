@@ -35,7 +35,10 @@ public class BeatmapIndex {
         @Override
         public void migrate(SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE BeatmapEntity ADD COLUMN source TEXT");
-            database.execSQL("ALTER TABLE CollectionBeatmapEntity ADD COLUMN source TEXT");
+            database.execSQL("CREATE TABLE t(path TEXT NOT NULL, PRIMARY KEY(path))");
+            database.execSQL("INSERT INTO t(path) SELECT (path) FROM CollectionBeatmapEntity");
+            database.execSQL("DROP TABLE CollectionBeatmapEntity");
+            database.execSQL("ALTER TABLE t RENAME TO CollectionBeatmapEntity");
         }
     };
 
