@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="224dp"
+            app:behavior_peekHeight="200dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <LinearLayout
@@ -121,13 +121,6 @@
                                 android:alpha="0"
                                 android:visibility="invisible" />
 
-                            <FrameLayout
-                                android:id="@+id/audio_setting_wrapper"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="8dp"
-                                android:alpha="0"
-                                android:visibility="invisible" />
                         </FrameLayout>
 
                         <LinearLayout
@@ -146,17 +139,6 @@
                             tools:translationX="24dp">
 
                             <TextView
-                                android:id="@+id/artist"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="8dp"
-                                android:alpha="0.75"
-                                android:singleLine="true"
-                                android:textAlignment="viewStart"
-                                android:textSize="16dp"
-                                tools:text="Artist" />
-
-                            <TextView
                                 android:id="@+id/title"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -167,21 +149,52 @@
                                 tools:text="Title" />
 
                             <TextView
-                                android:id="@+id/version"
+                                android:id="@+id/artist"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:alpha="0.75"
                                 android:singleLine="true"
                                 android:textAlignment="viewStart"
-                                android:textSize="12dp"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                tools:text="Version" />
+                                android:textSize="16dp"
+                                tools:text="Artist" />
+
                         </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </eightbitlab.com.blurview.BlurView>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <FrameLayout
+        android:id="@+id/audioSettingPanel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="80dp"
+        android:alpha="0"
+        android:background="@drawable/shadow_rect"
+        android:translationY="16dp"
+        android:visibility="invisible">
+
+        <eightbitlab.com.blurview.BlurView
+            android:id="@+id/audioSettingBlur"
+            android:layout_width="280dp"
+            android:layout_height="192dp"
+            android:clickable="false"
+            android:clipChildren="false"
+            android:focusableInTouchMode="false"
+            tools:background="?acrylicColor">
+
+            <FrameLayout
+                android:id="@+id/audio_setting_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_noise"
+                android:visibility="visible" />
+        </eightbitlab.com.blurview.BlurView>
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/llc"
@@ -215,6 +228,7 @@
             android:id="@+id/shadow"
             android:layout_width="match_parent"
             android:layout_height="24dp"
+            android:alpha="1"
             android:background="@drawable/shadow"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

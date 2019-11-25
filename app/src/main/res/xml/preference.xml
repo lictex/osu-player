@@ -26,6 +26,14 @@
             android:title="@string/pref_use_unicode_metadata_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="display_simple_info"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_display_simple_info_summary"
+            android:title="@string/pref_display_simple_info_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
+
         <ListPreference
             android:defaultValue="dark"
             android:entries="@array/ui_mode"

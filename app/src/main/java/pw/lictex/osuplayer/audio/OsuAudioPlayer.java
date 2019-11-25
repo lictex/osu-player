@@ -132,6 +132,14 @@ public class OsuAudioPlayer {
         return null;
     }
 
+    public String getSource() {
+        try {
+            var source = currentBeatmap.getMetadataSection().getSource();
+            return source.trim().isEmpty() ? null : source;
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
     public void destroy() {
         engine.destroy();
     }

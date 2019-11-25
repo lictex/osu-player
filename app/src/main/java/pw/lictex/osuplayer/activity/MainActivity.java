@@ -1,7 +1,6 @@
 package pw.lictex.osuplayer.activity;
 
 import android.*;
-import android.animation.*;
 import android.content.*;
 import android.content.pm.*;
 import android.content.res.*;
@@ -10,7 +9,6 @@ import android.graphics.drawable.*;
 import android.os.*;
 import android.util.*;
 import android.view.*;
-import android.view.animation.Interpolator;
 import android.view.animation.*;
 import android.widget.*;
 
@@ -32,11 +30,12 @@ import pw.lictex.osuplayer.audio.*;
 import pw.lictex.osuplayer.storage.*;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int animDuration = 200;
-    private static final Interpolator animInterpolator = new AccelerateDecelerateInterpolator();
+    private static final int baseAnimationDuration = 200;
     private static final float blurRadius = 25f;
 
     @BindView(R.id.controllerBlur) BlurView controllerBlur;
+    @BindView(R.id.audioSettingBlur) BlurView audioSettingBlur;
+    @BindView(R.id.audioSettingPanel) View audioSettingPanel;
     @BindView(R.id.contentLayout) View contentLayout;
     @BindView(R.id.content) CoordinatorLayout content;
     @BindView(R.id.backButton) ImageButton backBtn;
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.backgroundImage) ImageView bg;
     @BindView(R.id.title) TextView title;
     @BindView(R.id.artist) TextView artist;
-    @BindView(R.id.version) TextView version;
     @BindView(R.id.playlist_wrapper) View playlistWrapper;
     @BindView(R.id.audio_setting_wrapper) View audioSettingWrapper;
     @BindView(R.id.preference_wrapper) View preferenceWrapper;
@@ -69,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler bottomSheetHandler = new Handler();
     private BottomSheetBehavior bottomSheet;
+    private final DecelerateInterpolator interpolator = new DecelerateInterpolator(1.75f);
 
     @Override
     protected void onDestroy() {
@@ -85,7 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+        if (audioSettingPanel.getVisibility() == View.VISIBLE) {
+            setAudioSettingVisibility(false);
+        } else if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
             if (current != Content.Playlist) setCurrentContent(Content.Playlist);
             else bottomSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else super.onBackPressed();
@@ -124,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         TypedValue value = new TypedValue();
         getTheme().resolveAttribute(R.attr.acrylicColor, value, true);
         controllerBlur.setOverlayColor(value.data);
+        audioSettingBlur.setOverlayColor(value.data);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int color = Color.TRANSPARENT;
@@ -140,10 +142,13 @@ public class MainActivity extends AppCompatActivity {
                 .setBlurAlgorithm(new RenderScriptBlur(this))
                 .setBlurRadius(blurRadius)
                 .setSaturation(1.25f).setContrast(0.8f);
+        audioSettingBlur.setupWith(content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
+                .setBlurAlgorithm(new RenderScriptBlur(this))
+                .setBlurRadius(blurRadius)
+                .setSaturation(1.25f).setContrast(0.8f);
 
         title.setText(getResources().getString(R.string.app_name));
         artist.setText(getResources().getString(R.string.version));
-        version.setText(getResources().getString(R.string.slide_open_playlist));
 
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
 
@@ -152,19 +157,25 @@ public class MainActivity extends AppCompatActivity {
             bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
         } else getWindow().getDecorView().post(() -> setCurrentContent(Content.Playlist));
 
+        getWindow().getDecorView().post(() -> {
+            int statusBarHeight = 0;
+            int resourceId = getApplicationContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) statusBarHeight = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
+
+            ViewGroup.LayoutParams layoutParams = contentLayout.getLayoutParams();
+            layoutParams.height = findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight - Utils.dp2px(getBaseContext(), 40);
+            contentLayout.setLayoutParams(layoutParams);
+        });
+
         bottomSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override public void onStateChanged(@NonNull View view, int i) {
-                if (i == BottomSheetBehavior.STATE_COLLAPSED)
-                    bottomSheetHandler.postDelayed(() -> {
-                        setCurrentContent(Content.Playlist);
-                        findViewById(R.id.llcbg).requestFocus();
-                    }, 2000);
-                else bottomSheetHandler.removeCallbacksAndMessages(null);
+                if (i == BottomSheetBehavior.STATE_COLLAPSED) {
+                    findViewById(R.id.llcbg).requestFocus();
+                    bottomSheetHandler.postDelayed(() -> setCurrentContent(Content.Playlist), 2000);
+                } else bottomSheetHandler.removeCallbacksAndMessages(null);
             }
 
-            @Override public void onSlide(@NonNull View view, float v) {
-
-            }
+            @Override public void onSlide(@NonNull View view, float v) { }
         });
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -239,12 +250,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.buttonAudioSetting) void onAudioSettingClick() {
-        if (current != Content.AudioSetting) {
-            setCurrentContent(Content.AudioSetting);
-            bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-            bottomSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        if (audioSettingPanel.getVisibility() == View.VISIBLE) setAudioSettingVisibility(false);
+        else setAudioSettingVisibility(true);
     }
 
     @OnClick(R.id.buttonSetting) void onSettingClick() {
@@ -252,7 +259,9 @@ public class MainActivity extends AppCompatActivity {
             setCurrentContent(Content.Setting);
             bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
         } else {
-            bottomSheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            if (bottomSheet.getState() == BottomSheetBehavior.STATE_COLLAPSED)
+                bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
+            else setCurrentContent(Content.Playlist);
         }
     }
 
@@ -274,13 +283,20 @@ public class MainActivity extends AppCompatActivity {
             t = playerService.getOsuAudioPlayer().getRomanisedTitle();
             a = playerService.getOsuAudioPlayer().getRomanisedArtist();
         }
-        title.setText(t == null ? getResources().getString(R.string.app_name) : t);
-        artist.setText(a == null ? getResources().getString(R.string.version) : a);
-
-        if (playerService.getOsuAudioPlayer().getVersion() != null)
-            version.setText(getString(R.string.version_by_mapper, playerService.getOsuAudioPlayer().getVersion(), playerService.getOsuAudioPlayer().getMapper()));
-        else
-            version.setText(getResources().getString(R.string.slide_open_playlist));
+        boolean displaySimpleInfo = sharedPreferences.getBoolean("display_simple_info", true);
+        if (t == null || a == null) {
+            title.setText(getResources().getString(R.string.app_name));
+            artist.setText(getResources().getString(R.string.version));
+        } else {
+            if (displaySimpleInfo) {
+                title.setText(t);
+                artist.setText(a);
+            } else {
+                var s = playerService.getOsuAudioPlayer().getSource();
+                title.setText(getResources().getString(R.string.title_artist, t, s != null ? s + " (" + a + ")" : a));
+                artist.setText(getResources().getString(R.string.version_by_mapper, playerService.getOsuAudioPlayer().getVersion(), playerService.getOsuAudioPlayer().getMapper()));
+            }
+        }
 
         OsuAudioPlayer player = getPlayerService().getOsuAudioPlayer();
         audioSettingFragment.update(player.getMusicVolume(), player.getSoundVolume(), player.getCurrentMod());
@@ -295,75 +311,48 @@ public class MainActivity extends AppCompatActivity {
                 getResources().getDrawable(R.drawable.ic_refresh_one) : getResources().getDrawable(R.drawable.ic_refresh_r));
     }
 
-    private void setContentSize(float height, int duration) {
-        setContentSize(height, duration, false);
-    }
-
-    private void setContentSize(float height, int duration, boolean hideInfo) {
-        float infoAlpha = hideInfo ? 0 : 1;
-
-        info.animate().alpha(infoAlpha).setInterpolator(animInterpolator).setDuration(duration).start();
-
-        var heightAnim = ValueAnimator.ofInt(contentLayout.getMeasuredHeight(), Utils.dp2px(this, height));
-        heightAnim.setInterpolator(animInterpolator);
-        heightAnim.addUpdateListener(valueAnimator -> {
-            int val = (Integer) valueAnimator.getAnimatedValue();
-            ViewGroup.LayoutParams layoutParams = contentLayout.getLayoutParams();
-            layoutParams.height = val;
-            contentLayout.setLayoutParams(layoutParams);
-        });
-        heightAnim.setDuration(duration);
-        heightAnim.start();
-    }
-
     private void setCurrentContent(Content current) {
         boolean anim = true;
         if (bottomSheet.getState() == BottomSheetBehavior.STATE_COLLAPSED) anim = false;
-
         this.current = current;
-        int statusBarHeight = 0;
-        int resourceId = getApplicationContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            statusBarHeight = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
-        }
+        var animDuration = ((int) (baseAnimationDuration * 1.5f));
         var offsetPx = Utils.dp2px(this, 24);
         switch (this.current) {
-            case AudioSetting:
-                setContentSize(216, anim ? animDuration : 0);
-                setBackArrowVisibility(true);
-                audioSettingWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {audioSettingWrapper.setTranslationX(offsetPx); audioSettingWrapper.setVisibility(View.VISIBLE);}).start();
-                playlistWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
-                preferenceWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
-                break;
             case Setting:
-                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
                 setBackArrowVisibility(true);
-                audioSettingWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> audioSettingWrapper.setVisibility(View.INVISIBLE)).start();
-                playlistWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
-                preferenceWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {preferenceWrapper.setTranslationX(offsetPx); preferenceWrapper.setVisibility(View.VISIBLE);}).start();
+                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
+                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                    preferenceWrapper.setTranslationX(offsetPx); preferenceWrapper.setVisibility(View.VISIBLE);
+                }).start();
                 break;
             case Playlist:
-                setContentSize(Utils.px2dp(this, findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight * 2) - 40, anim ? animDuration : 0);
                 setBackArrowVisibility(false);
-                audioSettingWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> audioSettingWrapper.setVisibility(View.INVISIBLE)).start();
-                playlistWrapper.animate().setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {playlistWrapper.setTranslationX(-offsetPx); playlistWrapper.setVisibility(View.VISIBLE);}).start();
-                preferenceWrapper.animate().setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
+                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                    playlistWrapper.setTranslationX(-offsetPx); playlistWrapper.setVisibility(View.VISIBLE);
+                }).start();
+                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
                 break;
         }
     }
 
     private void setBackArrowVisibility(boolean b) {
+        var animDuration = ((int) (baseAnimationDuration * 1.5f));
         if (b) {
-            backBtn.animate().setDuration(animDuration).alpha(0.75f).withStartAction(() -> backBtn.setVisibility(View.VISIBLE)).start();
-            info.animate().setDuration(animDuration).translationX(Utils.dp2px(this, 24)).start();
+            backBtn.animate().setInterpolator(interpolator).setDuration(animDuration).alpha(0.75f).withStartAction(() -> backBtn.setVisibility(View.VISIBLE)).start();
+            info.animate().setInterpolator(interpolator).setDuration(animDuration).translationX(Utils.dp2px(this, 24)).start();
         } else {
-            backBtn.animate().setDuration(animDuration / 2).alpha(0).withEndAction(() -> backBtn.setVisibility(View.GONE)).start();
-            info.animate().setDuration(animDuration).translationX(0).start();
+            backBtn.animate().setInterpolator(interpolator).setDuration(animDuration / 2).alpha(0).withEndAction(() -> backBtn.setVisibility(View.GONE)).start();
+            info.animate().setInterpolator(interpolator).setDuration(animDuration).translationX(0).start();
         }
     }
 
+    private void setAudioSettingVisibility(boolean b) {
+        if (b) audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
+        else audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0).translationY(Utils.dp2px(this, 16)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
+    }
+
     private enum Content {
-        Playlist, AudioSetting, Setting
+        Playlist, Setting
     }
 
 }

@@ -33,6 +33,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                 activity.getPlayerService().getOsuAudioPlayer().reloadSetting();
                 break;
             case "use_unicode_metadata":
+            case "display_simple_info":
                 activity.getPlayerService().rebuildNotification();
                 activity.updateStatus();
                 break;

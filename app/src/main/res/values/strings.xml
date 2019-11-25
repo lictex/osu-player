@@ -18,6 +18,8 @@
     <string name="pref_rebuild_database_summary">如果添加或删除了歌曲</string>
     <string name="pref_use_unicode_metadata_title">使用原语言显示歌曲信息</string>
     <string name="pref_use_unicode_metadata_summary">仅在文件中包含这些信息时</string>
+    <string name="pref_display_simple_info_title">使用简化的歌曲信息</string>
+    <string name="pref_display_simple_info_summary">在播放界面隐藏难度、作者、来源</string>
     <string name="pref_theme_title">主题</string>
     <string name="pref_theme_array_default">跟随系统</string>
     <string name="pref_theme_array_dark">深色</string>
