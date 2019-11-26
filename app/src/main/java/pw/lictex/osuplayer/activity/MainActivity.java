@@ -9,7 +9,7 @@ import android.graphics.drawable.*;
 import android.os.*;
 import android.util.*;
 import android.view.*;
-import android.view.animation.*;
+import android.view.animation.Interpolator;
 import android.widget.*;
 
 import androidx.annotation.NonNull;
@@ -17,6 +17,7 @@ import androidx.appcompat.app.*;
 import androidx.coordinatorlayout.widget.*;
 import androidx.core.app.*;
 import androidx.core.content.*;
+import androidx.interpolator.view.animation.*;
 import androidx.preference.*;
 
 import com.google.android.material.bottomsheet.*;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler bottomSheetHandler = new Handler();
     private BottomSheetBehavior bottomSheet;
-    private final DecelerateInterpolator interpolator = new DecelerateInterpolator(1.75f);
+    private final Interpolator interpolator = new FastOutSlowInInterpolator();
 
     @Override
     protected void onDestroy() {
@@ -250,8 +251,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.buttonAudioSetting) void onAudioSettingClick() {
-        if (audioSettingPanel.getVisibility() == View.VISIBLE) setAudioSettingVisibility(false);
-        else setAudioSettingVisibility(true);
+        if (audioSettingPanel.getAlpha() == 1) setAudioSettingVisibility(false);
+        else if (audioSettingPanel.getAlpha() == 0) setAudioSettingVisibility(true);
     }
 
     @OnClick(R.id.buttonSetting) void onSettingClick() {
@@ -267,6 +268,10 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.backButton) void onBackToPlaylistClick() {
         setCurrentContent(Content.Playlist);
+    }
+
+    @OnClick(R.id.audioSettingPanelBackground) void onAudioSettingPanelBackgroundTouch() {
+        setAudioSettingVisibility(false);
     }
 
     protected void updateStatus() {
@@ -315,40 +320,39 @@ public class MainActivity extends AppCompatActivity {
         boolean anim = true;
         if (bottomSheet.getState() == BottomSheetBehavior.STATE_COLLAPSED) anim = false;
         this.current = current;
-        var animDuration = ((int) (baseAnimationDuration * 1.5f));
         var offsetPx = Utils.dp2px(this, 24);
         switch (this.current) {
             case Setting:
                 setBackArrowVisibility(true);
-                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
-                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
+                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
                     preferenceWrapper.setTranslationX(offsetPx); preferenceWrapper.setVisibility(View.VISIBLE);
                 }).start();
                 break;
             case Playlist:
                 setBackArrowVisibility(false);
-                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
                     playlistWrapper.setTranslationX(-offsetPx); playlistWrapper.setVisibility(View.VISIBLE);
                 }).start();
-                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? animDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
+                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
                 break;
         }
+        setAudioSettingVisibility(false);
     }
 
     private void setBackArrowVisibility(boolean b) {
-        var animDuration = ((int) (baseAnimationDuration * 1.5f));
         if (b) {
-            backBtn.animate().setInterpolator(interpolator).setDuration(animDuration).alpha(0.75f).withStartAction(() -> backBtn.setVisibility(View.VISIBLE)).start();
-            info.animate().setInterpolator(interpolator).setDuration(animDuration).translationX(Utils.dp2px(this, 24)).start();
+            backBtn.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0.75f).withStartAction(() -> backBtn.setVisibility(View.VISIBLE)).start();
+            info.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(Utils.dp2px(this, 24)).start();
         } else {
-            backBtn.animate().setInterpolator(interpolator).setDuration(animDuration / 2).alpha(0).withEndAction(() -> backBtn.setVisibility(View.GONE)).start();
-            info.animate().setInterpolator(interpolator).setDuration(animDuration).translationX(0).start();
+            backBtn.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration / 2).alpha(0).withEndAction(() -> backBtn.setVisibility(View.GONE)).start();
+            info.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(0).start();
         }
     }
 
     private void setAudioSettingVisibility(boolean b) {
         if (b) audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
-        else audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0).translationY(Utils.dp2px(this, 16)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
+        else audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
     }
 
     private enum Content {

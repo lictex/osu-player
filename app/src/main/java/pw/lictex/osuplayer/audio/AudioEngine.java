@@ -235,8 +235,8 @@ public class AudioEngine {
         public void run() {
             try {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
-                BASS_Init(-1, SAMPLERATE, 0);
                 BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
+                BASS_Init(-1, SAMPLERATE, 0);
 
                 //audio event loop
                 long t = SystemClock.elapsedRealtime(), i = 0;
