@@ -145,10 +145,10 @@ public class OsuAudioPlayer {
     }
 
     private void tick() {
-        //no beatmap
         if (currentBeatmap == null) return;
-
         synchronized (this) {
+            if (currentBeatmap == null) return; //double check is needed
+
             long currentTime = engine.getMainTrackCurrentTime() + sampleOffset;
             TimingPoint timingPoint = currentBeatmap.timingPointAt((int) currentTime);
 

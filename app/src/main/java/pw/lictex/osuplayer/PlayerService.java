@@ -67,6 +67,11 @@ public class PlayerService extends Service {
             }
 
         });
+
+        var order = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt("loop_mode", PlayerService.LoopMode.All.ordinal());
+        order = order < BeatmapIndex.Order.values().length ? order : 0;
+        setLoopMode(PlayerService.LoopMode.values()[order]);
+
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ensureAudioFocus();
         startForeground(ID, getNotification());

@@ -106,12 +106,28 @@ public class BeatmapIndex {
         }
     }
 
-    public LiveData<List<BeatmapEntity>> getAllBeatmaps(String filter) {
-        return beatmap.getDAO().orderByTitle(filter);
+    public LiveData<List<BeatmapEntity>> getAllBeatmaps(String filter, Order order) {
+        switch (order) {
+            case Artist:
+                return beatmap.getDAO().orderByArtist(filter);
+            case Creator:
+                return beatmap.getDAO().orderByCreator(filter);
+            default:
+            case Title:
+                return beatmap.getDAO().orderByTitle(filter);
+        }
     }
 
-    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps(String filter) {
-        return beatmap.getDAO().orderCollectionByTitle(filter);
+    public LiveData<List<BeatmapEntity>> getFavoriteBeatmaps(String filter, Order order) {
+        switch (order) {
+            case Artist:
+                return beatmap.getDAO().orderCollectionByArtist(filter);
+            case Creator:
+                return beatmap.getDAO().orderCollectionByCreator(filter);
+            default:
+            case Title:
+                return beatmap.getDAO().orderCollectionByTitle(filter);
+        }
     }
 
     public void addCollection(BeatmapEntity s) {
@@ -124,6 +140,10 @@ public class BeatmapIndex {
 
     private String m(String s) {
         return s.replaceFirst(Pattern.quote(currentPath), "").replaceAll("^/*", "");
+    }
+
+    public enum Order {
+        Title, Artist, Creator
     }
 
 }

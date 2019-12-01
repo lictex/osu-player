@@ -31,7 +31,6 @@ import pw.lictex.osuplayer.audio.*;
 import pw.lictex.osuplayer.storage.*;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int baseAnimationDuration = 200;
     private static final float blurRadius = 25f;
 
     @BindView(R.id.controllerBlur) BlurView controllerBlur;
@@ -58,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private PlaylistFragment playlistFragment;
     private PreferenceFragment preferenceFragment;
     @Getter private PlayerService playerService;
+    @Getter private int baseAnimationDuration;
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -119,6 +119,11 @@ public class MainActivity extends AppCompatActivity {
                 setTheme(R.style.DarkTheme);
                 break;
         }
+
+        var fastAnimation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fast_animation", false);
+        if (fastAnimation) baseAnimationDuration = 160;
+        else baseAnimationDuration = 220;
+
 
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
@@ -247,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
             playerService.setLoopMode(PlayerService.LoopMode.Random);
         else if (playerService.getLoopMode() == PlayerService.LoopMode.Random)
             playerService.setLoopMode(PlayerService.LoopMode.All);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("loop_mode", playerService.getLoopMode().ordinal()).apply();
         updateStatus();
     }
 
@@ -264,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
             else setCurrentContent(Content.Playlist);
         }
+        setAudioSettingVisibility(false);
     }
 
     @OnClick(R.id.backButton) void onBackToPlaylistClick() {
@@ -337,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
                 preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
                 break;
         }
-        setAudioSettingVisibility(false);
     }
 
     private void setBackArrowVisibility(boolean b) {
@@ -351,8 +357,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setAudioSettingVisibility(boolean b) {
-        if (b) audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
-        else audioSettingPanel.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
+        if (b)
+            audioSettingPanel.animate().setInterpolator(new LinearOutSlowInInterpolator()).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
+        else
+            audioSettingPanel.animate().setInterpolator(new FastOutLinearInInterpolator()).setDuration(baseAnimationDuration / 2).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
     }
 
     private enum Content {

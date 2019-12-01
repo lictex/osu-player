@@ -76,12 +76,12 @@
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="12dp"
         android:alpha="0.75"
         android:background="?rounded_rect_stroke_20_100"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonListOrder"
         app:layout_constraintStart_toEndOf="@+id/buttonLayout"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -98,10 +98,11 @@
 
         <EditText
             android:id="@+id/searchText"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:background="#00000000"
             android:ems="10"
             android:inputType="textPersonName"
@@ -110,6 +111,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/searchIcon"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/buttonClearSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:alpha="0"
+            android:background="@null"
+            android:padding="0dp"
+            android:src="@drawable/ic_close"
+            android:tint="?android:textColor" />
     </LinearLayout>
 
     <pw.lictex.osuplayer.activity.RecyclerView
@@ -124,4 +136,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchView" />
+
+    <ImageButton
+        android:id="@+id/buttonListOrder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_sort_title"
+        android:tint="?android:textColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,6 +38,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                 activity.updateStatus();
                 break;
             case "theme":
+            case "fast_animation":
                 activity.recreate();
                 break;
         }

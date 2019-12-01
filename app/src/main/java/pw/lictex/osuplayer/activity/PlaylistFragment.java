@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.*;
 import androidx.core.app.*;
 import androidx.fragment.app.*;
+import androidx.interpolator.view.animation.*;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.*;
 import androidx.preference.*;
@@ -33,11 +34,31 @@ public class PlaylistFragment extends Fragment {
     @BindView(R.id.status) View statusAll;
     @BindView(R.id.buttonAll) Button buttonAll;
     @BindView(R.id.buttonFavorite) Button buttonFavorite;
+    @BindView(R.id.buttonClearSearch) ImageButton buttonClearSearch;
+    @BindView(R.id.buttonListOrder) ImageButton buttonListOrder;
     private boolean showCollectionList = false;
+    private BeatmapIndex.Order listOrder = BeatmapIndex.Order.Title;
+    private LiveData<List<BeatmapEntity>> allMapLiveData;
+    private LiveData<List<BeatmapEntity>> collectionMapLiveData;
+
+    private final Observer<List<BeatmapEntity>> allMapObserver = beatmapEntities -> {
+        var playerService = ((MainActivity) getActivity()).getPlayerService();
+        playerService.getAllMapList().clear();
+        playerService.getAllMapList().addAll(beatmapEntities);
+        refreshList();
+    };
+    private final Observer<List<BeatmapEntity>> collectionMapObserver = beatmapEntities -> {
+        var playerService = ((MainActivity) getActivity()).getPlayerService();
+        playerService.getCollectionMapList().clear();
+        playerService.getCollectionMapList().addAll(beatmapEntities);
+        refreshList();
+    };
 
     @OnTextChanged(R.id.searchText) void onTextChanged() {
         refreshList();
-        searchView.animate().alpha(searchText.getText().toString().isEmpty() ? 0.75f : 1f).setDuration(200).start();
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
+        searchView.animate().alpha(searchText.getText().toString().isEmpty() ? 0.75f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        buttonClearSearch.animate().alpha(searchText.getText().toString().isEmpty() ? 0f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
     }
 
     @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
@@ -47,37 +68,57 @@ public class PlaylistFragment extends Fragment {
     }
 
     @OnClick(R.id.buttonAll) void onAllClick() {
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
         var anim = ValueAnimator.ofFloat(params.horizontalBias, 0);
         anim.addUpdateListener(valueAnimator -> {
             params.horizontalBias = (Float) valueAnimator.getAnimatedValue();
             statusAll.setLayoutParams(params);
         });
-        anim.setDuration(200);
+        anim.setDuration(baseAnimationDuration);
+        anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.start();
 
-        buttonAll.animate().alpha(1).setDuration(200).start();
-        buttonFavorite.animate().alpha(.75f).setDuration(200).start();
+        buttonAll.animate().alpha(1).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        buttonFavorite.animate().alpha(.75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
 
         showCollectionList = false;
         refreshList();
     }
 
     @OnClick(R.id.buttonFavorite) void onFavoriteClick() {
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
         var anim = ValueAnimator.ofFloat(params.horizontalBias, 1);
         anim.addUpdateListener(valueAnimator -> {
             params.horizontalBias = (Float) valueAnimator.getAnimatedValue();
             statusAll.setLayoutParams(params);
         });
-        anim.setDuration(200);
+        anim.setDuration(baseAnimationDuration);
+        anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.start();
 
-        buttonAll.animate().alpha(.75f).setDuration(200).start();
-        buttonFavorite.animate().alpha(1).setDuration(200).start();
+        buttonAll.animate().alpha(.75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        buttonFavorite.animate().alpha(1).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
 
         showCollectionList = true;
         refreshList();
+    }
+
+    @OnClick(R.id.buttonClearSearch) void onClearSearchClick() {
+        searchText.setText("");
+    }
+
+    @OnClick(R.id.buttonListOrder) void onListOrderClick() {
+        switch (listOrder) {
+            case Title:
+                setListOrder(BeatmapIndex.Order.Artist); break;
+            case Artist:
+                setListOrder(BeatmapIndex.Order.Creator); break;
+            case Creator:
+                setListOrder(BeatmapIndex.Order.Title); break;
+        }
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt("playlist_order", listOrder.ordinal()).apply();
     }
 
     @Override
@@ -89,22 +130,19 @@ public class PlaylistFragment extends Fragment {
         HomeAdapter adapter = new HomeAdapter();
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setAddDuration(baseAnimationDuration);
+        animator.setChangeDuration(baseAnimationDuration);
+        animator.setMoveDuration(baseAnimationDuration);
+        animator.setRemoveDuration(baseAnimationDuration / 2);
+        mRecyclerView.setItemAnimator(animator);
 
         var playerService = ((MainActivity) getActivity()).getPlayerService();
 
-        var allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps("");
-        allMapLiveData.observe(this, beatmapEntities -> {
-            playerService.getAllMapList().clear();
-            playerService.getAllMapList().addAll(beatmapEntities);
-            refreshList();
-        });
-        var collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps("");
-        collectionMapLiveData.observe(this, beatmapEntities -> {
-            playerService.getCollectionMapList().clear();
-            playerService.getCollectionMapList().addAll(beatmapEntities);
-            refreshList();
-        });
+        int order = PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("playlist_order", BeatmapIndex.Order.Title.ordinal());
+        order = order < BeatmapIndex.Order.values().length ? order : 0;
+        setListOrder(BeatmapIndex.Order.values()[order]);
 
         showCollectionList = playerService.isPlayCollectionList();
         if (showCollectionList) onFavoriteClick();
@@ -112,8 +150,27 @@ public class PlaylistFragment extends Fragment {
         return view;
     }
 
+    void setListOrder(BeatmapIndex.Order order) {
+        listOrder = order;
+        if (allMapLiveData != null) {
+            allMapLiveData.removeObserver(allMapObserver);
+            allMapLiveData = null;
+        }
+        if (collectionMapLiveData != null) {
+            collectionMapLiveData.removeObserver(allMapObserver);
+            collectionMapLiveData = null;
+        }
+
+        allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps("", listOrder);
+        allMapLiveData.observe(this, allMapObserver);
+        collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps("", listOrder);
+        collectionMapLiveData.observe(this, collectionMapObserver);
+
+        buttonListOrder.setImageDrawable(listOrder == BeatmapIndex.Order.Title ? getResources().getDrawable(R.drawable.ic_sort_title) : (listOrder == BeatmapIndex.Order.Artist ? getResources().getDrawable(R.drawable.ic_sort_artist) : getResources().getDrawable(R.drawable.ic_sort_mapper)));
+    }
+
     public void refreshList() {
-        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim()) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim());
+        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim(), listOrder);
         beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
             @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
                 ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;

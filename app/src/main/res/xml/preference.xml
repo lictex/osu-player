@@ -42,6 +42,14 @@
             android:layout="@layout/item_preference"
             android:summary="@string/pref_theme_summary"
             android:title="@string/pref_theme_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="fast_animation"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_animation_summary"
+            android:title="@string/pref_animation_title"
+            android:widgetLayout="@layout/item_preference_checkbox" />
     </PreferenceCategory>
 
     <PreferenceCategory

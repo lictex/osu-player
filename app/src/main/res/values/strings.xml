@@ -25,6 +25,8 @@
     <string name="pref_theme_array_dark">深色</string>
     <string name="pref_theme_array_light">浅色</string>
     <string name="pref_theme_summary">更改背景颜色模式</string>
+    <string name="pref_animation_title">快速动画</string>
+    <string name="pref_animation_summary">减少过渡动画时长</string>
 
     <string name="pref_category_player">播放器</string>
     <string name="pref_audio_latency_title">音频延迟</string>
