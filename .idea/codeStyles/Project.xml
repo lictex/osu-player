@@ -6,6 +6,9 @@
     <JavaCodeStyleSettings>
       <option name="USE_SINGLE_CLASS_IMPORTS" value="false" />
     </JavaCodeStyleSettings>
+    <MarkdownNavigatorCodeStyleSettings>
+      <option name="RIGHT_MARGIN" value="72" />
+    </MarkdownNavigatorCodeStyleSettings>
     <codeStyleSettings language="JAVA">
       <option name="RIGHT_MARGIN" value="240" />
       <option name="KEEP_SIMPLE_BLOCKS_IN_ONE_LINE" value="true" />

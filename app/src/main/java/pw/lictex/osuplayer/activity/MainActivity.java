@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.backButton) ImageButton backBtn;
     @BindView(R.id.infoLayout) LinearLayout info;
     @BindView(R.id.progressBar) SeekBar seekBar;
-    @BindView(R.id.backgroundImage) ImageView bg;
+    @BindView(R.id.backgroundImage) ImageSwitcher bg;
     @BindView(R.id.title) TextView title;
     @BindView(R.id.artist) TextView artist;
     @BindView(R.id.playlist_wrapper) View playlistWrapper;
@@ -122,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
         var fastAnimation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fast_animation", false);
         if (fastAnimation) baseAnimationDuration = 160;
-        else baseAnimationDuration = 220;
-
+        else baseAnimationDuration = 240;
 
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
@@ -155,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
 
         title.setText(getResources().getString(R.string.app_name));
         artist.setText(getResources().getString(R.string.version));
+
+        bg.setAnimationDuration(baseAnimationDuration);
 
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
 
@@ -283,8 +284,8 @@ public class MainActivity extends AppCompatActivity {
 
     protected void updateStatus() {
         Bitmap background = playerService.getOsuAudioPlayer().getBackground();
-        if (background != null) bg.setImageBitmap(background);
-        else bg.setImageDrawable(getResources().getDrawable(R.drawable.defaultbg));
+        if (background != null) bg.to(background);
+        else bg.to(getResources().getDrawable(R.drawable.defaultbg));
 
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String t, a;
@@ -357,10 +358,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setAudioSettingVisibility(boolean b) {
-        if (b)
+        if (b) {
             audioSettingPanel.animate().setInterpolator(new LinearOutSlowInInterpolator()).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
-        else
+            audioSettingWrapper.setAlpha(0);
+            audioSettingWrapper.animate().setInterpolator(new FastOutSlowInInterpolator()).setDuration(baseAnimationDuration).alpha(1).start();
+        } else {
             audioSettingPanel.animate().setInterpolator(new FastOutLinearInInterpolator()).setDuration(baseAnimationDuration / 2).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
+        }
     }
 
     private enum Content {

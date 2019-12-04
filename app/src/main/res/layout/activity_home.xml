@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
     android:clipChildren="false"
     android:fitsSystemWindows="false"
     android:orientation="vertical">
@@ -13,7 +12,6 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000000"
         android:clipChildren="false"
         app:layout_constraintBottom_toTopOf="@+id/llc"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,19 +19,24 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".activity.MainActivity">
 
-        <ImageView
+        <pw.lictex.osuplayer.activity.ImageSwitcher
             android:id="@+id/backgroundImage"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/defaultbg" />
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@android:color/black" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@android:color/black"
+                tools:srcCompat="@drawable/defaultbg" />
+        </pw.lictex.osuplayer.activity.ImageSwitcher>
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/bottom_sheet"
@@ -208,6 +211,7 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:background="@drawable/bg_noise"
                     android:clickable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -220,7 +224,6 @@
                     android:id="@+id/audio_setting_wrapper"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/bg_noise"
                     android:visibility="visible" />
             </eightbitlab.com.blurview.BlurView>
         </FrameLayout>
