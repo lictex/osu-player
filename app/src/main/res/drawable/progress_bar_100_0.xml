@@ -4,13 +4,20 @@
     <item android:id="@android:id/background">
         <color android:color="@android:color/transparent" />
     </item>
-    <item android:id="@android:id/progress">
+    <item
+        android:id="@android:id/progress"
+        android:gravity="center">
         <scale android:scaleWidth="100%">
             <selector>
                 <item android:state_enabled="false">
                     <color android:color="@android:color/transparent" />
                 </item>
-                <item android:drawable="@drawable/progress_bar_100" />
+                <item>
+                    <shape>
+                        <corners android:radius="144dp" />
+                        <solid android:color="#ffffff" />
+                    </shape>
+                </item>
             </selector>
         </scale>
     </item>

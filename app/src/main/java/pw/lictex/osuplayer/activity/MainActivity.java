@@ -1,6 +1,7 @@
 package pw.lictex.osuplayer.activity;
 
 import android.*;
+import android.animation.*;
 import android.content.*;
 import android.content.pm.*;
 import android.content.res.*;
@@ -58,10 +59,17 @@ public class MainActivity extends AppCompatActivity {
     private PreferenceFragment preferenceFragment;
     @Getter private PlayerService playerService;
     @Getter private int baseAnimationDuration;
+    private ObjectAnimator progressAnimator;
+    private boolean progressTouched;
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            seekBar.setProgress((int) (((double) playerService.getOsuAudioPlayer().getCurrentTime() / playerService.getOsuAudioPlayer().getAudioLength()) * seekBar.getMax()));
+            if (!progressTouched) {
+                progressAnimator = ObjectAnimator.ofInt(seekBar, "progress", seekBar.getProgress(), (int) (((double) playerService.getOsuAudioPlayer().getCurrentTime() / playerService.getOsuAudioPlayer().getAudioLength()) * seekBar.getMax()));
+                progressAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                progressAnimator.setDuration(750);
+                progressAnimator.start();
+            }
             handler.postDelayed(this, 1000);
         }
     };
@@ -191,9 +199,9 @@ public class MainActivity extends AppCompatActivity {
                 if (b) getPlayerService().getOsuAudioPlayer().seekTo((long) ((float) i / seekBar.getMax() * getPlayerService().getOsuAudioPlayer().getAudioLength()));
             }
 
-            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {progressAnimator.cancel(); progressTouched = true; }
 
-            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {progressTouched = false; }
         });
 
         playerServiceConnection = new ServiceConnection() {

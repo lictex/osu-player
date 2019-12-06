@@ -38,17 +38,19 @@ public class ImageSwitcher extends FrameLayout {
 
     public void to(Bitmap b) {
         i[second ? 0 : 1].setImageBitmap(b);
-        if (second) i[0].setVisibility(VISIBLE);
-        else i[0].postDelayed(() -> i[0].setVisibility(INVISIBLE), animationDuration);
-        i[1].animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationDuration).alpha(second ? 0 : 1).start();
+        var animator = i[1].animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationDuration);
+        if (second) animator.alpha(0).withStartAction(() -> i[0].setVisibility(VISIBLE));
+        else animator.alpha(1).withEndAction(() -> i[0].setVisibility(INVISIBLE));
+        animator.start();
         second = !second;
     }
 
     public void to(Drawable d) {
         i[second ? 0 : 1].setImageDrawable(d);
-        if (second) i[0].setVisibility(VISIBLE);
-        else i[0].postDelayed(() -> i[0].setVisibility(INVISIBLE), animationDuration);
-        i[1].animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationDuration).alpha(second ? 0 : 1).start();
+        var animator = i[1].animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationDuration);
+        if (second) animator.alpha(0).withStartAction(() -> i[0].setVisibility(VISIBLE));
+        else animator.alpha(1).withEndAction(() -> i[0].setVisibility(INVISIBLE));
+        animator.start();
         second = !second;
     }
 }

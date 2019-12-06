@@ -37,6 +37,7 @@
                 android:text="@string/double_time"
                 android:textColor="?android:textColor"
                 android:textSize="14dp"
+                app:buttonCompat="@null"
                 app:drawableRightCompat="?checkboxDrawable" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
@@ -52,6 +53,7 @@
                 android:text="@string/half_time"
                 android:textColor="?android:textColor"
                 android:textSize="14dp"
+                app:buttonCompat="@null"
                 app:drawableRightCompat="?checkboxDrawable" />
 
             <androidx.appcompat.widget.AppCompatCheckBox
@@ -67,6 +69,7 @@
                 android:text="@string/nightcore"
                 android:textColor="?android:textColor"
                 android:textSize="14dp"
+                app:buttonCompat="@null"
                 app:drawableRightCompat="?checkboxDrawable" />
         </LinearLayout>
 
@@ -108,6 +111,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:max="100"
+                android:maxHeight="2dp"
                 android:paddingStart="8dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="8dp"
@@ -134,6 +138,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:max="100"
+                android:maxHeight="2dp"
                 android:paddingStart="8dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="8dp"
