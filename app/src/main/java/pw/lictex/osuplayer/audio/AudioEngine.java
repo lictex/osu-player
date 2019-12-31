@@ -18,7 +18,6 @@ import static com.un4seen.bass.BASS_FX.*;
  * Created by kpx on 2019/2/26.
  */
 public class AudioEngine {
-    private static final int SAMPLERATE = 44100;
     private static final int AUDIOFREQ = 250;
     private static final int LOWAUDIOFREQ = 44;
 
@@ -81,6 +80,7 @@ public class AudioEngine {
             BASS_StreamFree(MainTrackChannel_BASS);
             MainTrackChannel_BASS = BASS_StreamCreateFile(file, 0, 0, BASS_STREAM_DECODE | BASS_STREAM_PRESCAN);
             MainTrackChannel_BASS = BASS_FX_TempoCreate(MainTrackChannel_BASS, BASS_FX_FREESOURCE);
+            BASS_ChannelSetAttribute(MainTrackChannel_BASS, BASS_ATTRIB_BUFFER, 0);
             totalLength.set((long) (BASS_ChannelBytes2Seconds(MainTrackChannel_BASS, BASS_ChannelGetLength(MainTrackChannel_BASS, BASS_POS_BYTE)) * 1000));
             resume();
         });
@@ -179,6 +179,7 @@ public class AudioEngine {
                 int handle = BASS_SampleGetChannel(ptr, false);
                 BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, volume);
                 BASS_ChannelSetAttribute(handle, BASS_ATTRIB_PAN, pan);
+                BASS_ChannelSetAttribute(handle, BASS_ATTRIB_BUFFER, 0);
                 BASS_ChannelFlags(handle, 0, BASS_SAMPLE_LOOP);
                 BASS_ChannelPlay(handle, false);
             });
@@ -193,6 +194,7 @@ public class AudioEngine {
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_VOL, volume);
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_PAN, pan);
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_FREQ, sampleRate);
+                    BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_BUFFER, 0);
 
                     BASS_ChannelFlags(channel.get(), BASS_SAMPLE_LOOP, BASS_SAMPLE_LOOP);
                     BASS_ChannelPlay(channel.get(), false);
@@ -200,6 +202,7 @@ public class AudioEngine {
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_VOL, volume);
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_PAN, pan);
                     BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_FREQ, sampleRate);
+                    BASS_ChannelSetAttribute(channel.get(), BASS_ATTRIB_BUFFER, 0);
                 }
             });
         }
@@ -236,7 +239,9 @@ public class AudioEngine {
             try {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
-                BASS_Init(-1, SAMPLERATE, 0);
+                BASS_SetConfig(BASS_CONFIG_UPDATEPERIOD, 8);
+                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, 16);
+                BASS_Init(-1, -1, 0);
 
                 //audio event loop
                 long t = SystemClock.elapsedRealtime(), i = 0;
@@ -255,7 +260,7 @@ public class AudioEngine {
                             onTrackEndCallback.run();
                         }
                     }
-                    currentTime.set((long) (BASS_ChannelBytes2Seconds(MainTrackChannel_BASS, BASS_ChannelGetPosition(MainTrackChannel_BASS, BASS_POS_BYTE)) * 1000d));
+                    currentTime.set((long) (BASS_ChannelBytes2Seconds(MainTrackChannel_BASS, BASS_ChannelGetPosition(MainTrackChannel_BASS, BASS_POS_BYTE | BASS_POS_DECODE)) * 1000d));
                     if (tickEvent != null) tickEvent.run();
                     synchronized (eventQueue) {
                         Runnable r;
