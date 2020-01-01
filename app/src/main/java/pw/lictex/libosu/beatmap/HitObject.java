@@ -91,10 +91,10 @@ public abstract class HitObject {
         //extras?
         if (extras != null) {
             var exArr = extras.split(":");
-            object.setSampleSet(SampleSet.fromInt(Integer.valueOf(exArr[0])));
-            object.setAdditions(SampleSet.fromInt(Integer.valueOf(exArr[1])));
-            object.setCustomSampleSetIndex(Integer.valueOf(exArr[2]));
-            object.setVolume(Integer.valueOf(exArr[3]));
+            if (exArr.length > 0) object.setSampleSet(SampleSet.fromInt(Integer.valueOf(exArr[0])));
+            if (exArr.length > 1) object.setAdditions(SampleSet.fromInt(Integer.valueOf(exArr[1])));
+            if (exArr.length > 2) object.setCustomSampleSetIndex(Integer.valueOf(exArr[2]));
+            if (exArr.length > 3) object.setVolume(Integer.valueOf(exArr[3]));
             if (exArr.length > 4) object.setSampleFile(exArr[4]);
         }
 
