@@ -1,5 +1,7 @@
 package pw.lictex.libosu.beatmap;
 
+import androidx.annotation.NonNull;
+
 import lombok.*;
 
 @Getter @Setter
@@ -25,7 +27,7 @@ public class TimingPoint implements Comparable<Integer> {
         effects = Integer.valueOf(arr[7]);
     }
 
-    @Override
+    @NonNull @Override
     public String toString() {
         return OsuBeatmap.NF.format(offset) + "," +
                 OsuBeatmap.NF.format(beatLength) + "," +
@@ -42,8 +44,12 @@ public class TimingPoint implements Comparable<Integer> {
     }
 
     @Override
-    public int compareTo(Integer o) {
-        return (int) (getOffset() - o);
+    public int compareTo(@NonNull Integer o) {
+        int i = (int) (getOffset() - o);
+        if (i == 0 && !isInherit()) {
+            return -1;
+        }
+        return i;
     }
 
     public enum Effect {

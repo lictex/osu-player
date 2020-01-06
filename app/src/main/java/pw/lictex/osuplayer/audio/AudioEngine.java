@@ -168,13 +168,13 @@ public class AudioEngine {
         Playing, Paused, Stopped
     }
 
-    class Sample {
-        String name;
-        int ptr;
+    public class Sample implements AutoCloseable {
+        private String name;
+        private int ptr;
 
         private volatile AtomicInteger channel;
 
-        void play(float volume, float pan) {
+        public void play(float volume, float pan) {
             runOnAudioThreadSync(() -> {
                 int handle = BASS_SampleGetChannel(ptr, false);
                 BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, volume);
@@ -185,7 +185,7 @@ public class AudioEngine {
             });
         }
 
-        void loop(float volume, float pan, int sampleRate) {
+        public void loop(float volume, float pan, int sampleRate) {
             runOnAudioThreadSync(() -> {
                 if (channel == null) {
                     channel = new AtomicInteger();
@@ -207,15 +207,15 @@ public class AudioEngine {
             });
         }
 
-        void loop(float volume) {
+        public void loop(float volume) {
             loop(volume, 0, 0);
         }
 
-        void loop(float volume, int sampleRate) {
+        public void loop(float volume, int sampleRate) {
             loop(volume, 0, sampleRate);
         }
 
-        void endLoop() {
+        public void endLoop() {
             runOnAudioThreadSync(() -> {
                 if (channel != null) {
                     int handle = channel.get();
@@ -223,6 +223,10 @@ public class AudioEngine {
                     BASS_ChannelStop(handle);
                 }
             });
+        }
+
+        @Override public void close() {
+            BASS_SampleFree(ptr);
         }
     }
 

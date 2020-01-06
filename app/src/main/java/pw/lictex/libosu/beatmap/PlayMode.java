@@ -1,6 +1,6 @@
 package pw.lictex.libosu.beatmap;
 
-public enum PlayModes {
+public enum PlayMode {
     Osu(0),
     Taiko(1),
     CatchTheBeat(2),
@@ -8,12 +8,12 @@ public enum PlayModes {
 
     private int i;
 
-    PlayModes(int i) {
+    PlayMode(int i) {
         this.i = i;
     }
 
-    public static PlayModes valueOf(int i) {
-        for (PlayModes b : PlayModes.values())
+    public static PlayMode valueOf(int i) {
+        for (PlayMode b : PlayMode.values())
             if (b.asInt() == i) return b;
         return null;
     }

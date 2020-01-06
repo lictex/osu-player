@@ -140,7 +140,7 @@ public class OsuBeatmap {
                                             beatmap.getGeneralSection().setStackLeniency(v.asFloat());
                                             break;
                                         case "Mode":
-                                            beatmap.getGeneralSection().setMode(PlayModes.valueOf(v.asInt()));
+                                            beatmap.getGeneralSection().setMode(PlayMode.valueOf(v.asInt()));
                                             break;
                                         case "LetterboxInBreaks":
                                             beatmap.getGeneralSection().setLetterboxInBreaks(v.asBoolean());
@@ -252,7 +252,7 @@ public class OsuBeatmap {
                             }
                             case "TimingPoints": {
                                 while (!(currentLine = in.readLine()).isEmpty()) {
-                                    beatmap.getTimingPointsSection().addTImingPoint(new TimingPoint(currentLine));
+                                    beatmap.getTimingPointsSection().addTimingPoint(new TimingPoint(currentLine));
                                 }
                                 break;
                             }
@@ -328,7 +328,7 @@ public class OsuBeatmap {
         @Getter @Setter private int countdown;
         @Getter @Setter private SampleSet sampleSet;
         @Getter @Setter private float stackLeniency;
-        @Getter @Setter private PlayModes mode;
+        @Getter @Setter private PlayMode mode;
         @Getter @Setter private boolean letterboxInBreaks;
         @Getter @Setter private boolean epilepsyWarning;
         @Getter @Setter private boolean widescreenStoryboard;
@@ -537,13 +537,13 @@ public class OsuBeatmap {
             return notInheritedTimingPoints;
         }
 
-        public void addTImingPoint(TimingPoint p) {
+        public void addTimingPoint(TimingPoint p) {
             timingPoints.add(p);
             sort();
         }
 
         private void sort() {
-            Collections.sort(this.timingPoints, (o1, o2) -> (int) (o1.getOffset() - o2.getOffset()));
+            Collections.sort(this.timingPoints, (o1, o2) -> o1.compareTo((int) o2.getOffset()));
             notInheritedTimingPoints = Stream.of(timingPoints).filter(value -> !value.isInherit()).toList();
         }
 
