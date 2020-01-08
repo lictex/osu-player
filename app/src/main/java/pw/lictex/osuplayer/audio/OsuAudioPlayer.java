@@ -5,6 +5,7 @@ import android.graphics.*;
 
 import androidx.preference.*;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.*;
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
 import pw.lictex.osuplayer.audio.hitsound.*;
+import pw.lictex.osuplayer.storage.*;
 
 /**
  * Created by kpx on 2019/2/26.
@@ -36,7 +38,7 @@ public class OsuAudioPlayer {
 
     private Context context;
     private SampleManager sampleManager;
-    private String currentBeatmapSetPath;
+    private BeatmapSetStorage currentBeatmapSetPath;
     private OsuBeatmap currentBeatmap = null;
     private List<HitObject> hitObjectsRemains = new ArrayList<>();
     private List<OsuBeatmap.Events.Sample> storyboardSampleRemains = new ArrayList<>();
@@ -104,7 +106,7 @@ public class OsuAudioPlayer {
             String backgroundImage = currentBeatmap.getEventsSection().getBackgroundImage();
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            return BitmapFactory.decodeFile(currentBeatmapSetPath + backgroundImage, options);
+            return BitmapFactory.decodeFile(currentBeatmapSetPath.getFile(backgroundImage).getNativePath(), options);
         } catch (Throwable ignored) {}
         return null;
     }
@@ -266,7 +268,7 @@ public class OsuAudioPlayer {
         }
     }
 
-    public void openBeatmapSet(String dir) {
+    public void openBeatmapSet(BeatmapSetStorage dir) {
         if (dir.equals(currentBeatmapSetPath)) return;
         synchronized (this) {
             currentBeatmap = null;
@@ -281,10 +283,19 @@ public class OsuAudioPlayer {
         hitObjectsRemains.clear();
         storyboardSampleRemains.clear();
 
-        OsuBeatmap beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath + filename);
+        OsuBeatmap beatmap = null;
+        try {
+            beatmap = OsuBeatmap.fromFile(currentBeatmapSetPath.getFile(filename).getNativePath());
+        } catch (IOException e) { e.printStackTrace(); }
         if (beatmap == null) return; //TODO invalid beatmap
 
-        engine.playMainTrack(currentBeatmapSetPath + beatmap.getGeneralSection().getAudioFilename());
+        String audioPath = null;
+        try {
+            audioPath = currentBeatmapSetPath.getFile(beatmap.getGeneralSection().getAudioFilename()).getNativePath();
+        } catch (IOException e) { e.printStackTrace(); }
+        if (audioPath == null) return;
+
+        engine.playMainTrack(audioPath);
         engine.setMainTrackVolume(this.musicVolume / 100f);
         setMod(currentMod);
         synchronized (this) {

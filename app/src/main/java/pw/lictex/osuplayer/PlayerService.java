@@ -136,7 +136,7 @@ public class PlayerService extends Service {
             else if (index >= getPlaylist().size()) index = 0;
 
             currentMap = getPlaylist().get(index);
-            osuAudioPlayer.openBeatmapSet(new File(BeatmapIndex.getCurrentPath() + currentMap.path).getParent() + "/");
+            osuAudioPlayer.openBeatmapSet(new ClassicBeatmapSetStorage(new File(BeatmapIndex.getCurrentPath() + currentMap.path).getParent() + "/"));
             osuAudioPlayer.playBeatmap(new File(BeatmapIndex.getCurrentPath() + currentMap.path).getName());
             if (onUpdateCallback != null) onUpdateCallback.run();
         }

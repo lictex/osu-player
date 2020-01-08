@@ -8,6 +8,7 @@ import java.util.*;
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
 import pw.lictex.osuplayer.*;
+import pw.lictex.osuplayer.storage.*;
 
 public class SampleManager {
     private AudioEngine engine;
@@ -62,24 +63,20 @@ public class SampleManager {
         list.clear();
     }
 
-    public void setDirectory(String p) {
+    public void setDirectory(BeatmapSetStorage f) {
         reset();
-        File f = new File(p);
-        if (f.isDirectory()) {
-            var files = f.listFiles(file -> {
-                if (!file.isFile()) return false;
-                if (file.getName().toLowerCase().endsWith(".wav")) return true;
-                if (file.getName().toLowerCase().endsWith(".ogg")) return true;
+        var files = f.searchFiles(file -> {
+            if (file.getType().equalsIgnoreCase("wav")) return true;
+            if (file.getType().equalsIgnoreCase("ogg")) return true;
 
-                if (file.getName().toLowerCase().endsWith(".mp3")) return true;
-                return false;
-            });
-            for (var file : files) {
-                try {
-                    addSample(list, file.getName().substring(0, file.getName().lastIndexOf(".")), new FileInputStream(file));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+            if (file.getType().equalsIgnoreCase("mp3")) return true;
+            return false;
+        });
+        for (var file : files) {
+            try {
+                addSample(list, file.getName(), file.openStream());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
