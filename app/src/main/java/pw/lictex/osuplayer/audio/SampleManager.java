@@ -49,6 +49,15 @@ public class SampleManager {
         addSample(defaultSet, "nightcore-hat", context.getResources().openRawResource(R.raw.nightcore_hat));
         addSample(defaultSet, "nightcore-finish", context.getResources().openRawResource(R.raw.nightcore_finish));
         addSample(defaultSet, "nightcore-kick", context.getResources().openRawResource(R.raw.nightcore_kick));
+
+        addSample(defaultSet, "taiko-normal-hitnormal", context.getResources().openRawResource(R.raw.taiko_normal_hitnormal));
+        addSample(defaultSet, "taiko-normal-hitclap", context.getResources().openRawResource(R.raw.taiko_normal_hitclap));
+        addSample(defaultSet, "taiko-normal-hitfinish", context.getResources().openRawResource(R.raw.taiko_normal_hitfinish));
+        addSample(defaultSet, "taiko-normal-hitwhistle", context.getResources().openRawResource(R.raw.taiko_normal_hitwhistle));
+        addSample(defaultSet, "taiko-soft-hitnormal", context.getResources().openRawResource(R.raw.taiko_soft_hitnormal));
+        addSample(defaultSet, "taiko-soft-hitclap", context.getResources().openRawResource(R.raw.taiko_soft_hitclap));
+        addSample(defaultSet, "taiko-soft-hitfinish", context.getResources().openRawResource(R.raw.taiko_soft_hitfinish));
+        addSample(defaultSet, "taiko-soft-hitwhistle", context.getResources().openRawResource(R.raw.taiko_soft_hitwhistle));
     }
 
     public void addSample(Map<String, AudioEngine.Sample> m, String name, InputStream stream) {
@@ -98,5 +107,28 @@ public class SampleManager {
         if (custom == 0)
             return getDefaultSample(sampleSet.toString().toLowerCase() + "-" + name.toLowerCase());
         return getSample(sampleSet.toString().toLowerCase() + "-" + name.toLowerCase() + (custom > 1 ? custom : ""));
+    }
+
+    public AudioEngine.Sample getTaikoSample(SampleSet sampleSet, String name, int custom) {
+        if (custom == 0) {
+            if (sampleSet == SampleSet.Drum) {
+                if (name.equalsIgnoreCase("hitnormal"))
+                    return getDefaultSample(sampleSet.toString().toLowerCase() + "-hitfinish");
+                if (name.equalsIgnoreCase("hitfinish"))
+                    return getDefaultSample(sampleSet.toString().toLowerCase() + "-hitnormal");
+                return getDefaultSample(sampleSet.toString().toLowerCase() + "-" + name.toLowerCase());
+            } else return getDefaultSample("taiko-" + sampleSet.toString().toLowerCase() + "-" + name.toLowerCase());
+        } else {
+            String s = sampleSet.toString().toLowerCase() + "-" + name.toLowerCase() + (custom > 1 ? custom : "");
+            var sample = list.get("taiko-" + s);
+            if (sample != null) return sample;
+            if (sampleSet == SampleSet.Drum) {
+                if (name.equalsIgnoreCase("hitnormal"))
+                    return getDefaultSample(sampleSet.toString().toLowerCase() + "-hitfinish");
+                if (name.equalsIgnoreCase("hitfinish"))
+                    return getDefaultSample(sampleSet.toString().toLowerCase() + "-hitnormal");
+                return getDefaultSample(s);
+            } else return getDefaultSample("taiko-" + s);
+        }
     }
 }

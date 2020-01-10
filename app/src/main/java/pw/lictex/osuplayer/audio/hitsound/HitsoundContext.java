@@ -8,6 +8,7 @@ import pw.lictex.libosu.beatmap.*;
 import pw.lictex.osuplayer.audio.*;
 import pw.lictex.osuplayer.audio.hitsound.mania.*;
 import pw.lictex.osuplayer.audio.hitsound.osu.*;
+import pw.lictex.osuplayer.audio.hitsound.taiko.*;
 
 public class HitsoundContext {
     public static class Builder {
@@ -91,6 +92,10 @@ public class HitsoundContext {
         HitsoundPlayer hitsoundPlayer = null;
         switch (mode) {
             case Taiko: //TODO
+                if (hitObject instanceof HitObject.Circle) hitsoundPlayer = new TaikoCirclePlayer(this, (HitObject.Circle) hitObject);
+                if (hitObject instanceof HitObject.Slider) hitsoundPlayer = new TaikoSliderPlayer(this, (HitObject.Slider) hitObject);
+                if (hitObject instanceof HitObject.Spinner) hitsoundPlayer = new TaikoSpinnerPlayer(this, (HitObject.Spinner) hitObject);
+                break;
             case CatchTheBeat: //TODO
             case Osu:
             case OsuMania:

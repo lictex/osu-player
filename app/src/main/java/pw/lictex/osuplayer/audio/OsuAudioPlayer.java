@@ -184,7 +184,8 @@ public class OsuAudioPlayer {
             while (iterator.hasNext()) {
                 HitObject hitObject = iterator.next();
                 if (hitObject.getTime() > hitsoundContext.getPlayerTime()) break;
-                if (hitsoundContext.createPlayer(hitObject).play()) iterator.remove();
+                HitsoundPlayer player = hitsoundContext.createPlayer(hitObject, hitsoundContext.getCurrentBeatmap().getGeneralSection().getMode());
+                if (player != null) if (player.play()) iterator.remove();
             }
 
             hitsoundContext.runLooper();
