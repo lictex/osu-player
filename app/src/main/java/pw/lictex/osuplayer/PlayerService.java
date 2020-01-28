@@ -26,6 +26,8 @@ public class PlayerService extends Service {
     @Getter private OsuAudioPlayer osuAudioPlayer;
     @Getter @Setter private Runnable onUpdateCallback;
 
+    private Utils.LimitedStack<Integer> randHistory = new Utils.LimitedStack<>(32);
+
     private boolean focusPlaying = false;
     private final AudioManager.OnAudioFocusChangeListener focusChangeListener = focusChange -> {
         switch (focusChange) {
@@ -43,7 +45,13 @@ public class PlayerService extends Service {
                 break;
         }
     };
-    @Getter @Setter private LoopMode loopMode = LoopMode.All;
+    @Getter private LoopMode loopMode = LoopMode.All;
+
+    public void setLoopMode(LoopMode loopMode) {
+        this.loopMode = loopMode;
+        randHistory.clear();
+        if (loopMode == LoopMode.Random) randHistory.push(getPlaylist().indexOf(currentMap));
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,10 +68,8 @@ public class PlayerService extends Service {
                     play(getPlaylist().indexOf(currentMap));
                     break;
                 case All:
-                    play(getPlaylist().indexOf(currentMap) + 1);
-                    break;
                 case Random:
-                    play(((int) (Math.random() * getPlaylist().size())));
+                    next();
             }
 
         });
@@ -122,14 +128,17 @@ public class PlayerService extends Service {
     }
 
     public void next() {
-        play(getPlaylist().indexOf(currentMap) + 1);
+        if (loopMode == LoopMode.Random) play((int) (Math.random() * getPlaylist().size()));
+        else play(getPlaylist().indexOf(currentMap) + 1);
     }
 
     public void previous() {
-        play(getPlaylist().indexOf(currentMap) - 1);
+        if (loopMode == LoopMode.Random) play(randHistory.skip(1).pop().orElse((int) (Math.random() * getPlaylist().size())));
+        else play(getPlaylist().indexOf(currentMap) - 1);
     }
 
     public synchronized void play(int index) {
+        if (loopMode == LoopMode.Random) randHistory.push(index);
         ensureAudioFocus();
         if (getPlaylist().size() != 0) {
             if (index < 0) index = getPlaylist().size() - 1;
