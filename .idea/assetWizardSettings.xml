@@ -130,8 +130,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_sort_mapper" />
-                            <entry key="sourceFile" value="C:\Users\licte\Desktop\sort-03.svg" />
+                            <entry key="outputName" value="ic_sort_title" />
+                            <entry key="sourceFile" value="C:\Users\licte\Downloads\vector.svg" />
                           </map>
                         </option>
                       </PersistentState>

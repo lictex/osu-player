@@ -244,8 +244,8 @@ public class AudioEngine {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
                 BASS_SetConfig(BASS_CONFIG_DEV_NONSTOP, 1);
-                BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, 8);
-                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, 32);
+                BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, 4);
+                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, 8);
                 BASS_Init(-1, -1, 0);
 
                 //audio event loop

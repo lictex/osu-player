@@ -1,7 +1,12 @@
 package pw.lictex.osuplayer;
 
+import android.app.*;
 import android.content.*;
 import android.os.*;
+import android.view.*;
+import android.view.inputmethod.*;
+
+import androidx.core.app.*;
 
 import com.annimon.stream.*;
 
@@ -17,6 +22,21 @@ public class Utils {
     public static float px2dp(Context context, int pxValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return pxValue / scale + 0.5f;
+    }
+
+    public static void clearFocus(Activity a) {
+        View current = a.getCurrentFocus();
+        if (current != null) current.clearFocus();
+    }
+
+    public static void showSoftInput(View v) {
+        InputMethodManager inputMethodManager = ActivityCompat.getSystemService(v.getContext(), InputMethodManager.class);
+        inputMethodManager.showSoftInput(v, 0);
+    }
+
+    public static void hideSoftInput(View v) {
+        InputMethodManager inputMethodManager = ActivityCompat.getSystemService(v.getContext(), InputMethodManager.class);
+        inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     public static void runTask(Runnable r) {

@@ -3,12 +3,10 @@ package pw.lictex.osuplayer.activity;
 import android.animation.*;
 import android.os.*;
 import android.view.*;
-import android.view.inputmethod.*;
 import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.*;
-import androidx.core.app.*;
 import androidx.fragment.app.*;
 import androidx.interpolator.view.animation.*;
 import androidx.lifecycle.Observer;
@@ -25,16 +23,18 @@ import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.storage.*;
 
-
 public class PlaylistFragment extends Fragment {
 
     @BindView(R.id.recyclerView) RecyclerView mRecyclerView;
     @BindView(R.id.searchText) EditText searchText;
     @BindView(R.id.searchView) View searchView;
+    @BindView(R.id.searchStatus) View searchStatus;
+    @BindView(R.id.searchArea) View searchArea;
+    @BindView(R.id.searchIcon) View searchIcon;
     @BindView(R.id.status) View statusAll;
     @BindView(R.id.buttonAll) Button buttonAll;
     @BindView(R.id.buttonFavorite) Button buttonFavorite;
-    @BindView(R.id.buttonClearSearch) ImageButton buttonClearSearch;
+    @BindView(R.id.buttonCloseSearch) ImageButton buttonClearSearch;
     @BindView(R.id.buttonListOrder) ImageButton buttonListOrder;
     private boolean showCollectionList = false;
     private BeatmapIndex.Order listOrder = BeatmapIndex.Order.Title;
@@ -56,15 +56,49 @@ public class PlaylistFragment extends Fragment {
 
     @OnTextChanged(R.id.searchText) void onTextChanged() {
         refreshList();
-        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        searchView.animate().alpha(searchText.getText().toString().isEmpty() ? 0.75f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        buttonClearSearch.animate().alpha(searchText.getText().toString().isEmpty() ? 0f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
     }
 
     @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
         if (searchText.hasFocus()) return;
-        InputMethodManager inputMethodManager = ActivityCompat.getSystemService(getContext(), InputMethodManager.class);
-        inputMethodManager.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
+        Utils.hideSoftInput(searchText);
+        if (searchText.getText().toString().trim().isEmpty()) searchText.post(this::onCloseSearchClick);
+    }
+
+    @OnClick(R.id.searchIcon) void onOpenSearchClick() {
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
+        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), 0);
+        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
+        animator.setDuration(baseAnimationDuration);
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override public void onAnimationEnd(Animator animation) {
+                searchText.post(() -> {
+                    searchText.requestFocus();
+                    Utils.showSoftInput(searchText);
+                });
+            }
+        });
+        animator.start();
+        buttonClearSearch.animate().setStartDelay(baseAnimationDuration / 2).alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+    }
+
+    @OnClick(R.id.buttonCloseSearch) void onCloseSearchClick() {
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
+        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), searchArea.getMeasuredWidth() - searchIcon.getMeasuredWidth());
+        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.setDuration(baseAnimationDuration);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override public void onAnimationEnd(Animator animation, boolean isReverse) {
+                searchText.setText("");
+            }
+        });
+        animator.start();
+        buttonClearSearch.animate().setStartDelay(0).alpha(0f).setDuration(baseAnimationDuration / 2).setInterpolator(new FastOutSlowInInterpolator()).start();
+        searchStatus.animate().alpha(0f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+
+        Utils.clearFocus(getActivity());
     }
 
     @OnClick(R.id.buttonAll) void onAllClick() {
@@ -105,10 +139,6 @@ public class PlaylistFragment extends Fragment {
         refreshList();
     }
 
-    @OnClick(R.id.buttonClearSearch) void onClearSearchClick() {
-        searchText.setText("");
-    }
-
     @OnClick(R.id.buttonListOrder) void onListOrderClick() {
         switch (listOrder) {
             case Title:
@@ -146,6 +176,7 @@ public class PlaylistFragment extends Fragment {
 
         showCollectionList = playerService.isPlayCollectionList();
         if (showCollectionList) onFavoriteClick();
+        searchArea.post(this::onCloseSearchClick);
 
         return view;
     }

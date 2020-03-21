@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         bottomSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override public void onStateChanged(@NonNull View view, int i) {
                 if (i == BottomSheetBehavior.STATE_COLLAPSED) {
-                    findViewById(R.id.llcbg).requestFocus();
+                    Utils.clearFocus(MainActivity.this);
                     bottomSheetHandler.postDelayed(() -> setCurrentContent(Content.Playlist), 2000);
                 } else bottomSheetHandler.removeCallbacksAndMessages(null);
             }
