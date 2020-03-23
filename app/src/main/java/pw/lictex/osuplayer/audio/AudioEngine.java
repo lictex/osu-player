@@ -30,8 +30,10 @@ public class AudioEngine {
     private int MainTrackChannel_BASS;
 
     @Getter private PlaybackStatus playbackStatus = PlaybackStatus.Stopped;
+    private int bufferSize;
 
-    AudioEngine() {
+    AudioEngine(int bufferSize) {
+        this.bufferSize = bufferSize;
         audioThread = new AudioThread();
         audioThread.start();
     }
@@ -40,15 +42,6 @@ public class AudioEngine {
         try {
             audioThread.interrupt();
         } catch (Throwable ignored) {}
-    }
-
-    //TODO ???
-    private void runOnAudioThread(Runnable r) {
-        if (Thread.currentThread() == audioThread) {
-            r.run();
-            return;
-        }
-        audioThread.eventQueue.offer(r);
     }
 
     private void runOnAudioThreadSync(Runnable r) {
@@ -245,7 +238,7 @@ public class AudioEngine {
                 BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
                 BASS_SetConfig(BASS_CONFIG_DEV_NONSTOP, 1);
                 BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, 4);
-                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, 8);
+                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, bufferSize);
                 BASS_Init(-1, -1, 0);
 
                 //audio event loop

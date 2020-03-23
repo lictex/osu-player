@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.*;
 
 import lombok.*;
 import pw.lictex.libosu.beatmap.*;
+import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.audio.hitsound.*;
 
 /**
@@ -44,7 +45,7 @@ public class OsuAudioPlayer {
 
     public OsuAudioPlayer(Context context) {
         this.context = context;
-        engine = new AudioEngine();
+        engine = new AudioEngine(Utils.getPreferenceStringAsInt(PreferenceManager.getDefaultSharedPreferences(context), "audio_buffer_size", 24));
         sampleManager = new SampleManager(context, engine);
         reloadSetting();
         engine.setTickCallback(this::tick);
@@ -53,13 +54,7 @@ public class OsuAudioPlayer {
     public void reloadSetting() {
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        int i = 0;
-        try {
-            i = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString("audio_latency", null)));
-        } catch (Throwable e) {
-            sharedPreferences.edit().putString("audio_latency", "0").apply();
-        }
-        setSampleOffset(i);
+        setSampleOffset(Utils.getPreferenceStringAsInt(sharedPreferences, "audio_latency", 0));
 
         setNightcoreUseSoundVolume(sharedPreferences.getBoolean("nightcore_sound_volume", false));
         setStoryboardUseSoundVolume(sharedPreferences.getBoolean("storyboard_sound_volume", false));

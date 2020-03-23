@@ -29,8 +29,10 @@
     <string name="pref_animation_summary">减少过渡动画时长</string>
 
     <string name="pref_category_player">播放器</string>
-    <string name="pref_audio_latency_title">音频延迟</string>
+    <string name="pref_audio_latency_title">音效偏移（毫秒）</string>
     <string name="pref_audio_latency_summary">增加该值使音效更早响起</string>
+    <string name="pref_audio_buffer_size_title">缓冲区容量（毫秒）</string>
+    <string name="pref_audio_buffer_size_summary">缩小缓冲区可能降低音频延迟，但会增加出现杂音的概率</string>
     <string name="pref_nightcore_sound_volume_title">Nightcore音效由音效音量控制</string>
     <string name="pref_nightcore_sound_volume_summary">取消则使用音乐音量</string>
     <string name="pref_storyboard_sound_volume_title">Storyboard音效由音效音量控制</string>
@@ -46,6 +48,4 @@
 
     <string name="playlist_all">全部</string>
     <string name="playlist_collection">收藏</string>
-
-    <string name="slide_open_playlist">向上滑动打开播放列表</string>
 </resources>

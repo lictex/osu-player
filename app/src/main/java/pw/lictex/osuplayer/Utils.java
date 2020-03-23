@@ -39,6 +39,16 @@ public class Utils {
         inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
+    public static int getPreferenceStringAsInt(SharedPreferences preferences, String k, int def) {
+        int i = def;
+        try {
+            i = Integer.parseInt(java.util.Objects.requireNonNull(preferences.getString(k, null)));
+        } catch (Throwable e) {
+            preferences.edit().putString(k, String.valueOf(def)).apply();
+        }
+        return i;
+    }
+
     public static void runTask(Runnable r) {
         new Task(r).execute();
     }

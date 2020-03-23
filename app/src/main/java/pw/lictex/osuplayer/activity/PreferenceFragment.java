@@ -32,6 +32,13 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
             case "spinnerbonus_enabled":
                 activity.getPlayerService().getOsuAudioPlayer().reloadSetting();
                 break;
+            case "audio_buffer_size":
+                activity.detachService();
+                Intent intent = new Intent(activity.getApplication(), PlayerService.class);
+                activity.getApplication().stopService(intent);
+                activity.getApplication().startService(intent);
+                activity.recreate();
+                break;
             case "use_unicode_metadata":
             case "display_simple_info":
                 activity.getPlayerService().rebuildNotification();

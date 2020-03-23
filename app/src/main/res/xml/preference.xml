@@ -65,6 +65,15 @@
             android:summary="@string/pref_audio_latency_summary"
             android:title="@string/pref_audio_latency_title" />
 
+        <EditTextPreference
+            android:defaultValue="24"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="audio_buffer_size"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_audio_buffer_size_summary"
+            android:title="@string/pref_audio_buffer_size_title" />
+
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="nightcore_sound_volume"
