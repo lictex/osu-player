@@ -61,7 +61,11 @@ public class Utils {
         }
 
         @Override protected Void doInBackground(Void... voids) {
-            r.run();
+            try {
+                r.run();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
             return null;
         }
     }

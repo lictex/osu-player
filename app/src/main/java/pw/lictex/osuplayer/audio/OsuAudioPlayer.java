@@ -2,6 +2,7 @@ package pw.lictex.osuplayer.audio;
 
 import android.content.*;
 import android.graphics.*;
+import android.os.*;
 
 import androidx.preference.*;
 
@@ -70,7 +71,7 @@ public class OsuAudioPlayer {
     }
 
     public void setOnBeatmapEndCallback(Runnable onBeatmapEndCallback) {
-        engine.setOnTrackEndCallback(onBeatmapEndCallback);
+        engine.setOnTrackEndCallback(() -> new Handler(Looper.getMainLooper()).post(onBeatmapEndCallback));
     }
 
     public String getRomanisedTitle() {

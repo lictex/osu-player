@@ -49,17 +49,16 @@ public class AudioEngine {
             r.run();
             return;
         }
+        if (audioThread.terminated) return;
         try {
             var lock = new Object();
             synchronized (lock) {
-                synchronized (audioThread.eventQueue) {
-                    audioThread.eventQueue.offer(() -> {
-                        synchronized (lock) {
-                            r.run();
-                            lock.notifyAll();
-                        }
-                    });
-                }
+                audioThread.eventQueue.offer(() -> {
+                    synchronized (lock) {
+                        r.run();
+                        lock.notifyAll();
+                    }
+                });
                 lock.wait();
             }
         } catch (InterruptedException e) {
@@ -227,51 +226,56 @@ public class AudioEngine {
 
         private final ConcurrentLinkedQueue<Runnable> eventQueue = new ConcurrentLinkedQueue<>();
 
+        private volatile boolean terminated = false;
+
         private AudioThread() {
             setName("AudioEngineThread");
         }
 
         @Override
         public void run() {
-            try {
-                android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
-                BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
-                BASS_SetConfig(BASS_CONFIG_DEV_NONSTOP, 1);
-                BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, 4);
-                BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, bufferSize);
-                BASS_Init(-1, -1, 0);
+            synchronized (AudioEngine.class) { //to avoid BASS_ERROR_ALREADY error on service restart
+                try {
+                    android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
+                    BASS_SetConfig(BASS_CONFIG_ANDROID_AAUDIO, 0);
+                    BASS_SetConfig(BASS_CONFIG_DEV_NONSTOP, 1);
+                    BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, 4);
+                    BASS_SetConfig(BASS_CONFIG_DEV_BUFFER, bufferSize);
+                    BASS_Init(-1, -1, 0);
 
-                //audio event loop
-                long t = SystemClock.elapsedRealtime(), i = 0;
-                while (!isInterrupted()) {
-                    i++;
-                    long s = SystemClock.elapsedRealtime();
-                    long l = SystemClock.elapsedRealtime() - t;
-                    if (l >= 1000) {
-                        currentTPS.set(i);
-                        i = 0;
-                        t = SystemClock.elapsedRealtime();
-                    }
-                    if (BASS_ChannelIsActive(MainTrackChannel_BASS) == BASS_ACTIVE_STOPPED) {
-                        if (getPlaybackStatus() == PlaybackStatus.Playing) {
-                            playbackStatus = PlaybackStatus.Stopped;
-                            onTrackEndCallback.run();
+                    //audio event loop
+                    long t = SystemClock.elapsedRealtime(), i = 0;
+                    while (!isInterrupted()) {
+                        i++;
+                        long s = SystemClock.elapsedRealtime();
+                        long l = SystemClock.elapsedRealtime() - t;
+                        if (l >= 1000) {
+                            currentTPS.set(i);
+                            i = 0;
+                            t = SystemClock.elapsedRealtime();
                         }
-                    }
-                    currentTime.set((long) (BASS_ChannelBytes2Seconds(MainTrackChannel_BASS, BASS_ChannelGetPosition(MainTrackChannel_BASS, BASS_POS_BYTE | BASS_POS_DECODE)) * 1000d));
-                    if (tickEvent != null) tickEvent.run();
-                    synchronized (eventQueue) {
+                        if (BASS_ChannelIsActive(MainTrackChannel_BASS) == BASS_ACTIVE_STOPPED) {
+                            if (getPlaybackStatus() == PlaybackStatus.Playing) {
+                                playbackStatus = PlaybackStatus.Stopped;
+                                onTrackEndCallback.run();
+                            }
+                        }
+                        currentTime.set((long) (BASS_ChannelBytes2Seconds(MainTrackChannel_BASS, BASS_ChannelGetPosition(MainTrackChannel_BASS, BASS_POS_BYTE | BASS_POS_DECODE)) * 1000d));
+                        if (tickEvent != null) tickEvent.run();
                         Runnable r;
                         while ((r = eventQueue.poll()) != null) r.run();
+                        long sleepms = (long) Math.ceil(1f / (playbackStatus == PlaybackStatus.Playing ? AUDIOFREQ : LOWAUDIOFREQ) * 1000f - (SystemClock.elapsedRealtime() - s));
+                        if (sleepms > 0) SystemClock.sleep(sleepms);
                     }
-                    long sleepms = (long) Math.ceil(1f / (playbackStatus == PlaybackStatus.Playing ? AUDIOFREQ : LOWAUDIOFREQ) * 1000f - (SystemClock.elapsedRealtime() - s));
-                    //long sleepms = (long) Math.ceil(1f / AUDIOFREQ * 1000f);
-                    if (sleepms > 0) SystemClock.sleep(sleepms);
+                } catch (Throwable e) {
+                    Log.e("AE", "Audio engine stopped.", e);
+                } finally {
+                    terminated = true;
+                    Runnable r;
+                    while ((r = eventQueue.poll()) != null) r.run(); //clean the queue to prevent deadlock..?
+                    BASS_Free();
                 }
-            } catch (Throwable e) {
-                Log.e("AE", "Audio engine stopped.", e);
             }
-            BASS_Free();
         }
     }
 }
