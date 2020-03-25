@@ -36,7 +36,7 @@ public class PlaylistFragment extends Fragment {
     @BindView(R.id.buttonFavorite) Button buttonFavorite;
     @BindView(R.id.buttonCloseSearch) ImageButton buttonClearSearch;
     @BindView(R.id.buttonListOrder) ImageButton buttonListOrder;
-    private boolean showCollectionList = false;
+    @Getter private boolean showCollectionList = false;
     private BeatmapIndex.Order listOrder = BeatmapIndex.Order.Title;
     private LiveData<List<BeatmapEntity>> allMapLiveData;
     private LiveData<List<BeatmapEntity>> collectionMapLiveData;
@@ -61,16 +61,20 @@ public class PlaylistFragment extends Fragment {
     @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
         if (searchText.hasFocus()) return;
         Utils.hideSoftInput(searchText);
-        if (searchText.getText().toString().trim().isEmpty()) searchText.post(this::onCloseSearchClick);
+        if (searchText.getText().toString().trim().isEmpty()) onCloseSearchClick();
     }
 
     @OnClick(R.id.searchIcon) void onOpenSearchClick() {
+        openSearch(true);
+    }
+
+    public void openSearch(boolean showKeyboard) {
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
         ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), 0);
         animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
         animator.setDuration(baseAnimationDuration);
         animator.setInterpolator(new FastOutSlowInInterpolator());
-        animator.addListener(new AnimatorListenerAdapter() {
+        if (showKeyboard) animator.addListener(new AnimatorListenerAdapter() {
             @Override public void onAnimationEnd(Animator animation) {
                 searchText.post(() -> {
                     searchText.requestFocus();
@@ -176,7 +180,15 @@ public class PlaylistFragment extends Fragment {
 
         showCollectionList = playerService.isPlayCollectionList();
         if (showCollectionList) onFavoriteClick();
-        searchArea.post(this::onCloseSearchClick);
+
+        container.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override public void onGlobalLayout() {
+                container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                searchArea.setTranslationX(searchArea.getMeasuredWidth() - searchIcon.getMeasuredWidth());
+                buttonClearSearch.setAlpha(0f);
+                searchStatus.setAlpha(0f);
+            }
+        });
 
         return view;
     }
@@ -201,12 +213,20 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void refreshList() {
+        int index = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+        View v = mRecyclerView.getChildAt(0);
+        int offset = (v == null) ? 0 : (v.getTop() - mRecyclerView.getPaddingTop());
+        refreshList(index, offset);
+    }
+
+    public void refreshList(int index, int offset) {
         LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim(), listOrder);
         beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
             @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
                 ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;
                 mRecyclerView.getAdapter().notifyDataSetChanged();
                 beatmaps.removeObserver(this);
+                if (index >= 0) ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(index, offset);
             }
         });
     }

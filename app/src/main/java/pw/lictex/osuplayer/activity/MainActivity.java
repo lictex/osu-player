@@ -20,6 +20,7 @@ import androidx.core.app.*;
 import androidx.core.content.*;
 import androidx.interpolator.view.animation.*;
 import androidx.preference.*;
+import androidx.recyclerview.widget.*;
 
 import com.google.android.material.bottomsheet.*;
 
@@ -229,7 +230,17 @@ public class MainActivity extends AppCompatActivity {
                         .replace(R.id.playlist_wrapper, playlistFragment, "playlistFragment")
                         .replace(R.id.preference_wrapper, preferenceFragment, "preferenceFragment")
                         .commit();
-
+                handler.post(() -> {
+                    if (savedInstanceState != null) {
+                        if (savedInstanceState.getInt("playlist") == 1) playlistFragment.onFavoriteClick();
+                        String search = savedInstanceState.getString("playlistSearch");
+                        if (search != null && !search.isEmpty()) {
+                            playlistFragment.openSearch(false);
+                            playlistFragment.searchText.setText(search);
+                        }
+                        playlistFragment.refreshList(savedInstanceState.getInt("playlistIndex"), savedInstanceState.getInt("playlistOffset"));
+                    }
+                });
                 handler.post(() -> updateStatus());
                 handler.postDelayed(runnable, 32);
             }
@@ -241,6 +252,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("content", current.ordinal());
+        outState.putInt("playlist", playlistFragment.isShowCollectionList() ? 1 : 0);
+        outState.putString("playlistSearch", playlistFragment.searchText.getText().toString().trim());
+        outState.putInt("playlistIndex", ((LinearLayoutManager) playlistFragment.mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+        View v = playlistFragment.mRecyclerView.getChildAt(0);
+        outState.putInt("playlistOffset", (v == null) ? 0 : (v.getTop() - playlistFragment.mRecyclerView.getPaddingTop()));
     }
 
     @OnClick(R.id.buttonPlayPause) void onPauseClick() {
