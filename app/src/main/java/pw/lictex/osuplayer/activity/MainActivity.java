@@ -193,7 +193,10 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onStateChanged(@NonNull View view, int i) {
                 if (i == BottomSheetBehavior.STATE_COLLAPSED) {
                     Utils.clearFocus(MainActivity.this);
-                    bottomSheetHandler.postDelayed(() -> setCurrentContent(Content.Playlist), 2000);
+                    bottomSheetHandler.postDelayed(() -> {
+                        setCurrentContent(Content.Playlist);
+                        playlistFragment.refreshListToCurrent();
+                    }, 2000);
                 } else bottomSheetHandler.removeCallbacksAndMessages(null);
             }
 
@@ -232,13 +235,13 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
                 handler.post(() -> {
                     if (savedInstanceState != null) {
-                        if (savedInstanceState.getInt("playlist") == 1) playlistFragment.onFavoriteClick();
+                        if (savedInstanceState.getInt("playlist") == 1) playlistFragment.setPlaylist(true, false);
                         String search = savedInstanceState.getString("playlistSearch");
                         if (search != null && !search.isEmpty()) {
                             playlistFragment.openSearch(false);
                             playlistFragment.searchText.setText(search);
                         }
-                        playlistFragment.refreshList(savedInstanceState.getInt("playlistIndex"), savedInstanceState.getInt("playlistOffset"));
+                        playlistFragment.refreshListToPosition(savedInstanceState.getInt("playlistIndex"), savedInstanceState.getInt("playlistOffset"));
                     }
                 });
                 handler.post(() -> updateStatus());

@@ -41,17 +41,20 @@ public class PlaylistFragment extends Fragment {
     private LiveData<List<BeatmapEntity>> allMapLiveData;
     private LiveData<List<BeatmapEntity>> collectionMapLiveData;
 
+    private boolean scrollToCurrentEnabled = false;
     private final Observer<List<BeatmapEntity>> allMapObserver = beatmapEntities -> {
         var playerService = ((MainActivity) getActivity()).getPlayerService();
         playerService.getAllMapList().clear();
         playerService.getAllMapList().addAll(beatmapEntities);
-        refreshList();
+        if (scrollToCurrentEnabled) refreshListToCurrent();
+        else refreshList();
     };
     private final Observer<List<BeatmapEntity>> collectionMapObserver = beatmapEntities -> {
         var playerService = ((MainActivity) getActivity()).getPlayerService();
         playerService.getCollectionMapList().clear();
         playerService.getCollectionMapList().addAll(beatmapEntities);
-        refreshList();
+        if (scrollToCurrentEnabled) refreshListToCurrent();
+        else refreshList();
     };
 
     @OnTextChanged(R.id.searchText) void onTextChanged() {
@@ -66,25 +69,6 @@ public class PlaylistFragment extends Fragment {
 
     @OnClick(R.id.searchIcon) void onOpenSearchClick() {
         openSearch(true);
-    }
-
-    public void openSearch(boolean showKeyboard) {
-        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), 0);
-        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
-        animator.setDuration(baseAnimationDuration);
-        animator.setInterpolator(new FastOutSlowInInterpolator());
-        if (showKeyboard) animator.addListener(new AnimatorListenerAdapter() {
-            @Override public void onAnimationEnd(Animator animation) {
-                searchText.post(() -> {
-                    searchText.requestFocus();
-                    Utils.showSoftInput(searchText);
-                });
-            }
-        });
-        animator.start();
-        buttonClearSearch.animate().setStartDelay(baseAnimationDuration / 2).alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
     }
 
     @OnClick(R.id.buttonCloseSearch) void onCloseSearchClick() {
@@ -106,28 +90,17 @@ public class PlaylistFragment extends Fragment {
     }
 
     @OnClick(R.id.buttonAll) void onAllClick() {
-        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
-        var anim = ValueAnimator.ofFloat(params.horizontalBias, 0);
-        anim.addUpdateListener(valueAnimator -> {
-            params.horizontalBias = (Float) valueAnimator.getAnimatedValue();
-            statusAll.setLayoutParams(params);
-        });
-        anim.setDuration(baseAnimationDuration);
-        anim.setInterpolator(new FastOutSlowInInterpolator());
-        anim.start();
-
-        buttonAll.animate().alpha(1).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        buttonFavorite.animate().alpha(.75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-
-        showCollectionList = false;
-        refreshList();
+        setPlaylist(false, true);
     }
 
     @OnClick(R.id.buttonFavorite) void onFavoriteClick() {
+        setPlaylist(true, true);
+    }
+
+    public void setPlaylist(boolean collection, boolean scrollToCurrent) {
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
-        var anim = ValueAnimator.ofFloat(params.horizontalBias, 1);
+        var anim = ValueAnimator.ofFloat(params.horizontalBias, collection ? 1 : 0);
         anim.addUpdateListener(valueAnimator -> {
             params.horizontalBias = (Float) valueAnimator.getAnimatedValue();
             statusAll.setLayoutParams(params);
@@ -136,14 +109,16 @@ public class PlaylistFragment extends Fragment {
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.start();
 
-        buttonAll.animate().alpha(.75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        buttonFavorite.animate().alpha(1).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        buttonAll.animate().alpha(collection ? .75f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        buttonFavorite.animate().alpha(collection ? 1f : .75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
 
-        showCollectionList = true;
-        refreshList();
+        showCollectionList = collection;
+        if (scrollToCurrent) refreshListToCurrent();
+        else refreshList();
     }
 
     @OnClick(R.id.buttonListOrder) void onListOrderClick() {
+        scrollToCurrentEnabled = true;
         switch (listOrder) {
             case Title:
                 setListOrder(BeatmapIndex.Order.Artist); break;
@@ -179,7 +154,7 @@ public class PlaylistFragment extends Fragment {
         setListOrder(BeatmapIndex.Order.values()[order]);
 
         showCollectionList = playerService.isPlayCollectionList();
-        if (showCollectionList) onFavoriteClick();
+        if (showCollectionList) setPlaylist(true, false);
 
         container.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
@@ -193,7 +168,55 @@ public class PlaylistFragment extends Fragment {
         return view;
     }
 
-    void setListOrder(BeatmapIndex.Order order) {
+    public void openSearch(boolean showKeyboard) {
+        int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
+        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), 0);
+        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
+        animator.setDuration(baseAnimationDuration);
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        if (showKeyboard) animator.addListener(new AnimatorListenerAdapter() {
+            @Override public void onAnimationEnd(Animator animation) {
+                searchText.post(() -> {
+                    searchText.requestFocus();
+                    Utils.showSoftInput(searchText);
+                });
+            }
+        });
+        animator.start();
+        buttonClearSearch.animate().setStartDelay(baseAnimationDuration / 2).alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+    }
+
+    private void refreshList(Runnable onFinish) {
+        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim(), listOrder);
+        beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
+            @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
+                ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+                beatmaps.removeObserver(this);
+                onFinish.run();
+            }
+        });
+    }
+
+    public void refreshList() {
+        int index = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+        View v = mRecyclerView.getChildAt(0);
+        int offset = (v == null) ? 0 : (v.getTop() - mRecyclerView.getPaddingTop());
+        refreshListToPosition(index, offset);
+    }
+
+    public void refreshListToPosition(int index, int offset) {
+        refreshList(() -> {
+            if (index >= 0) ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(index, offset);
+        });
+    }
+
+    public void refreshListToCurrent() {
+        refreshList(() -> mRecyclerView.scrollToPosition(((HomeAdapter) mRecyclerView.getAdapter()).list.indexOf(((MainActivity) getActivity()).getPlayerService().getCurrentMap())));
+    }
+
+    private void setListOrder(BeatmapIndex.Order order) {
         listOrder = order;
         if (allMapLiveData != null) {
             allMapLiveData.removeObserver(allMapObserver);
@@ -210,25 +233,6 @@ public class PlaylistFragment extends Fragment {
         collectionMapLiveData.observe(this, collectionMapObserver);
 
         buttonListOrder.setImageDrawable(listOrder == BeatmapIndex.Order.Title ? getResources().getDrawable(R.drawable.ic_sort_title) : (listOrder == BeatmapIndex.Order.Artist ? getResources().getDrawable(R.drawable.ic_sort_artist) : getResources().getDrawable(R.drawable.ic_sort_mapper)));
-    }
-
-    public void refreshList() {
-        int index = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-        View v = mRecyclerView.getChildAt(0);
-        int offset = (v == null) ? 0 : (v.getTop() - mRecyclerView.getPaddingTop());
-        refreshList(index, offset);
-    }
-
-    public void refreshList(int index, int offset) {
-        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim(), listOrder);
-        beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
-            @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
-                ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;
-                mRecyclerView.getAdapter().notifyDataSetChanged();
-                beatmaps.removeObserver(this);
-                if (index >= 0) ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(index, offset);
-            }
-        });
     }
 
     protected class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.PlaylistViewHolder> {
