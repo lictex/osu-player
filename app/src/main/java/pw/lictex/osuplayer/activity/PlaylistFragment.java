@@ -58,7 +58,7 @@ public class PlaylistFragment extends Fragment {
     };
 
     @OnTextChanged(R.id.searchText) void onTextChanged() {
-        refreshList();
+        refreshListToCurrent();
     }
 
     @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
@@ -213,7 +213,10 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void refreshListToCurrent() {
-        refreshList(() -> mRecyclerView.scrollToPosition(((HomeAdapter) mRecyclerView.getAdapter()).list.indexOf(((MainActivity) getActivity()).getPlayerService().getCurrentMap())));
+        refreshList(() -> {
+            mRecyclerView.stopScroll();
+            ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(((HomeAdapter) mRecyclerView.getAdapter()).list.indexOf(((MainActivity) getActivity()).getPlayerService().getCurrentMap()), Utils.dp2px(getContext(), 24));
+        });
     }
 
     private void setListOrder(BeatmapIndex.Order order) {
