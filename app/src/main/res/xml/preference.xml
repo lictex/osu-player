@@ -129,4 +129,20 @@
             android:title="@string/pref_spinnerbonus_enabled_title"
             android:widgetLayout="@layout/item_preference_checkbox" />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/item_preference_category"
+        android:title="@string/pref_category_about">
+        <Preference
+            android:key="about_version"
+            android:layout="@layout/item_preference"
+            android:summary="@string/version"
+            android:title="@string/app_name" />
+
+        <Preference
+            android:key="about_source"
+            android:layout="@layout/item_preference"
+            android:summary="@string/pref_about_source_summary"
+            android:title="@string/pref_about_source_title" />
+    </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

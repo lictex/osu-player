@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">osu!player</string>
-    <string name="version">v0.3.2</string>
+    <string name="version">v0.4.0</string>
 
     <string name="title_artist">%1$s - %2$s</string>
     <string name="version_by_mapper">%1$s by %2$s</string>
@@ -45,6 +45,9 @@
     <string name="pref_spinnerspin_enabled_title">启用spinnerspin</string>
     <string name="pref_spinnerbonus_enabled_summary">播放转盘加分音效</string>
     <string name="pref_spinnerbonus_enabled_title">启用spinnerbonus</string>
+    <string name="pref_category_about">关于</string>
+    <string name="pref_about_source_title">源代码</string>
+    <string name="pref_about_source_summary">在GitHub上查看</string>
 
     <string name="playlist_all">全部</string>
     <string name="playlist_collection">收藏</string>

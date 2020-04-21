@@ -1,12 +1,12 @@
 # osu!player
 play music with hitsounds on android devices, inspired by [this project](https://github.com/Milkitic/Osu-Player).  
 
-(only) tested on Galaxy S10+ with android q (one ui beta)
+(only) tested on Galaxy S10+ with android q
 
-<img src="https://file.blessingsoftware.cc/upload/Screenshot_20191204-230342_osu!player_compressed.jpg" width="192"> <img src="https://file.blessingsoftware.cc/upload/Screenshot_20191204-230212_osu!player_compressed.jpg" width="192">  
+<img src="https://file.blessingsoftware.cc/upload/Screenshot_20200421-152847_osu!player.jpg" width="192"> <img src="https://file.blessingsoftware.cc/upload/Screenshot_20200421-152334_osu!player.jpg" width="192">  
 
 ## known issues
 * maybe incompatible with old osu file formats.
-* bluetooth audio latency is sometimes unstable. try using a wired headset instead if this affects ur device.
+* not compatible with osu!laser yet.
 * low performance.
 * many many bugs.

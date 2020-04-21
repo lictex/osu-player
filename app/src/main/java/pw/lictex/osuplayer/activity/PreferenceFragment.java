@@ -1,6 +1,7 @@
 package pw.lictex.osuplayer.activity;
 
 import android.content.*;
+import android.net.*;
 import android.os.*;
 import android.view.*;
 
@@ -62,6 +63,9 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
 
         findPreference("rebuild_database").setOnPreferenceClickListener(preference -> {
             BeatmapIndex.getInstance().refresh(); return true;
+        });
+        findPreference("about_source").setOnPreferenceClickListener(preference -> {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/xyning/osu-player"))); return true;
         });
         return scrollView;
     }
