@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(runnable);
+        bottomSheetHandler.removeCallbacksAndMessages(null);
         detachService();
     }
 
