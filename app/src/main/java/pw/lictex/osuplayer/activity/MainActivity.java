@@ -8,11 +8,13 @@ import android.content.res.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
+import android.provider.*;
 import android.util.*;
 import android.view.*;
 import android.view.animation.Interpolator;
 import android.widget.*;
 
+import androidx.annotation.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.*;
 import androidx.coordinatorlayout.widget.*;
@@ -100,6 +102,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0x8086) onRequestPermissionsResult(requestCode, new String[0], new int[0]);
+    }
+
+    @Override
     public void onBackPressed() {
         if (audioSettingPanel.getVisibility() == View.VISIBLE) {
             setAudioSettingVisibility(false);
@@ -158,6 +167,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager())
+            startActivityForResult(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 0x8086);
 
         controllerBlur.setupWith(content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
                 .setBlurAlgorithm(new RenderScriptBlur(this))
