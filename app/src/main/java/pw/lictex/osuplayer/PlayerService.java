@@ -19,6 +19,7 @@ import pw.lictex.osuplayer.storage.*;
 public class PlayerService extends Service {
     private final int ID = 141;
     private AudioManager audioManager;
+    private RemoteControlClient remoteControlClient;
     @Getter private ArrayList<BeatmapEntity> allMapList = new ArrayList<>();
     @Getter private ArrayList<BeatmapEntity> collectionMapList = new ArrayList<>();
     @Getter @Setter private boolean playCollectionList = false;
@@ -80,7 +81,7 @@ public class PlayerService extends Service {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ensureAudioFocus();
-        startForeground(ID, getNotification());
+        startForeground(ID, generateNotification());
     }
 
     private static final String ACTION_RESUME = "pw.lictex.osuplayer.action_resume";
@@ -165,20 +166,35 @@ public class PlayerService extends Service {
 
     public void rebuildNotification() {
         var notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(ID, getNotification());
+        notificationManager.notify(ID, generateNotification());
     }
 
     public List<BeatmapEntity> getPlaylist() {
         return playCollectionList ? collectionMapList : allMapList;
     }
 
-    private Notification getNotification() {
+    private Notification generateNotification() {
+        if (remoteControlClient == null) {
+            var intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            intent.setComponent(new ComponentName(getPackageName(), MediaBroadcastReceiver.class.getName()));
+            remoteControlClient = new RemoteControlClient(PendingIntent.getBroadcast(this, 0, intent, 0));
+            audioManager.registerRemoteControlClient(remoteControlClient);
+        }
+        remoteControlClient.setPlaybackState(getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing ?
+                RemoteControlClient.PLAYSTATE_PLAYING : RemoteControlClient.PLAYSTATE_PAUSED
+        );
+        remoteControlClient.setTransportControlFlags(
+                RemoteControlClient.FLAG_KEY_MEDIA_PAUSE | RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS | RemoteControlClient.FLAG_KEY_MEDIA_NEXT | RemoteControlClient.FLAG_KEY_MEDIA_STOP
+        );
+
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         var builder = new NotificationCompat.Builder(getApplication(), "Service")
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_osu_96)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT));
+        var lockScreenEditor = remoteControlClient.editMetadata(true)
+                .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, osuAudioPlayer.getBackground());
 
         builder.addAction(R.drawable.ic_skip_previous, "Previous", PendingIntent.getService(getBaseContext(), 0, new Intent(this, PlayerService.class).setAction(ACTION_PREVIOUS), 0));
         if (getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing)
@@ -192,13 +208,19 @@ public class PlayerService extends Service {
                 .setShowActionsInCompactView(1, 2, 3).setShowCancelButton(true).setCancelButtonIntent(PendingIntent.getService(getBaseContext(), 3, new Intent(this, PlayerService.class).setAction(ACTION_TERMINATE), 0)))
                 .setLargeIcon(osuAudioPlayer.getBackground());
 
-        if (allMapList.size() == 0 || osuAudioPlayer.getTitle() == null) builder.setContentTitle("闲置中");
-        else if (sharedPreferences.getBoolean("use_unicode_metadata", false))
-            builder.setContentTitle(osuAudioPlayer.getTitle() + " - " + osuAudioPlayer.getArtist()).
-                    setContentText(getString(R.string.version_by_mapper, osuAudioPlayer.getVersion(), osuAudioPlayer.getMapper()));
-        else builder.setContentTitle(osuAudioPlayer.getRomanisedTitle() + " - " + osuAudioPlayer.getRomanisedArtist()).
-                    setContentText(getString(R.string.version_by_mapper, osuAudioPlayer.getVersion(), osuAudioPlayer.getMapper()));
+        if (allMapList.size() == 0 || osuAudioPlayer.getTitle() == null) {
+            builder.setContentTitle("闲置中");
+            lockScreenEditor.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, "闲置中");
+        } else {
+            var title = sharedPreferences.getBoolean("use_unicode_metadata", false) ?
+                    osuAudioPlayer.getTitle() + " - " + osuAudioPlayer.getArtist() :
+                    osuAudioPlayer.getRomanisedTitle() + " - " + osuAudioPlayer.getRomanisedArtist();
+            var mapper = getString(R.string.version_by_mapper, osuAudioPlayer.getVersion(), osuAudioPlayer.getMapper());
+            builder.setContentTitle(title).setContentText(mapper);
+            lockScreenEditor.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, title).putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, mapper);
+        }
 
+        lockScreenEditor.apply();
         return builder.build();
     }
 
