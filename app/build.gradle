@@ -33,6 +33,9 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 repositories {
@@ -43,8 +46,8 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
     implementation 'com.jakewharton:butterknife:10.2.0'
 

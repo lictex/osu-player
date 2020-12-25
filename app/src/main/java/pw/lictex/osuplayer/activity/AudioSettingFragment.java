@@ -8,41 +8,34 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.*;
 import androidx.preference.*;
 
-import com.h6ah4i.android.widget.verticalseekbar.*;
-
-import butterknife.*;
 import lombok.*;
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.audio.*;
-
+import pw.lictex.osuplayer.databinding.*;
 
 public class AudioSettingFragment extends Fragment {
-    @BindView(R.id.seekBarMusicVolume) VerticalSeekBar seekBarMusicVolume;
-    @BindView(R.id.seekBarSoundVolume) VerticalSeekBar seekBarSoundVolume;
-    @BindView(R.id.checkboxDT) CheckBox checkBoxDt;
-    @BindView(R.id.checkboxNC) CheckBox checkBoxNc;
-    @BindView(R.id.checkboxHT) CheckBox checkBoxHt;
+    private FragmentAudiosettingBinding views;
 
     private void setModCheckBox(OsuAudioPlayer.Mod m) {
-        checkBoxDt.setChecked(false);
-        checkBoxDt.setChecked(false);
-        checkBoxDt.setChecked(false);
+        views.checkboxDT.setChecked(false);
+        views.checkboxHT.setChecked(false);
+        views.checkboxNC.setChecked(false);
         switch (m) {
             case DT:
-                checkBoxDt.setChecked(true);
+                views.checkboxDT.setChecked(true);
                 break;
             case HT:
-                checkBoxHt.setChecked(true);
+                views.checkboxHT.setChecked(true);
                 break;
             case NC:
-                checkBoxNc.setChecked(true);
+                views.checkboxNC.setChecked(true);
                 break;
         }
     }
 
     public void update(int musicVol, int soundVol, OsuAudioPlayer.Mod mod) {
-        seekBarMusicVolume.setProgress(musicVol);
-        seekBarSoundVolume.setProgress(soundVol);
+        views.seekBarMusicVolume.setProgress(musicVol);
+        views.seekBarSoundVolume.setProgress(soundVol);
 
         setModCheckBox(mod);
     }
@@ -50,32 +43,32 @@ public class AudioSettingFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_audiosetting, container, false);
-        ButterKnife.bind(this, view);
+        views = FragmentAudiosettingBinding.bind(view);
 
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         CompoundButton.OnCheckedChangeListener listener = (compoundButton, b) -> {
-            if (!checkBoxDt.isChecked() && !checkBoxNc.isChecked() && !checkBoxHt.isChecked()) {
+            if (!views.checkboxDT.isChecked() && !views.checkboxNC.isChecked() && !views.checkboxHT.isChecked()) {
                 AudioSettingFragment.this.setModCheckBox(OsuAudioPlayer.Mod.None);
                 ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setMod(OsuAudioPlayer.Mod.None);
                 return;
             }
             if (b) {
-                if (compoundButton != checkBoxDt) checkBoxDt.setChecked(false);
-                if (compoundButton != checkBoxNc) checkBoxNc.setChecked(false);
-                if (compoundButton != checkBoxHt) checkBoxHt.setChecked(false);
-                var current = compoundButton == checkBoxDt ? OsuAudioPlayer.Mod.DT :
-                        compoundButton == checkBoxNc ? OsuAudioPlayer.Mod.NC :
-                                compoundButton == checkBoxHt ? OsuAudioPlayer.Mod.HT : OsuAudioPlayer.Mod.None;
+                if (compoundButton != views.checkboxDT) views.checkboxDT.setChecked(false);
+                if (compoundButton != views.checkboxNC) views.checkboxNC.setChecked(false);
+                if (compoundButton != views.checkboxHT) views.checkboxHT.setChecked(false);
+                var current = compoundButton == views.checkboxDT ? OsuAudioPlayer.Mod.DT :
+                        compoundButton == views.checkboxNC ? OsuAudioPlayer.Mod.NC :
+                                compoundButton == views.checkboxHT ? OsuAudioPlayer.Mod.HT : OsuAudioPlayer.Mod.None;
                 AudioSettingFragment.this.setModCheckBox(current);
                 ((MainActivity) getActivity()).getPlayerService().getOsuAudioPlayer().setMod(current);
             }
         };
-        checkBoxDt.setOnCheckedChangeListener(listener);
-        checkBoxNc.setOnCheckedChangeListener(listener);
-        checkBoxHt.setOnCheckedChangeListener(listener);
+        views.checkboxDT.setOnCheckedChangeListener(listener);
+        views.checkboxNC.setOnCheckedChangeListener(listener);
+        views.checkboxHT.setOnCheckedChangeListener(listener);
 
-        seekBarMusicVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        views.seekBarMusicVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 sharedPreferences.edit().putInt("music_volume", i).apply();
@@ -86,7 +79,7 @@ public class AudioSettingFragment extends Fragment {
 
             @Override public void onStopTrackingTouch(SeekBar seekBar) { }
         });
-        seekBarSoundVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        views.seekBarSoundVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 sharedPreferences.edit().putInt("sound_volume", i).apply();

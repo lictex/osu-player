@@ -17,58 +17,35 @@ import android.widget.*;
 import androidx.annotation.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.*;
-import androidx.coordinatorlayout.widget.*;
 import androidx.core.app.*;
 import androidx.core.content.*;
+import androidx.core.content.res.*;
 import androidx.interpolator.view.animation.*;
 import androidx.preference.*;
 import androidx.recyclerview.widget.*;
 
 import com.google.android.material.bottomsheet.*;
 
-import butterknife.*;
 import eightbitlab.com.blurview.*;
 import lombok.*;
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.*;
 import pw.lictex.osuplayer.audio.*;
+import pw.lictex.osuplayer.databinding.*;
 import pw.lictex.osuplayer.storage.*;
 
 public class MainActivity extends AppCompatActivity {
     private static final float blurRadius = 25f;
 
-    @BindView(R.id.controllerBlur) BlurView controllerBlur;
-    @BindView(R.id.audioSettingBlur) BlurView audioSettingBlur;
-    @BindView(R.id.audioSettingPanel) View audioSettingPanel;
-    @BindView(R.id.contentLayout) View contentLayout;
-    @BindView(R.id.content) CoordinatorLayout content;
-    @BindView(R.id.backButton) ImageButton backBtn;
-    @BindView(R.id.infoLayout) LinearLayout info;
-    @BindView(R.id.progressBar) SeekBar seekBar;
-    @BindView(R.id.backgroundImage) ImageSwitcher bg;
-    @BindView(R.id.title) TextView title;
-    @BindView(R.id.artist) TextView artist;
-    @BindView(R.id.playlist_wrapper) View playlistWrapper;
-    @BindView(R.id.audio_setting_wrapper) View audioSettingWrapper;
-    @BindView(R.id.preference_wrapper) View preferenceWrapper;
-    @BindView(R.id.buttonPlayPause) ImageButton buttonPlayPause;
-    @BindView(R.id.buttonLoopMode) ImageButton buttonLoopMode;
-
-    private Content current = Content.Playlist;
-    private ServiceConnection playerServiceConnection;
-    private Handler handler = new Handler();
-    private AudioSettingFragment audioSettingFragment;
-    private PlaylistFragment playlistFragment;
-    private PreferenceFragment preferenceFragment;
-    @Getter private PlayerService playerService;
-    @Getter private int baseAnimationDuration;
-    private ObjectAnimator progressAnimator;
-    private boolean progressTouched;
-    private Runnable runnable = new Runnable() {
+    private ActivityHomeBinding views;
+    private final Handler handler = new Handler();
+    private final Handler bottomSheetHandler = new Handler();
+    private final Interpolator interpolator = new FastOutSlowInInterpolator();
+    private final Runnable runnable = new Runnable() {
         @Override
         public void run() {
             if (!progressTouched) {
-                progressAnimator = ObjectAnimator.ofInt(seekBar, "progress", seekBar.getProgress(), (int) (((double) playerService.getOsuAudioPlayer().getCurrentTime() / playerService.getOsuAudioPlayer().getAudioLength()) * seekBar.getMax()));
+                progressAnimator = ObjectAnimator.ofInt(views.progressBar, "progress", views.progressBar.getProgress(), (int) (((double) playerService.getOsuAudioPlayer().getCurrentTime() / playerService.getOsuAudioPlayer().getAudioLength()) * views.progressBar.getMax()));
                 progressAnimator.setInterpolator(new LinearOutSlowInInterpolator());
                 progressAnimator.setDuration(750);
                 progressAnimator.start();
@@ -77,9 +54,16 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private Handler bottomSheetHandler = new Handler();
-    private BottomSheetBehavior bottomSheet;
-    private final Interpolator interpolator = new FastOutSlowInInterpolator();
+    private Content current = Content.Playlist;
+    private ServiceConnection playerServiceConnection;
+    private AudioSettingFragment audioSettingFragment;
+    private PlaylistFragment playlistFragment;
+    private PreferenceFragment preferenceFragment;
+    @Getter private PlayerService playerService;
+    @Getter private int baseAnimationDuration;
+    private ObjectAnimator progressAnimator;
+    private boolean progressTouched;
+    private BottomSheetBehavior<View> bottomSheet;
 
     @Override
     protected void onDestroy() {
@@ -110,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (audioSettingPanel.getVisibility() == View.VISIBLE) {
+        if (views.audioSettingPanel.getVisibility() == View.VISIBLE) {
             setAudioSettingVisibility(false);
         } else if (bottomSheet.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
             if (current != Content.Playlist) setCurrentContent(Content.Playlist);
@@ -149,17 +133,18 @@ public class MainActivity extends AppCompatActivity {
         if (fastAnimation) baseAnimationDuration = 160;
         else baseAnimationDuration = 240;
 
-        setContentView(R.layout.activity_home);
-        ButterKnife.bind(this);
+        views = ActivityHomeBinding.inflate(getLayoutInflater());
+        setContentView(views.getRoot());
 
         TypedValue value = new TypedValue();
         getTheme().resolveAttribute(R.attr.acrylicColor, value, true);
-        controllerBlur.setOverlayColor(value.data);
-        audioSettingBlur.setOverlayColor(value.data);
+        views.controllerBlur.setOverlayColor(value.data);
+        views.audioSettingBlur.setOverlayColor(value.data);
 
+        var controller = findViewById(R.id.llcbg);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int color = Color.TRANSPARENT;
-            Drawable bg = findViewById(R.id.llcbg).getBackground();
+            Drawable bg = controller.getBackground();
             if (bg instanceof ColorDrawable) color = ((ColorDrawable) bg).getColor();
             getWindow().setNavigationBarColor(color);
             if (color == 0xFFFFFFFF) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
@@ -170,19 +155,19 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager())
             startActivityForResult(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 0x8086);
 
-        controllerBlur.setupWith(content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
+        views.controllerBlur.setupWith(views.content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
                 .setBlurAlgorithm(new RenderScriptBlur(this))
                 .setBlurRadius(blurRadius)
                 .setSaturation(1.25f).setContrast(0.8f);
-        audioSettingBlur.setupWith(content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
+        views.audioSettingBlur.setupWith(views.content).setFrameClearDrawable(new ColorDrawable(0xFFFFFFFF))
                 .setBlurAlgorithm(new RenderScriptBlur(this))
                 .setBlurRadius(blurRadius)
                 .setSaturation(1.25f).setContrast(0.8f);
 
-        title.setText(getResources().getString(R.string.app_name));
-        artist.setText(getResources().getString(R.string.version));
+        views.title.setText(getResources().getString(R.string.app_name));
+        views.artist.setText(getResources().getString(R.string.version));
 
-        bg.setAnimationDuration(baseAnimationDuration);
+        views.backgroundImage.setAnimationDuration(baseAnimationDuration);
 
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
 
@@ -196,12 +181,12 @@ public class MainActivity extends AppCompatActivity {
             int resourceId = getApplicationContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
             if (resourceId > 0) statusBarHeight = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
 
-            ViewGroup.LayoutParams layoutParams = contentLayout.getLayoutParams();
-            layoutParams.height = findViewById(R.id.content).getMeasuredHeight() - findViewById(R.id.llcbg).getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight - Utils.dp2px(getBaseContext(), 40);
-            contentLayout.setLayoutParams(layoutParams);
+            ViewGroup.LayoutParams layoutParams = views.contentLayout.getLayoutParams();
+            layoutParams.height = findViewById(R.id.content).getMeasuredHeight() - controller.getMeasuredHeight() - findViewById(R.id.infoLayout).getMeasuredHeight() - statusBarHeight - Utils.dp2px(getBaseContext(), 40);
+            views.contentLayout.setLayoutParams(layoutParams);
         });
 
-        bottomSheet.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheet.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override public void onStateChanged(@NonNull View view, int i) {
                 if (i == BottomSheetBehavior.STATE_COLLAPSED) {
                     Utils.clearFocus(MainActivity.this);
@@ -215,7 +200,16 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onSlide(@NonNull View view, float v) { }
         });
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        views.buttonPlayPause.setOnClickListener(this::onPauseClick);
+        views.buttonNext.setOnClickListener(this::onNextClick);
+        views.buttonPrev.setOnClickListener(this::onPrevClick);
+        views.buttonLoopMode.setOnClickListener(this::onLoopClick);
+        views.buttonAudioSetting.setOnClickListener(this::onAudioSettingClick);
+        views.buttonSetting.setOnClickListener(this::onSettingClick);
+        views.backButton.setOnClickListener(this::onBackToPlaylistClick);
+        views.audioSettingPanelBackground.setOnClickListener(this::onAudioSettingPanelBackgroundTouch);
+
+        views.progressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if (b) getPlayerService().getOsuAudioPlayer().seekTo((long) ((float) i / seekBar.getMax() * getPlayerService().getOsuAudioPlayer().getAudioLength()));
@@ -251,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
                         String search = savedInstanceState.getString("playlistSearch");
                         if (search != null && !search.isEmpty()) {
                             playlistFragment.openSearch(false);
-                            playlistFragment.searchText.setText(search);
+                            playlistFragment.getViews().searchText.setText(search);
                         }
                         playlistFragment.refreshListToPosition(savedInstanceState.getInt("playlistIndex"), savedInstanceState.getInt("playlistOffset"));
                         preferenceFragment.getView().post(() -> ((ScrollView) preferenceFragment.getView()).smoothScrollTo(0, savedInstanceState.getInt("settingOffset")));
@@ -269,14 +263,14 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putInt("content", current.ordinal());
         outState.putInt("playlist", playlistFragment.isShowCollectionList() ? 1 : 0);
-        outState.putString("playlistSearch", playlistFragment.searchText.getText().toString().trim());
-        outState.putInt("playlistIndex", ((LinearLayoutManager) playlistFragment.mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
-        View v = playlistFragment.mRecyclerView.getChildAt(0);
-        outState.putInt("playlistOffset", (v == null) ? 0 : (v.getTop() - playlistFragment.mRecyclerView.getPaddingTop()));
+        outState.putString("playlistSearch", playlistFragment.getViews().searchText.getText().toString().trim());
+        outState.putInt("playlistIndex", ((LinearLayoutManager) playlistFragment.getViews().recyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+        View v = playlistFragment.getViews().recyclerView.getChildAt(0);
+        outState.putInt("playlistOffset", (v == null) ? 0 : (v.getTop() - playlistFragment.getViews().recyclerView.getPaddingTop()));
         outState.putInt("settingOffset", preferenceFragment.getView().getScrollY());
     }
 
-    @OnClick(R.id.buttonPlayPause) void onPauseClick() {
+    private void onPauseClick(View v) {
         if (playerService.getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing)
             getPlayerService().pause();
         else {
@@ -285,15 +279,15 @@ public class MainActivity extends AppCompatActivity {
         updateStatus();
     }
 
-    @OnClick(R.id.buttonNext) void onNextClick() {
+    private void onNextClick(View v) {
         Utils.runTask(() -> getPlayerService().next());
     }
 
-    @OnClick(R.id.buttonPrev) void onPrevClick() {
+    private void onPrevClick(View v) {
         Utils.runTask(() -> getPlayerService().previous());
     }
 
-    @OnClick(R.id.buttonLoopMode) void onLoopClick() {
+    private void onLoopClick(View v) {
         if (playerService.getLoopMode() == PlayerService.LoopMode.All)
             playerService.setLoopMode(PlayerService.LoopMode.Single);
         else if (playerService.getLoopMode() == PlayerService.LoopMode.Single)
@@ -304,12 +298,12 @@ public class MainActivity extends AppCompatActivity {
         updateStatus();
     }
 
-    @OnClick(R.id.buttonAudioSetting) void onAudioSettingClick() {
-        if (audioSettingPanel.getAlpha() == 1) setAudioSettingVisibility(false);
-        else if (audioSettingPanel.getAlpha() == 0) setAudioSettingVisibility(true);
+    private void onAudioSettingClick(View v) {
+        if (views.audioSettingPanel.getAlpha() == 1) setAudioSettingVisibility(false);
+        else if (views.audioSettingPanel.getAlpha() == 0) setAudioSettingVisibility(true);
     }
 
-    @OnClick(R.id.buttonSetting) void onSettingClick() {
+    private void onSettingClick(View v) {
         if (current != Content.Setting) {
             setCurrentContent(Content.Setting);
             bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -321,18 +315,18 @@ public class MainActivity extends AppCompatActivity {
         setAudioSettingVisibility(false);
     }
 
-    @OnClick(R.id.backButton) void onBackToPlaylistClick() {
+    private void onBackToPlaylistClick(View v) {
         setCurrentContent(Content.Playlist);
     }
 
-    @OnClick(R.id.audioSettingPanelBackground) void onAudioSettingPanelBackgroundTouch() {
+    private void onAudioSettingPanelBackgroundTouch(View v) {
         setAudioSettingVisibility(false);
     }
 
     protected void updateStatus() {
         Bitmap background = playerService.getOsuAudioPlayer().getBackground();
-        if (background != null) bg.to(background);
-        else bg.to(getResources().getDrawable(R.drawable.defaultbg));
+        if (background != null) views.backgroundImage.to(background);
+        else views.backgroundImage.to(ResourcesCompat.getDrawable(getResources(), R.drawable.defaultbg, null));
 
         var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String t, a;
@@ -345,16 +339,16 @@ public class MainActivity extends AppCompatActivity {
         }
         boolean displaySimpleInfo = sharedPreferences.getBoolean("display_simple_info", true);
         if (t == null || a == null) {
-            title.setText(getResources().getString(R.string.app_name));
-            artist.setText(getResources().getString(R.string.version));
+            views.title.setText(getResources().getString(R.string.app_name));
+            views.artist.setText(getResources().getString(R.string.version));
         } else {
             if (displaySimpleInfo) {
-                title.setText(t);
-                artist.setText(a);
+                views.title.setText(t);
+                views.artist.setText(a);
             } else {
                 var s = playerService.getOsuAudioPlayer().getSource();
-                title.setText(getResources().getString(R.string.title_artist, t, s != null ? s + " (" + a + ")" : a));
-                artist.setText(getResources().getString(R.string.version_by_mapper, playerService.getOsuAudioPlayer().getVersion(), playerService.getOsuAudioPlayer().getMapper()));
+                views.title.setText(getResources().getString(R.string.title_artist, t, s != null ? s + " (" + a + ")" : a));
+                views.artist.setText(getResources().getString(R.string.version_by_mapper, playerService.getOsuAudioPlayer().getVersion(), playerService.getOsuAudioPlayer().getMapper()));
             }
         }
 
@@ -363,12 +357,12 @@ public class MainActivity extends AppCompatActivity {
 
         playlistFragment.refreshList();
 
-        buttonPlayPause.setImageDrawable(playerService.getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing ?
-                getResources().getDrawable(R.drawable.ic_pause) : getResources().getDrawable(R.drawable.ic_play));
+        views.buttonPlayPause.setImageDrawable(playerService.getOsuAudioPlayer().getEngine().getPlaybackStatus() == AudioEngine.PlaybackStatus.Playing ?
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause, null) : ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play, null));
 
-        buttonLoopMode.setImageDrawable(playerService.getLoopMode() == PlayerService.LoopMode.All ?
-                getResources().getDrawable(R.drawable.ic_refresh) : playerService.getLoopMode() == PlayerService.LoopMode.Single ?
-                getResources().getDrawable(R.drawable.ic_refresh_one) : getResources().getDrawable(R.drawable.ic_refresh_r));
+        views.buttonLoopMode.setImageDrawable(playerService.getLoopMode() == PlayerService.LoopMode.All ?
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_refresh, null) : playerService.getLoopMode() == PlayerService.LoopMode.Single ?
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_refresh_one, null) : ResourcesCompat.getDrawable(getResources(), R.drawable.ic_refresh_r, null));
     }
 
     private void setCurrentContent(Content current) {
@@ -379,43 +373,42 @@ public class MainActivity extends AppCompatActivity {
         switch (this.current) {
             case Setting:
                 setBackArrowVisibility(true);
-                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> playlistWrapper.setVisibility(View.INVISIBLE)).start();
-                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
-                    preferenceWrapper.setTranslationX(offsetPx); preferenceWrapper.setVisibility(View.VISIBLE);
+                views.playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(offsetPx).withEndAction(() -> views.playlistWrapper.setVisibility(View.INVISIBLE)).start();
+                views.preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                    views.preferenceWrapper.setTranslationX(offsetPx); views.preferenceWrapper.setVisibility(View.VISIBLE);
                 }).start();
                 break;
             case Playlist:
                 setBackArrowVisibility(false);
-                playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
-                    playlistWrapper.setTranslationX(-offsetPx); playlistWrapper.setVisibility(View.VISIBLE);
+                views.playlistWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration : 0).alpha(1).translationX(0).withStartAction(() -> {
+                    views.playlistWrapper.setTranslationX(-offsetPx); views.playlistWrapper.setVisibility(View.VISIBLE);
                 }).start();
-                preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> preferenceWrapper.setVisibility(View.INVISIBLE)).start();
+                views.preferenceWrapper.animate().setInterpolator(interpolator).setDuration(anim ? baseAnimationDuration / 2 : 0).alpha(0).translationX(-offsetPx).withEndAction(() -> views.preferenceWrapper.setVisibility(View.INVISIBLE)).start();
                 break;
         }
     }
 
     private void setBackArrowVisibility(boolean b) {
         if (b) {
-            backBtn.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0.75f).withStartAction(() -> backBtn.setVisibility(View.VISIBLE)).start();
-            info.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(Utils.dp2px(this, 24)).start();
+            views.backButton.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).alpha(0.75f).withStartAction(() -> views.backButton.setVisibility(View.VISIBLE)).start();
+            views.infoLayout.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(Utils.dp2px(this, 24)).start();
         } else {
-            backBtn.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration / 2).alpha(0).withEndAction(() -> backBtn.setVisibility(View.GONE)).start();
-            info.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(0).start();
+            views.backButton.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration / 2).alpha(0).withEndAction(() -> views.backButton.setVisibility(View.GONE)).start();
+            views.infoLayout.animate().setInterpolator(interpolator).setDuration(baseAnimationDuration).translationX(0).start();
         }
     }
 
     private void setAudioSettingVisibility(boolean b) {
         if (b) {
-            audioSettingPanel.animate().setInterpolator(new LinearOutSlowInInterpolator()).setDuration(baseAnimationDuration).withStartAction(() -> audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
-            audioSettingWrapper.setAlpha(0);
-            audioSettingWrapper.animate().setInterpolator(new FastOutSlowInInterpolator()).setDuration(baseAnimationDuration).alpha(1).start();
+            views.audioSettingPanel.animate().setInterpolator(new LinearOutSlowInInterpolator()).setDuration(baseAnimationDuration).withStartAction(() -> views.audioSettingPanel.setVisibility(View.VISIBLE)).alpha(1).translationY(0).start();
+            views.audioSettingWrapper.setAlpha(0);
+            views.audioSettingWrapper.animate().setInterpolator(new FastOutSlowInInterpolator()).setDuration(baseAnimationDuration).alpha(1).start();
         } else {
-            audioSettingPanel.animate().setInterpolator(new FastOutLinearInInterpolator()).setDuration(baseAnimationDuration / 2).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> audioSettingPanel.setVisibility(View.INVISIBLE)).start();
+            views.audioSettingPanel.animate().setInterpolator(new FastOutLinearInInterpolator()).setDuration(baseAnimationDuration / 2).alpha(0).translationY(Utils.dp2px(this, 8)).withEndAction(() -> views.audioSettingPanel.setVisibility(View.INVISIBLE)).start();
         }
     }
 
     private enum Content {
         Playlist, Setting
     }
-
 }

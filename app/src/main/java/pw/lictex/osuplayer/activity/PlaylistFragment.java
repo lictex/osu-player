@@ -2,11 +2,13 @@ package pw.lictex.osuplayer.activity;
 
 import android.animation.*;
 import android.os.*;
+import android.text.*;
 import android.view.*;
 import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.*;
+import androidx.core.content.res.*;
 import androidx.fragment.app.*;
 import androidx.interpolator.view.animation.*;
 import androidx.lifecycle.Observer;
@@ -17,31 +19,21 @@ import androidx.recyclerview.widget.*;
 import java.nio.charset.*;
 import java.util.*;
 
-import butterknife.*;
 import lombok.*;
 import pw.lictex.osuplayer.R;
 import pw.lictex.osuplayer.*;
+import pw.lictex.osuplayer.databinding.*;
 import pw.lictex.osuplayer.storage.*;
 
 public class PlaylistFragment extends Fragment {
+    @Getter private FragmentPlaylistBinding views;
 
-    @BindView(R.id.recyclerView) RecyclerView mRecyclerView;
-    @BindView(R.id.searchText) EditText searchText;
-    @BindView(R.id.searchView) View searchView;
-    @BindView(R.id.searchStatus) View searchStatus;
-    @BindView(R.id.searchArea) View searchArea;
-    @BindView(R.id.searchIcon) View searchIcon;
-    @BindView(R.id.status) View statusAll;
-    @BindView(R.id.buttonAll) Button buttonAll;
-    @BindView(R.id.buttonFavorite) Button buttonFavorite;
-    @BindView(R.id.buttonCloseSearch) ImageButton buttonClearSearch;
-    @BindView(R.id.buttonListOrder) ImageButton buttonListOrder;
     @Getter private boolean showCollectionList = false;
     private BeatmapIndex.Order listOrder = BeatmapIndex.Order.Title;
     private LiveData<List<BeatmapEntity>> allMapLiveData;
     private LiveData<List<BeatmapEntity>> collectionMapLiveData;
-
     private boolean scrollToCurrentEnabled = false;
+
     private final Observer<List<BeatmapEntity>> allMapObserver = beatmapEntities -> {
         var playerService = ((MainActivity) getActivity()).getPlayerService();
         playerService.getAllMapList().clear();
@@ -57,67 +49,67 @@ public class PlaylistFragment extends Fragment {
         else refreshList();
     };
 
-    @OnTextChanged(R.id.searchText) void onTextChanged() {
+    private void onTextChanged() {
         refreshListToCurrent();
     }
 
-    @OnFocusChange(R.id.searchText) void onTextFocusChanged() {
-        if (searchText.hasFocus()) return;
-        Utils.hideSoftInput(searchText);
-        if (searchText.getText().toString().trim().isEmpty()) onCloseSearchClick();
+    private void onTextFocusChanged(View v, boolean b) {
+        if (views.searchText.hasFocus()) return;
+        Utils.hideSoftInput(views.searchText);
+        if (views.searchText.getText().toString().trim().isEmpty()) onCloseSearchClick(v);
     }
 
-    @OnClick(R.id.searchIcon) void onOpenSearchClick() {
+    private void onOpenSearchClick(View v) {
         openSearch(true);
     }
 
-    @OnClick(R.id.buttonCloseSearch) void onCloseSearchClick() {
+    private void onCloseSearchClick(View v) {
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), searchArea.getMeasuredWidth() - searchIcon.getMeasuredWidth());
-        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
+        ValueAnimator animator = ValueAnimator.ofInt((int) views.searchArea.getTranslationX(), views.searchArea.getMeasuredWidth() - views.searchIcon.getMeasuredWidth());
+        animator.addUpdateListener(valueAnimator -> views.searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
         animator.setInterpolator(new FastOutSlowInInterpolator());
         animator.setDuration(baseAnimationDuration);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override public void onAnimationEnd(Animator animation, boolean isReverse) {
-                searchText.setText("");
+                views.searchText.setText("");
             }
         });
         animator.start();
-        buttonClearSearch.animate().setStartDelay(0).alpha(0f).setDuration(baseAnimationDuration / 2).setInterpolator(new FastOutSlowInInterpolator()).start();
-        searchStatus.animate().alpha(0f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.buttonCloseSearch.animate().setStartDelay(0).alpha(0f).setDuration(baseAnimationDuration / 2).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.searchStatus.animate().alpha(0f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
 
         Utils.clearFocus(getActivity());
     }
 
-    @OnClick(R.id.buttonAll) void onAllClick() {
+    private void onAllClick(View v) {
         setPlaylist(false, true);
     }
 
-    @OnClick(R.id.buttonFavorite) void onFavoriteClick() {
+    private void onFavoriteClick(View v) {
         setPlaylist(true, true);
     }
 
     public void setPlaylist(boolean collection, boolean scrollToCurrent) {
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) statusAll.getLayoutParams();
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) views.status.getLayoutParams();
         var anim = ValueAnimator.ofFloat(params.horizontalBias, collection ? 1 : 0);
         anim.addUpdateListener(valueAnimator -> {
             params.horizontalBias = (Float) valueAnimator.getAnimatedValue();
-            statusAll.setLayoutParams(params);
+            views.status.setLayoutParams(params);
         });
         anim.setDuration(baseAnimationDuration);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.start();
 
-        buttonAll.animate().alpha(collection ? .75f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        buttonFavorite.animate().alpha(collection ? 1f : .75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.buttonAll.animate().alpha(collection ? .75f : 1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.buttonFavorite.animate().alpha(collection ? 1f : .75f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
 
         showCollectionList = collection;
         if (scrollToCurrent) refreshListToCurrent();
         else refreshList();
     }
 
-    @OnClick(R.id.buttonListOrder) void onListOrderClick() {
+    private void onListOrderClick(View v) {
         scrollToCurrentEnabled = true;
         switch (listOrder) {
             case Title:
@@ -133,19 +125,39 @@ public class PlaylistFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_playlist, container, false);
-        ButterKnife.bind(this, view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        views = FragmentPlaylistBinding.bind(view);
+        views.searchText.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                PlaylistFragment.this.onTextChanged();
+            }
+
+            @Override public void afterTextChanged(Editable s) {
+
+            }
+        });
+        views.searchText.setOnFocusChangeListener(this::onTextFocusChanged);
+        views.searchIcon.setOnClickListener(this::onOpenSearchClick);
+        views.buttonCloseSearch.setOnClickListener(this::onCloseSearchClick);
+        views.buttonAll.setOnClickListener(this::onAllClick);
+        views.buttonFavorite.setOnClickListener(this::onFavoriteClick);
+        views.buttonListOrder.setOnClickListener(this::onListOrderClick);
+
+        views.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         HomeAdapter adapter = new HomeAdapter();
         adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
+        views.recyclerView.setAdapter(adapter);
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setAddDuration(baseAnimationDuration);
         animator.setChangeDuration(baseAnimationDuration);
         animator.setMoveDuration(baseAnimationDuration);
         animator.setRemoveDuration(baseAnimationDuration / 2);
-        mRecyclerView.setItemAnimator(animator);
+        views.recyclerView.setItemAnimator(animator);
 
         var playerService = ((MainActivity) getActivity()).getPlayerService();
 
@@ -159,9 +171,9 @@ public class PlaylistFragment extends Fragment {
         container.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
                 container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                searchArea.setTranslationX(searchArea.getMeasuredWidth() - searchIcon.getMeasuredWidth());
-                buttonClearSearch.setAlpha(0f);
-                searchStatus.setAlpha(0f);
+                views.searchArea.setTranslationX(views.searchArea.getMeasuredWidth() - views.searchIcon.getMeasuredWidth());
+                views.buttonCloseSearch.setAlpha(0f);
+                views.searchStatus.setAlpha(0f);
             }
         });
 
@@ -170,29 +182,29 @@ public class PlaylistFragment extends Fragment {
 
     public void openSearch(boolean showKeyboard) {
         int baseAnimationDuration = ((MainActivity) getActivity()).getBaseAnimationDuration();
-        ValueAnimator animator = ValueAnimator.ofInt((int) searchArea.getTranslationX(), 0);
-        animator.addUpdateListener(valueAnimator -> searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
+        ValueAnimator animator = ValueAnimator.ofInt((int) views.searchArea.getTranslationX(), 0);
+        animator.addUpdateListener(valueAnimator -> views.searchArea.setTranslationX((Integer) valueAnimator.getAnimatedValue()));
         animator.setDuration(baseAnimationDuration);
         animator.setInterpolator(new FastOutSlowInInterpolator());
         if (showKeyboard) animator.addListener(new AnimatorListenerAdapter() {
             @Override public void onAnimationEnd(Animator animation) {
-                searchText.post(() -> {
-                    searchText.requestFocus();
-                    Utils.showSoftInput(searchText);
+                views.searchText.post(() -> {
+                    views.searchText.requestFocus();
+                    Utils.showSoftInput(views.searchText);
                 });
             }
         });
         animator.start();
-        buttonClearSearch.animate().setStartDelay(baseAnimationDuration / 2).alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
-        searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.buttonCloseSearch.animate().setStartDelay(baseAnimationDuration / 2).alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
+        views.searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
     }
 
     private void refreshList(Runnable onFinish) {
-        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(searchText.getText().toString().trim(), listOrder);
-        beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
+        LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(views.searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(views.searchText.getText().toString().trim(), listOrder);
+        beatmaps.observe(getViewLifecycleOwner(), new Observer<List<BeatmapEntity>>() {
             @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
-                ((HomeAdapter) mRecyclerView.getAdapter()).list = beatmapEntities;
-                mRecyclerView.getAdapter().notifyDataSetChanged();
+                ((HomeAdapter) views.recyclerView.getAdapter()).list = beatmapEntities;
+                views.recyclerView.getAdapter().notifyDataSetChanged();
                 beatmaps.removeObserver(this);
                 onFinish.run();
             }
@@ -200,22 +212,22 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void refreshList() {
-        int index = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-        View v = mRecyclerView.getChildAt(0);
-        int offset = (v == null) ? 0 : (v.getTop() - mRecyclerView.getPaddingTop());
+        int index = ((LinearLayoutManager) views.recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+        View v = views.recyclerView.getChildAt(0);
+        int offset = (v == null) ? 0 : (v.getTop() - views.recyclerView.getPaddingTop());
         refreshListToPosition(index, offset);
     }
 
     public void refreshListToPosition(int index, int offset) {
         refreshList(() -> {
-            if (index >= 0) ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(index, offset);
+            if (index >= 0) ((LinearLayoutManager) views.recyclerView.getLayoutManager()).scrollToPositionWithOffset(index, offset);
         });
     }
 
     public void refreshListToCurrent() {
         refreshList(() -> {
-            mRecyclerView.stopScroll();
-            ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(((HomeAdapter) mRecyclerView.getAdapter()).list.indexOf(((MainActivity) getActivity()).getPlayerService().getCurrentMap()), Utils.dp2px(getContext(), 24));
+            views.recyclerView.stopScroll();
+            ((LinearLayoutManager) views.recyclerView.getLayoutManager()).scrollToPositionWithOffset(((HomeAdapter) views.recyclerView.getAdapter()).list.indexOf(((MainActivity) getActivity()).getPlayerService().getCurrentMap()), Utils.dp2px(getContext(), 24));
         });
     }
 
@@ -231,11 +243,16 @@ public class PlaylistFragment extends Fragment {
         }
 
         allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps("", listOrder);
-        allMapLiveData.observe(this, allMapObserver);
+        allMapLiveData.observe(getViewLifecycleOwner(), allMapObserver);
         collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps("", listOrder);
-        collectionMapLiveData.observe(this, collectionMapObserver);
+        collectionMapLiveData.observe(getViewLifecycleOwner(), collectionMapObserver);
 
-        buttonListOrder.setImageDrawable(listOrder == BeatmapIndex.Order.Title ? getResources().getDrawable(R.drawable.ic_sort_title) : (listOrder == BeatmapIndex.Order.Artist ? getResources().getDrawable(R.drawable.ic_sort_artist) : getResources().getDrawable(R.drawable.ic_sort_mapper)));
+        views.buttonListOrder.setImageDrawable(listOrder == BeatmapIndex.Order.Title ?
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_sort_title, null) :
+                (listOrder == BeatmapIndex.Order.Artist ?
+                        ResourcesCompat.getDrawable(getResources(), R.drawable.ic_sort_artist, null) :
+                        ResourcesCompat.getDrawable(getResources(), R.drawable.ic_sort_mapper, null)
+                ));
     }
 
     protected class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.PlaylistViewHolder> {
@@ -263,10 +280,10 @@ public class PlaylistFragment extends Fragment {
 
             if (playerService.getCollectionMapList().contains(beatmapEntity)) {
                 holder.getFavorite().setAlpha(1f);
-                holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart));
+                holder.getFavorite().setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart, null));
             } else {
                 holder.getFavorite().setAlpha(0.75f);
-                holder.getFavorite().setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_outline));
+                holder.getFavorite().setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_outline, null));
             }
             holder.getFavorite().setOnClickListener(a -> {
                 if (playerService.getCollectionMapList().contains(beatmapEntity))
@@ -283,7 +300,7 @@ public class PlaylistFragment extends Fragment {
 
         @Override
         public long getItemId(int position) {
-            return UUID.nameUUIDFromBytes(list.get(position).path.getBytes(Charset.forName("UTF-8"))).getMostSignificantBits(); //hope there will be no conflicts....
+            return UUID.nameUUIDFromBytes(list.get(position).path.getBytes(StandardCharsets.UTF_8)).getMostSignificantBits(); //hope there will be no conflicts....
         }
 
         @Override
@@ -292,15 +309,19 @@ public class PlaylistFragment extends Fragment {
         }
 
         class PlaylistViewHolder extends RecyclerView.ViewHolder {
-            @Getter @BindView(R.id.title) TextView title;
-            @Getter @BindView(R.id.version) TextView version;
-            @Getter @BindView(R.id.root) View root;
-            @Getter @BindView(R.id.playing) ImageView playing;
-            @Getter @BindView(R.id.imageButton) ImageButton favorite;
+            @Getter TextView title;
+            @Getter TextView version;
+            @Getter View root;
+            @Getter ImageView playing;
+            @Getter ImageButton favorite;
 
             private PlaylistViewHolder(View view) {
                 super(view);
-                ButterKnife.bind(this, view);
+                title = view.findViewById(R.id.title);
+                version = view.findViewById(R.id.version);
+                root = view.findViewById(R.id.root);
+                playing = view.findViewById(R.id.playing);
+                favorite = view.findViewById(R.id.imageButton);
             }
         }
     }
