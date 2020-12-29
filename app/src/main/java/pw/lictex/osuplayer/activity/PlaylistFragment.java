@@ -1,6 +1,7 @@
 package pw.lictex.osuplayer.activity;
 
 import android.animation.*;
+import android.annotation.*;
 import android.os.*;
 import android.text.*;
 import android.view.*;
@@ -199,9 +200,10 @@ public class PlaylistFragment extends Fragment {
         views.searchStatus.animate().alpha(1f).setDuration(baseAnimationDuration).setInterpolator(new FastOutSlowInInterpolator()).start();
     }
 
+    @SuppressLint("FragmentLiveDataObserve")
     private void refreshList(Runnable onFinish) {
         LiveData<List<BeatmapEntity>> beatmaps = showCollectionList ? BeatmapIndex.getInstance().getFavoriteBeatmaps(views.searchText.getText().toString().trim(), listOrder) : BeatmapIndex.getInstance().getAllBeatmaps(views.searchText.getText().toString().trim(), listOrder);
-        beatmaps.observe(getViewLifecycleOwner(), new Observer<List<BeatmapEntity>>() {
+        beatmaps.observe(this, new Observer<List<BeatmapEntity>>() {
             @Override public void onChanged(List<BeatmapEntity> beatmapEntities) {
                 ((HomeAdapter) views.recyclerView.getAdapter()).list = beatmapEntities;
                 views.recyclerView.getAdapter().notifyDataSetChanged();
@@ -231,6 +233,7 @@ public class PlaylistFragment extends Fragment {
         });
     }
 
+    @SuppressLint("FragmentLiveDataObserve")
     private void setListOrder(BeatmapIndex.Order order) {
         listOrder = order;
         if (allMapLiveData != null) {
@@ -243,9 +246,9 @@ public class PlaylistFragment extends Fragment {
         }
 
         allMapLiveData = BeatmapIndex.getInstance().getAllBeatmaps("", listOrder);
-        allMapLiveData.observe(getViewLifecycleOwner(), allMapObserver);
+        allMapLiveData.observe(this, allMapObserver);
         collectionMapLiveData = BeatmapIndex.getInstance().getFavoriteBeatmaps("", listOrder);
-        collectionMapLiveData.observe(getViewLifecycleOwner(), collectionMapObserver);
+        collectionMapLiveData.observe(this, collectionMapObserver);
 
         views.buttonListOrder.setImageDrawable(listOrder == BeatmapIndex.Order.Title ?
                 ResourcesCompat.getDrawable(getResources(), R.drawable.ic_sort_title, null) :
